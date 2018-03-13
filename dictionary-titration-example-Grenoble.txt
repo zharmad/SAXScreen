@@ -1,0 +1,22 @@
+# Example Dictionary File to fit the Grenoble Synchrotron log files.
+# Column 1: Titration-ID, i.e. identity of ligand
+# Column 2: The final ligand:protein ratio
+# Column 3: The volume-wise fraction of added-ligand in the final SAXS sample. E.g. 20uL ligand added to 20uL sample results in 0.5
+# Column 4: File location.
+RNA01   0.0   0.0   ./1d/Sxl_10gs_153_ave.dat
+RNA01   0.1   0.05  ./1d/Sxl_10gs_155_ave.dat
+RNA01   0.2   0.1   ./1d/Sxl_10gs_157_ave.dat
+RNA01   0.4   0.2   ./1d/Sxl_10gs_159_ave.dat
+RNA01   0.6   0.3   ./1d/Sxl_10gs_161_ave.dat
+RNA01   0.8   0.4   ./1d/Sxl_10gs_163_ave.dat
+RNA01   0.9   0.45  ./1d/Sxl_10gs_165_ave.dat
+RNA01   1.0   0.5   ./1d/Sxl_10gs_167_ave.dat
+
+RNA01   0.0   0.0   ./1d/Sxl_10gs_153_ave.dat
+RNA01   0.1   0.05  ./1d/Sxl_10gs_155_ave.dat
+RNA01   0.2   0.1   ./1d/Sxl_10gs_157_ave.dat
+RNA01   0.4   0.2   ./1d/Sxl_10gs_159_ave.dat
+RNA01   0.6   0.3   ./1d/Sxl_10gs_161_ave.dat
+RNA01   0.8   0.4   ./1d/Sxl_10gs_163_ave.dat
+RNA01   0.9   0.45  ./1d/Sxl_10gs_165_ave.dat
+RNA01   1.0   0.5   ./1d/Sxl_10gs_167_ave.dat

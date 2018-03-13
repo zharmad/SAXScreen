@@ -1,0 +1,54 @@
+# This is a file to share all variables across different BASH scripts.
+# = = =
+# It is read at the beginning through a bash function that evaluates $1=$2
+# so sets the variable name as the 1st column with the contents in the second column
+# Empty lines are skipped.
+#
+# Having this file here also serves as a convenient single location to
+# check the definition between all files and their variables/meanings.
+
+# Software locations and suffixes
+ATSAS_location  /g/software/bin
+ATSAS_suffix    -2.7.1
+
+synchrotron_source   Grenoble
+synchrotron_data_location_sample ./1d
+synchrotron_data_location_ligand ./RNA-1d
+#synchrotron_source   Hamburg
+#synchrotron_data_location_sample ./datacollection/data
+
+script_location      ./scripts
+
+# The final analysis file implicitly uses micromolar as the unit (uM)
+sample_concentration 50
+
+# Four dictionary files that needs to be prepared.
+sample_buffer_list   ./dictionary-sample-buffer-files.txt
+ligand_buffer_list   ./dictionary-ligand-buffer-files.txt
+titration_dictionary ./dictionary-titration.txt
+ligand_dictionary    ./dictionary-ligand-scattering.txt
+
+# Averaged raw files for correction and linearity calculation
+average_raw_sample_buffer ./raw-average-sample-buffer.dat
+average_raw_ligand_buffer ./raw-average-ligand-buffer.dat
+average_raw_apo_sample    ./raw-average-apo-sample.dat
+buffer_difference_file    ./saxs-buffer-difference.dat
+
+buffer_subtracted_saxs_folder ./subtracted
+buffer_subtracted_saxs_suffix man01
+
+q_min   0.3
+q_max   3.0
+
+autognom_output_folder      ./autognom
+autognom_output_designation autognom
+
+# The paper utilised 100 trials. This can be cut down to 10 for fast prototyping.
+linear_fit_output_folder    ./linearfit
+linear_fit_chi_summary_file chi-all.dat
+linear_fitting_error_trials 100
+
+# The paper utilised 5000 trials. This can be cut down to 10 for fast prototyping, and in practice 1000 should be enough.
+analysis_output_folder      ./analysis
+analysis_fit_errormode      noise2sig
+analysis_fit_trials         5000

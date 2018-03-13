@@ -1,0 +1,13 @@
+RNA01  RNA-1d/apoRNA_274_ave.dat
+RNA02  RNA-1d/apoRNA_276_ave.dat
+RNA03  RNA-1d/apoRNA_278_ave.dat
+RNA04  RNA-1d/apoRNA_280_ave.dat
+RNA05  RNA-1d/apoRNA_282_ave.dat
+RNA06  RNA-1d/apoRNA_284_ave.dat
+RNA07  RNA-1d/apoRNA_286_ave.dat
+RNA08  RNA-1d/apoRNA_288_ave.dat
+RNA09  RNA-1d/apoRNA_290_ave.dat
+RNA10  RNA-1d/apoRNA_292_ave.dat
+RNA11  RNA-1d/apoRNA_294_ave.dat
+RNA12  RNA-1d/apoRNA_296_ave.dat
+RNA13  RNA-1d/apoRNA_298_ave.dat

@@ -1,0 +1,425 @@
+@with g0
+@ view 0.1, 0.1, 0.7, 0.95
+@ legend 0.7, 0.95
+@ legend char size 0.75
+@ legend length 2
+@s0 line type 1
+@s0 line linewidth 1.0
+@s0 line color 1
+@s0 symbol 0
+@s0 symbol size 0.25
+@s0 symbol color 1
+@s1 line type 0
+@s1 line linewidth 1.0
+@s1 line color 1
+@s1 errorbar color 1
+@s1 errorbar size 0.20
+@s1 symbol 1
+@s1 symbol size 0.25
+@s1 symbol color 1
+@s2 line type 1
+@s2 line linewidth 1.0
+@s2 line color 2
+@s2 symbol 0
+@s2 symbol size 0.25
+@s2 symbol color 2
+@s3 line type 0
+@s3 line linewidth 1.0
+@s3 line color 2
+@s3 errorbar color 2
+@s3 errorbar size 0.20
+@s3 symbol 1
+@s3 symbol size 0.25
+@s3 symbol color 2
+@s4 line type 1
+@s4 line linewidth 1.0
+@s4 line color 3
+@s4 symbol 0
+@s4 symbol size 0.25
+@s4 symbol color 3
+@s5 line type 0
+@s5 line linewidth 1.0
+@s5 line color 3
+@s5 errorbar color 3
+@s5 errorbar size 0.20
+@s5 symbol 1
+@s5 symbol size 0.25
+@s5 symbol color 3
+@s6 line type 1
+@s6 line linewidth 1.0
+@s6 line color 4
+@s6 symbol 0
+@s6 symbol size 0.25
+@s6 symbol color 4
+@s7 line type 0
+@s7 line linewidth 1.0
+@s7 line color 4
+@s7 errorbar color 4
+@s7 errorbar size 0.20
+@s7 symbol 1
+@s7 symbol size 0.25
+@s7 symbol color 4
+@s8 line type 1
+@s8 line linewidth 1.0
+@s8 line color 5
+@s8 symbol 0
+@s8 symbol size 0.25
+@s8 symbol color 5
+@s9 line type 0
+@s9 line linewidth 1.0
+@s9 line color 5
+@s9 errorbar color 5
+@s9 errorbar size 0.20
+@s9 symbol 1
+@s9 symbol size 0.25
+@s9 symbol color 5
+@s10 line type 1
+@s10 line linewidth 1.0
+@s10 line color 6
+@s10 symbol 0
+@s10 symbol size 0.25
+@s10 symbol color 6
+@s11 line type 0
+@s11 line linewidth 1.0
+@s11 line color 6
+@s11 errorbar color 6
+@s11 errorbar size 0.20
+@s11 symbol 1
+@s11 symbol size 0.25
+@s11 symbol color 6
+@s12 line type 1
+@s12 line linewidth 1.0
+@s12 line color 7
+@s12 symbol 0
+@s12 symbol size 0.25
+@s12 symbol color 7
+@s13 line type 0
+@s13 line linewidth 1.0
+@s13 line color 7
+@s13 errorbar color 7
+@s13 errorbar size 0.20
+@s13 symbol 1
+@s13 symbol size 0.25
+@s13 symbol color 7
+@s14 line type 1
+@s14 line linewidth 1.0
+@s14 line color 8
+@s14 symbol 0
+@s14 symbol size 0.25
+@s14 symbol color 8
+@s15 line type 0
+@s15 line linewidth 1.0
+@s15 line color 8
+@s15 errorbar color 8
+@s15 errorbar size 0.20
+@s15 symbol 1
+@s15 symbol size 0.25
+@s15 symbol color 8
+@s16 line type 1
+@s16 line linewidth 1.0
+@s16 line color 9
+@s16 symbol 0
+@s16 symbol size 0.25
+@s16 symbol color 9
+@s17 line type 0
+@s17 line linewidth 1.0
+@s17 line color 9
+@s17 errorbar color 9
+@s17 errorbar size 0.20
+@s17 symbol 1
+@s17 symbol size 0.25
+@s17 symbol color 9
+@s18 line type 1
+@s18 line linewidth 1.0
+@s18 line color 10
+@s18 symbol 0
+@s18 symbol size 0.25
+@s18 symbol color 10
+@s19 line type 0
+@s19 line linewidth 1.0
+@s19 line color 10
+@s19 errorbar color 10
+@s19 errorbar size 0.20
+@s19 symbol 1
+@s19 symbol size 0.25
+@s19 symbol color 10
+@s20 line type 1
+@s20 line linewidth 1.0
+@s20 line color 11
+@s20 symbol 0
+@s20 symbol size 0.25
+@s20 symbol color 11
+@s21 line type 0
+@s21 line linewidth 1.0
+@s21 line color 11
+@s21 errorbar color 11
+@s21 errorbar size 0.20
+@s21 symbol 1
+@s21 symbol size 0.25
+@s21 symbol color 11
+@s22 line type 1
+@s22 line linewidth 1.0
+@s22 line color 12
+@s22 symbol 0
+@s22 symbol size 0.25
+@s22 symbol color 12
+@s23 line type 0
+@s23 line linewidth 1.0
+@s23 line color 12
+@s23 errorbar color 12
+@s23 errorbar size 0.20
+@s23 symbol 1
+@s23 symbol size 0.25
+@s23 symbol color 12
+@s0 legend "RNA01: S\s\xD\f{}\N = 1e+04 \xm\f{}M"
+@s2 legend "RNA02: S\s\xD\f{}\N =  24.6 \xm\f{}M"
+@s4 legend "RNA03: S\s\xD\f{}\N =  21.3 \xm\f{}M"
+@s6 legend "RNA04: S\s\xD\f{}\N =  7.57 \xm\f{}M"
+@s8 legend "RNA05: S\s\xD\f{}\N = 5.79e+03 \xm\f{}M"
+@s10 legend "RNA06: S\s\xD\f{}\N =   9.4 \xm\f{}M"
+@s12 legend "RNA07: S\s\xD\f{}\N =  6.23 \xm\f{}M"
+@s14 legend "RNA08: S\s\xD\f{}\N =  27.1 \xm\f{}M"
+@s16 legend "RNA09: S\s\xD\f{}\N =  39.7 \xm\f{}M"
+@s18 legend "RNA10: S\s\xD\f{}\N =  71.5 \xm\f{}M"
+@s20 legend "RNA11: S\s\xD\f{}\N =   104 \xm\f{}M"
+@s22 legend "RNA12: S\s\xD\f{}\N =   380 \xm\f{}M"
+@type xy
+0 2.33071
+0.1 2.33116
+0.2 2.33162
+0.4 2.33253
+0.6 2.33344
+0.8 2.33435
+0.9 2.33481
+1 2.33526
+&
+@type xydy
+0 2.17368 0.0217632
+0.1 2.42072 0.0235506
+0.2 2.46165 0.0230019
+0.4 2.54775 0.0208151
+0.6 2.46949 0.0240272
+0.8 2.32308 0.0210667
+0.9 2.1781 0.0848373
+1 2.06181 0.0719798
+&
+@type xy
+0 2.21796
+0.1 2.2782
+0.2 2.33554
+0.4 2.44096
+0.6 2.53344
+0.8 2.61297
+0.9 2.64806
+1 2.68024
+&
+@type xydy
+0 2.10925 0.0318252
+0.1 2.32693 0.0200947
+0.2 2.40991 0.44475
+0.4 2.52079 0.0173009
+0.6 2.59421 0.0185782
+0.8 2.61982 0.0190731
+0.9 2.61335 0.0204806
+1 2.60119 0.016362
+&
+@type xy
+0 2.19905
+0.1 2.26216
+0.2 2.32236
+0.4 2.43319
+0.6 2.53037
+0.8 2.61354
+0.9 2.65003
+1 2.6833
+&
+@type xydy
+0 2.16936 0.0132509
+0.1 2.26356 0.0188373
+0.2 2.32337 0.0170832
+0.4 2.47836 0.0189922
+0.6 2.54864 0.0166758
+0.8 2.60974 0.0151286
+0.9 2.6334 0.0154824
+1 2.66413 0.0184372
+&
+@type xy
+0 2.21041
+0.1 2.28932
+0.2 2.36602
+0.4 2.5108
+0.6 2.64018
+0.8 2.74929
+0.9 2.79519
+1 2.83525
+&
+@type xydy
+0 2.1535 0.0450335
+0.1 2.29059 0.021425
+0.2 2.35673 0.0179635
+0.4 2.55604 0.0200635
+0.6 2.73814 0.0187807
+0.8 2.81564 0.0177973
+0.9 2.78064 0.0176769
+1 2.71174 0.0190542
+&
+@type xy
+0 2.1791
+0.1 2.17989
+0.2 2.18067
+0.4 2.18224
+0.6 2.1838
+0.8 2.18536
+0.9 2.18614
+1 2.18691
+&
+@type xydy
+0 2.13843 0.123774
+0.1 2.18756 0.0817595
+0.2 2.21153 0.0164222
+0.4 2.18948 0.0165878
+0.6 2.25575 0.017901
+0.8 2.20472 0.0223556
+0.9 2.15893 0.0250722
+1 2.10755 0.0255098
+&
+@type xy
+0 2.26822
+0.1 2.34455
+0.2 2.41842
+0.4 2.55699
+0.6 2.67995
+0.8 2.78364
+0.9 2.82762
+1 2.86639
+&
+@type xydy
+0 2.14597 0.145235
+0.1 2.35331 0.0178795
+0.2 2.42887 0.0174513
+0.4 2.61252 0.0211745
+0.6 2.8728 0.0210595
+0.8 2.84453 0.0240535
+0.9 2.76672 0.0230128
+1 2.70645 0.0223081
+&
+@type xy
+0 2.15266
+0.1 2.23357
+0.2 2.31249
+0.4 2.46235
+0.6 2.59723
+0.8 2.71117
+0.9 2.7588
+1 2.79996
+&
+@type xydy
+0 2.11771 0.0339156
+0.1 2.19182 0.0221299
+0.2 2.35594 0.0168232
+0.4 2.48252 0.0166748
+0.6 2.66974 0.0166476
+0.8 2.7885 0.0217452
+0.9 2.62347 0.0129641
+1 2.79877 0.016119
+&
+@type xy
+0 2.09775
+0.1 2.15599
+0.2 2.21138
+0.4 2.31311
+0.6 2.40245
+0.8 2.47952
+0.9 2.51368
+1 2.54509
+&
+@type xydy
+0 1.97708 0.0186829
+0.1 2.1776 0.0181035
+0.2 2.28519 0.0145793
+0.4 2.39103 0.0174341
+0.6 2.43896 0.014364
+0.8 2.47286 0.020382
+0.9 2.46785 0.0143173
+1 2.50107 0.0156997
+&
+@type xy
+0 2.07177
+0.1 2.12176
+0.2 2.16918
+0.4 2.2563
+0.6 2.33331
+0.8 2.40074
+0.9 2.4311
+1 2.45937
+&
+@type xydy
+0 1.96707 0.0105575
+0.1 2.14387 0.0160687
+0.2 2.23481 0.0171103
+0.4 2.3215 0.0129579
+0.6 2.37161 0.0166356
+0.8 2.39869 0.0148931
+0.9 2.39241 0.014616
+1 2.41772 0.0136729
+&
+@type xy
+0 2.09489
+0.1 2.13182
+0.2 2.16696
+0.4 2.23209
+0.6 2.29074
+0.8 2.34344
+0.9 2.36772
+1 2.39072
+&
+@type xydy
+0 2.0489 0.0140036
+0.1 2.13183 0.0176437
+0.2 2.2043 0.0148285
+0.4 2.27762 0.0159479
+0.6 2.27842 0.0166659
+0.8 2.34607 0.0225809
+0.9 2.3503 0.0157878
+1 2.37754 0.0176787
+&
+@type xy
+0 2.07353
+0.1 2.10272
+0.2 2.13065
+0.4 2.18292
+0.6 2.2307
+0.8 2.27436
+0.9 2.29477
+1 2.31428
+&
+@type xydy
+0 1.99969 0.0123557
+0.1 2.14968 0.0143332
+0.2 2.16207 0.019253
+0.4 2.20573 0.0156507
+0.6 2.23339 0.0146469
+0.8 2.2812 0.0194244
+0.9 2.26132 0.0124736
+1 2.30919 0.0131459
+&
+@type xy
+0 2.08331
+0.1 2.09391
+0.2 2.10428
+0.4 2.12442
+0.6 2.14376
+0.8 2.16236
+0.9 2.17139
+1 2.18024
+&
+@type xydy
+0 2.0869 0.019608
+0.1 2.07865 0.0167134
+0.2 2.11301 0.0169312
+0.4 2.11486 0.0126018
+0.6 2.15484 0.0158554
+0.8 2.17321 0.0183237
+0.9 2.18026 0.0134457
+1 2.16187 0.0107377
+&

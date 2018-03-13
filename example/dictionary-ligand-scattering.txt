@@ -1,0 +1,13 @@
+RNA01 ./ligand-1d/apoRNA_274_ave.dat
+RNA02 ./ligand-1d/apoRNA_276_ave.dat
+RNA03 ./ligand-1d/apoRNA_278_ave.dat
+RNA04 ./ligand-1d/apoRNA_280_ave.dat
+RNA05 ./ligand-1d/apoRNA_282_ave.dat
+RNA06 ./ligand-1d/apoRNA_284_ave.dat
+RNA07 ./ligand-1d/apoRNA_286_ave.dat
+RNA08 ./ligand-1d/apoRNA_288_ave.dat
+RNA09 ./ligand-1d/apoRNA_290_ave.dat
+RNA10 ./ligand-1d/apoRNA_292_ave.dat
+RNA11 ./ligand-1d/apoRNA_294_ave.dat
+RNA12 ./ligand-1d/apoRNA_296_ave.dat
+RNA13 ./ligand-1d/apoRNA_298_ave.dat
