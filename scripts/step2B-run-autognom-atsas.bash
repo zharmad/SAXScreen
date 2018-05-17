@@ -48,6 +48,7 @@ do
 
     echo "= = Processing $source_file ..."
     out_final=$ofold/${1}_${2}_${autognom_output_designation}
+    [ -e ${out_final}_Iq.dat ] && continue
 
     # Cleave off low and high-angle components.
     awk "\$1 > $q_min && \$1 < $q_max { print }" $source_file > temp-inp.dat

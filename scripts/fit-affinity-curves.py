@@ -233,7 +233,8 @@ def write_fitted_modelA(outfn, params, db):
     #write_xvg_legends(fp, "K\\sd\\N =", "\\xm\\f{}M", Kds, 2)
     s=0
     for i in range(len(Kds)):
-        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+#        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+        print >> fp, "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
         s+=2
     for i in range(len(db)):
         for j in range(len(db[i])):
@@ -314,8 +315,8 @@ def write_fitted_modelB(outfn, legends, params, db):
     #write_xvg_legends(fp, "K\\sd\\N =", "\\xm\\f{}M", Kds, 2)
     s=0
     for i in range(len(Kds)):
-        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
-#        print >> fp, "@s%i legend \"%s: K\\sd\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+#        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+        print >> fp, "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
         s+=2
     for i in range(len(db)):
         print >> fp, "@type xy"
@@ -582,7 +583,7 @@ def modelfit_2state(params, *args):
 
 scriptname=os.path.basename(__file__)
 
-parser = argparse.ArgumentParser(description='Conduct a fit of S_Delta (effective K_D) given the concentrations of receptor:ligand'
+parser = argparse.ArgumentParser(description='Conduct a fit of effective K_D given the concentrations of receptor:ligand'
                                 'and some measure that is a proxy of their relative populations.'
                                 'This script operates in two modes:'
                                 'In mode 1, the measure for each rec:lig is a full curve, with the assumption that the complex curve is unknown.'
@@ -634,10 +635,10 @@ parser.add_argument('--bSmallPerturb', action='store_true',
 args = parser.parse_args()
 
 opref=args.opref
-fileScore1=args.opref+'-score1.xvg'
-fileScore2=args.opref+'-score2.xvg'
-fileModel=args.opref+'-model.xvg'
-fileHist=args.opref+'-hist.xvg'
+fileScore1=args.opref+'_score1.xvg'
+fileScore2=args.opref+'_score2.xvg'
+fileModel=args.opref+'_model.xvg'
+fileHist=args.opref+'_hist.xvg'
 
 bLog=args.bLog
 bWeight=args.bSigma
@@ -804,9 +805,9 @@ if mode==2:
             logKd_std  = np.std(logKd,axis=0)
             Kd_mean = np.mean(np.power(10.0,logKd),axis=0)
             Kd_std  = np.std(np.power(10.0,logKd),axis=0)
-            write_distrib_file( opref+'-logKd.xvg',    legends, logKd.T,    header='# Fitted Log_10(Kd)\n# Number of trials: %i' % ntrials)
-            write_distrib_file( opref+'-baseline.xvg', legends, baselines.T, header='# Fitted baselines\n# Number of trials: %i' % ntrials)
-            write_distrib_file( opref+'-Deltas.xvg', ['Shared-Delta'], deltas, header='# Fitted Deltas\n# Number of trials: %i' % ntrials)
+            write_distrib_file( opref+'_logKd.xvg',    legends, logKd.T,    header='# Fitted Log_10(Kd)\n# Number of trials: %i' % ntrials)
+            write_distrib_file( opref+'_baseline.xvg', legends, baselines.T, header='# Fitted baselines\n# Number of trials: %i' % ntrials)
+            write_distrib_file( opref+'_Deltas.xvg', ['Shared-Delta'], deltas, header='# Fitted Deltas\n# Number of trials: %i' % ntrials)
             #write_score_file( fileScore1, legends, np.stack( (logKd_mean, logKd_std), axis=-1 ), header='# Number of trials: %i' % ntrials )
             #write_score_file( fileScore2, legends, np.stack( (Kd_mean, Kd_std), axis=-1 ), header='# Number of trials: %i' % ntrials )
             write_logKd_histogram(fileHist, legends, logKd, xmin=-2.0, xmax=4.0)

@@ -24,8 +24,8 @@ set term pngcairo enhanced color \
 
 ratiolist='VAR_IDLIST'
 do for [ratio in ratiolist] {
-    filename='chimatrix-'.ratio.'-chiMatrix.dat'
-    outfn='./chimatrix-'.ratio.'-chiMatrix.png'
+    filename='fitted_VAR_METRIC_'.ratio.'_matrix.dat'
+    outfn='./fitted_VAR_METRIC_'.ratio.'_matrix.png'
     #outfn='./chiMatrix-linear-fc-'.ratio.'.pdf'
     #outfn='./chiMatrix-linear-fc-'.ratio.'.svg'
     set output outfn

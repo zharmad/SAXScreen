@@ -52,3 +52,8 @@ linear_fitting_error_trials 100
 analysis_output_folder      ./analysis
 analysis_fit_errormode      noise2sig
 analysis_fit_trials         5000
+
+# The comparison matrix can take on a number of different metrics: chi, log_chi, chi_free, V_R, and cormap.
+analysis_comparison_fit_metric  chi
+analysis_comparison_Dmax   NAN
+

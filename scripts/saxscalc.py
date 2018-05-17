@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import sem
 import math
 import random
+import sys
 
 def block_average(x, stride, bSEM=False):
     """
@@ -73,7 +74,7 @@ def run_distribution(boolList, bPrune=True ):
 
 def schilling_equation(n, c):
     """
-    A_n(C) as defined by Schilling and Franke.
+    A_n(C) as defined by Schilling, Coll. Math. J., 1990 and Franke et al., Nat. Methods, 2015.
     Won't work above n=30 or so due to recursive limit.
     """
     return sum( [schilling_equation(n-1-j, c) for j in range(0,c+1)]) if n>c else 2**n
@@ -100,7 +101,7 @@ def schilling_iterative(n, c):
 
 def probability_cormap_heads(n, c):
     """
-    P(R_n>C) as defined by Franke.
+    P(R_n>C) as defined by Franke et al., Nat. Methods, 2015.
     Essentially, "What's the likelihood of more than C heads in a row over n tosses?"
     Can have issues calculating the ratio of two very long integers, therefore hack as strings for magnitude comparison.
     Keep at least 16-digits for magnitude comparison.
@@ -138,10 +139,25 @@ def cormap_value(x1, x2):
     numPoints=len(x1)
     runs = run_distribution( (x1>x2), bPrune=True )
     maxRun = len(runs)
-    print "= = Longest sequence found %i in %i tosses." % (maxRun, numPoints)
+    print >> sys.stderr, "= = Longest sequence found %i in %i tosses." % (maxRun, numPoints)
     probExceed = probability_cormap_either(numPoints, maxRun)
-    print "= = Probability of a single random-sequence exceeding this: %g" % probExceed
+    print >> sys.stderr, "= = Probability of a single random-sequence exceeding this: %g" % probExceed
     return probExceed
+
+def cormap_matrix(x1, x2):
+    """
+    Plot the CorMap visualisation to see the checkerboard pattern.
+    """
+    boolVec=(x1>x2)
+    return boolVec.reshape(len(boolVec),1) ^ boolVec
+
+def print_cormap_matrix( fp, mat ):
+    sh = mat.shape
+    for i in range(sh[0]):
+        for j in range(sh[1]):
+            print >> fp, int(mat[i,j]),
+        print >> fp, ''
+#        print >> fp, ' '.join(str(mat[i].astype(int))).strip('[]')
 
 def volatility_ratio(x1, x2, stride=1, bElementwise=False, bReweightFractionalBin=True):
     """

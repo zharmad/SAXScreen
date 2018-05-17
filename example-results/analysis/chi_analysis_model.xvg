@@ -1,0 +1,425 @@
+@with g0
+@ view 0.1, 0.1, 0.7, 0.95
+@ legend 0.7, 0.95
+@ legend char size 0.75
+@ legend length 2
+@s0 line type 1
+@s0 line linewidth 1.0
+@s0 line color 1
+@s0 symbol 0
+@s0 symbol size 0.25
+@s0 symbol color 1
+@s1 line type 0
+@s1 line linewidth 1.0
+@s1 line color 1
+@s1 errorbar color 1
+@s1 errorbar size 0.20
+@s1 symbol 1
+@s1 symbol size 0.25
+@s1 symbol color 1
+@s2 line type 1
+@s2 line linewidth 1.0
+@s2 line color 2
+@s2 symbol 0
+@s2 symbol size 0.25
+@s2 symbol color 2
+@s3 line type 0
+@s3 line linewidth 1.0
+@s3 line color 2
+@s3 errorbar color 2
+@s3 errorbar size 0.20
+@s3 symbol 1
+@s3 symbol size 0.25
+@s3 symbol color 2
+@s4 line type 1
+@s4 line linewidth 1.0
+@s4 line color 3
+@s4 symbol 0
+@s4 symbol size 0.25
+@s4 symbol color 3
+@s5 line type 0
+@s5 line linewidth 1.0
+@s5 line color 3
+@s5 errorbar color 3
+@s5 errorbar size 0.20
+@s5 symbol 1
+@s5 symbol size 0.25
+@s5 symbol color 3
+@s6 line type 1
+@s6 line linewidth 1.0
+@s6 line color 4
+@s6 symbol 0
+@s6 symbol size 0.25
+@s6 symbol color 4
+@s7 line type 0
+@s7 line linewidth 1.0
+@s7 line color 4
+@s7 errorbar color 4
+@s7 errorbar size 0.20
+@s7 symbol 1
+@s7 symbol size 0.25
+@s7 symbol color 4
+@s8 line type 1
+@s8 line linewidth 1.0
+@s8 line color 5
+@s8 symbol 0
+@s8 symbol size 0.25
+@s8 symbol color 5
+@s9 line type 0
+@s9 line linewidth 1.0
+@s9 line color 5
+@s9 errorbar color 5
+@s9 errorbar size 0.20
+@s9 symbol 1
+@s9 symbol size 0.25
+@s9 symbol color 5
+@s10 line type 1
+@s10 line linewidth 1.0
+@s10 line color 6
+@s10 symbol 0
+@s10 symbol size 0.25
+@s10 symbol color 6
+@s11 line type 0
+@s11 line linewidth 1.0
+@s11 line color 6
+@s11 errorbar color 6
+@s11 errorbar size 0.20
+@s11 symbol 1
+@s11 symbol size 0.25
+@s11 symbol color 6
+@s12 line type 1
+@s12 line linewidth 1.0
+@s12 line color 7
+@s12 symbol 0
+@s12 symbol size 0.25
+@s12 symbol color 7
+@s13 line type 0
+@s13 line linewidth 1.0
+@s13 line color 7
+@s13 errorbar color 7
+@s13 errorbar size 0.20
+@s13 symbol 1
+@s13 symbol size 0.25
+@s13 symbol color 7
+@s14 line type 1
+@s14 line linewidth 1.0
+@s14 line color 8
+@s14 symbol 0
+@s14 symbol size 0.25
+@s14 symbol color 8
+@s15 line type 0
+@s15 line linewidth 1.0
+@s15 line color 8
+@s15 errorbar color 8
+@s15 errorbar size 0.20
+@s15 symbol 1
+@s15 symbol size 0.25
+@s15 symbol color 8
+@s16 line type 1
+@s16 line linewidth 1.0
+@s16 line color 9
+@s16 symbol 0
+@s16 symbol size 0.25
+@s16 symbol color 9
+@s17 line type 0
+@s17 line linewidth 1.0
+@s17 line color 9
+@s17 errorbar color 9
+@s17 errorbar size 0.20
+@s17 symbol 1
+@s17 symbol size 0.25
+@s17 symbol color 9
+@s18 line type 1
+@s18 line linewidth 1.0
+@s18 line color 10
+@s18 symbol 0
+@s18 symbol size 0.25
+@s18 symbol color 10
+@s19 line type 0
+@s19 line linewidth 1.0
+@s19 line color 10
+@s19 errorbar color 10
+@s19 errorbar size 0.20
+@s19 symbol 1
+@s19 symbol size 0.25
+@s19 symbol color 10
+@s20 line type 1
+@s20 line linewidth 1.0
+@s20 line color 11
+@s20 symbol 0
+@s20 symbol size 0.25
+@s20 symbol color 11
+@s21 line type 0
+@s21 line linewidth 1.0
+@s21 line color 11
+@s21 errorbar color 11
+@s21 errorbar size 0.20
+@s21 symbol 1
+@s21 symbol size 0.25
+@s21 symbol color 11
+@s22 line type 1
+@s22 line linewidth 1.0
+@s22 line color 12
+@s22 symbol 0
+@s22 symbol size 0.25
+@s22 symbol color 12
+@s23 line type 0
+@s23 line linewidth 1.0
+@s23 line color 12
+@s23 errorbar color 12
+@s23 errorbar size 0.20
+@s23 symbol 1
+@s23 symbol size 0.25
+@s23 symbol color 12
+@s0 legend "RNA01: K\sD\N\S\eff.\N =   480 \xm\f{}M"
+@s2 legend "RNA02: K\sD\N\S\eff.\N =  37.2 \xm\f{}M"
+@s4 legend "RNA03: K\sD\N\S\eff.\N =  20.8 \xm\f{}M"
+@s6 legend "RNA04: K\sD\N\S\eff.\N =  2.92 \xm\f{}M"
+@s8 legend "RNA05: K\sD\N\S\eff.\N =   808 \xm\f{}M"
+@s10 legend "RNA06: K\sD\N\S\eff.\N =  11.9 \xm\f{}M"
+@s12 legend "RNA07: K\sD\N\S\eff.\N = 0.316 \xm\f{}M"
+@s14 legend "RNA08: K\sD\N\S\eff.\N =  89.6 \xm\f{}M"
+@s16 legend "RNA09: K\sD\N\S\eff.\N =  82.1 \xm\f{}M"
+@s18 legend "RNA10: K\sD\N\S\eff.\N =   322 \xm\f{}M"
+@s20 legend "RNA11: K\sD\N\S\eff.\N =   576 \xm\f{}M"
+@s22 legend "RNA12: K\sD\N\S\eff.\N = 1e+04 \xm\f{}M"
+@type xy
+0 0.24378
+0.1 0.247364
+0.2 0.250888
+0.4 0.25776
+0.6 0.264406
+0.8 0.270836
+0.9 0.273973
+1 0.27706
+&
+@type xydy
+0 0.212251 0.00570247
+0.1 0.24382 0.00641249
+0.2 0.273095 0.00611258
+0.4 0.287898 0.00604009
+0.6 0.2724 0.00585295
+0.8 0.273778 0.00661474
+0.9 0.259661 0.0070247
+1 0.265307 0.0060798
+&
+@type xy
+0 0.202556
+0.1 0.223982
+0.2 0.244313
+0.4 0.281649
+0.6 0.314604
+0.8 0.343379
+0.9 0.3563
+1 0.368307
+&
+@type xydy
+0 0.20328 0.00573671
+0.1 0.217031 0.00562155
+0.2 0.236 0.00559153
+0.4 0.295726 0.00541267
+0.6 0.329143 0.00495888
+0.8 0.348871 0.00547932
+0.9 0.348006 0.00528623
+1 0.358089 0.00514811
+&
+@type xy
+0 0.193181
+0.1 0.219659
+0.2 0.24492
+0.4 0.291447
+0.6 0.332241
+0.8 0.367131
+0.9 0.382419
+1 0.396348
+&
+@type xydy
+0 0.219658 0.00611719
+0.1 0.216043 0.00543372
+0.2 0.22213 0.00463525
+0.4 0.278043 0.00538821
+0.6 0.328289 0.0051989
+0.8 0.367535 0.00557702
+0.9 0.386317 0.00534204
+1 0.407992 0.00478545
+&
+@type xy
+0 0.211715
+0.1 0.247692
+0.2 0.283175
+0.4 0.351969
+0.6 0.415924
+0.8 0.471102
+0.9 0.493794
+1 0.512609
+&
+@type xydy
+0 0.215442 0.00684666
+0.1 0.221707 0.00600865
+0.2 0.258443 0.00600339
+0.4 0.368757 0.00538694
+0.6 0.472492 0.00555457
+0.8 0.510418 0.00512669
+0.9 0.493655 0.0048301
+1 0.447179 0.00457758
+&
+@type xy
+0 0.211573
+0.1 0.213792
+0.2 0.215987
+0.4 0.220305
+0.6 0.224531
+0.8 0.228668
+0.9 0.230704
+1 0.232719
+&
+@type xydy
+0 0.212185 0.00634461
+0.1 0.223864 0.00548256
+0.2 0.212939 0.00528219
+0.4 0.212279 0.00532261
+0.6 0.218236 0.00584091
+0.8 0.227092 0.00616732
+0.9 0.236784 0.00623967
+1 0.236154 0.00603253
+&
+@type xy
+0 0.25899
+0.1 0.289406
+0.2 0.318708
+0.4 0.373306
+0.6 0.421459
+0.8 0.462148
+0.9 0.479571
+1 0.495095
+&
+@type xydy
+0 0.211947 0.00591917
+0.1 0.253818 0.0052398
+0.2 0.298936 0.00513403
+0.4 0.463074 0.00499662
+0.6 0.580697 0.00442968
+0.8 0.47307 0.005358
+0.9 0.436526 0.00570852
+1 0.380119 0.00586286
+&
+@type xy
+0 0.186414
+0.1 0.224446
+0.2 0.262412
+0.4 0.338022
+0.6 0.412708
+0.8 0.48432
+0.9 0.516111
+1 0.540125
+&
+@type xydy
+0 0.209395 0.00574624
+0.1 0.220991 0.00566351
+0.2 0.256383 0.00588997
+0.4 0.30867 0.00546113
+0.6 0.426151 0.00534711
+0.8 0.468111 0.00379378
+0.9 0.55815 0.0044705
+1 0.514795 0.00453859
+&
+@type xy
+0 0.194633
+0.1 0.208035
+0.2 0.220827
+0.4 0.244665
+0.6 0.266322
+0.8 0.285982
+0.9 0.29512
+1 0.303825
+&
+@type xydy
+0 0.196758 0.00576604
+0.1 0.2077 0.00581842
+0.2 0.219881 0.00593389
+0.4 0.239735 0.00531789
+0.6 0.27598 0.00591144
+0.8 0.276459 0.00569308
+0.9 0.294418 0.0060134
+1 0.308977 0.00503921
+&
+@type xy
+0 0.199025
+0.1 0.213179
+0.2 0.22667
+0.4 0.251756
+0.6 0.274468
+0.8 0.295003
+0.9 0.304516
+1 0.31356
+&
+@type xydy
+0 0.233701 0.00511878
+0.1 0.209042 0.00559241
+0.2 0.215488 0.00539661
+0.4 0.225341 0.00505837
+0.6 0.255995 0.00523332
+0.8 0.270558 0.00554956
+0.9 0.292294 0.00540071
+1 0.374996 0.0048345
+&
+@type xy
+0 0.196388
+0.1 0.201471
+0.2 0.206439
+0.4 0.21604
+0.6 0.225215
+0.8 0.233989
+0.9 0.238232
+1 0.242384
+&
+@type xydy
+0 0.20131 0.00557728
+0.1 0.201434 0.00587133
+0.2 0.205747 0.00545112
+0.4 0.214082 0.00504266
+0.6 0.222008 0.00542784
+0.8 0.226886 0.00594145
+0.9 0.235102 0.00574087
+1 0.25413 0.00535672
+&
+@type xy
+0 0.200232
+0.1 0.203267
+0.2 0.206259
+0.4 0.212113
+0.6 0.217801
+0.8 0.22333
+0.9 0.226037
+1 0.228706
+&
+@type xydy
+0 0.198499 0.00529608
+0.1 0.208673 0.00534164
+0.2 0.2094 0.00475435
+0.4 0.21098 0.00597917
+0.6 0.213913 0.00521408
+0.8 0.219157 0.00465796
+0.9 0.216351 0.00595708
+1 0.24236 0.00453547
+&
+@type xy
+0 0.209782
+0.1 0.209972
+0.2 0.210162
+0.4 0.210542
+0.6 0.210922
+0.8 0.2113
+0.9 0.211489
+1 0.211678
+&
+@type xydy
+0 0.201494 0.00532096
+0.1 0.210701 0.00572105
+0.2 0.207888 0.00539529
+0.4 0.208092 0.00507862
+0.6 0.207998 0.00599558
+0.8 0.199709 0.00482484
+0.9 0.20823 0.00578749
+1 0.233298 0.00488528
+&

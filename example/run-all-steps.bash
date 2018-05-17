@@ -18,7 +18,7 @@ $scrfold/step2A-run-linear-fitting.bash
 $scrfold/step2B-run-autognom-atsas.bash
 
 # = = Dedicated script to generate similarity matrices for clustering
-$scrfold/step3B-construct-chimatrix.bash
+$scrfold/step3B-construct-matrix.bash
 
 # = = Collate or compute structural quantities
 for quant in chi Vc PV Rg ; do
@@ -26,4 +26,4 @@ for quant in chi Vc PV Rg ; do
 done
 
 # = = Run final fitting for ranking and affinity estimation. Takes some time.
-$scrfold/step4-fit-curves.bash
+$scrfold/step4-fit-affinity-curves.bash

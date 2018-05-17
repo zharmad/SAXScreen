@@ -212,36 +212,44 @@ def load_sxydylist(fn, key="legend"):
     else:
         return leglist, np.array(xlist), np.array(ylist), []
 
-#def print_flex(fn, datablock=[], header="", legs=[]):
-#    fp=open(fn,'w')
-#    if header != "":
-#        print >>fp, header
-#
-#    nlegs = len(legs)
-#    if nlegs>0:
-#        bLegend = True
-#    else:
-#        bLegend = False
-#
-#    for i in range(len(x)):
-#        print >> fp, x[i], y[i]
-#    fp.close()
+# = = = Printing functions = = =
 
+def xmgrace_template( plotType ):
+    header="@type %s" % plotType
+    footer="&"
+    return header, footer
 
-def print_xy(fn, x, y, dy=[], header=""):
+def _print_flexible(filePointer, variable):
+    """
+    Internal handler for taking several kinds of inputs of var, according to the type of variable.
+    Giving the empty string will do nothing.
+    """
+    if variable=='':
+        return
+    t=type(variable)
+    if t==type('a') or t==type(1):
+        print >> filePointer, variable
+    elif t==type([]) or t==type(()):
+        for line in variable:
+            print >> filePointer, line
+    else:
+        print >> sys.stderr, '= = ERROR in _print_flexible: type %s is not accounted for in the function.' % t
+        sys.exit(1)
+
+def print_xy(fn, x, y, dy=[], header="", footer=""):
     fp=open(fn,'w')
-    if header != "":
-        print >>fp, header
+    _print_flexible(fp, header)
     if dy==[]:
         for i in range(len(x)):
             print >> fp, x[i], y[i]
     else:
         for i in range(len(x)):
             print >> fp, x[i], y[i], dy[i]
+    _print_flexible(fp, footer)
     fp.close()
 
-def print_xydy(fn, x, y, dy, header=""):
-    print_xy(fn, x, y, dy, header)
+def print_xydy(fn, x, y, dy, header="", footer=""):
+    print_xy(fn, x, y, dy, header, footer)
 
 def print_xylist(fn, x, ylist, bCols=False, header=""):
     """
@@ -249,8 +257,8 @@ def print_xylist(fn, x, ylist, bCols=False, header=""):
     bCols will stack all y contents in the same line, useful for errors.
     """
     fp = open( fn, 'w')
-    if header != "":
-        print >> fp, header
+    _print_flexible(fp, header)
+
     ylist=np.array(ylist)
     shape=ylist.shape
     print shape
@@ -466,3 +474,97 @@ def format_header_legend(legends, s_init=0, step=1):
         string=string+'@s%i legend "%s"\n' % (s, legends[i])
         s+=step
     return string
+
+def print_xvg_simple(fn, x, y, dy=[]):
+    if dy==[]:
+        h="@type xy"
+    else:
+        h="@type xydy"
+    f="&"
+    print_xy(fn, x, y, dy=dy, header=h, footer=f)
+
+def print_xvg_matrix(fn, db, header='', bReverse=False, bAmpersand=True):
+    fp = open(fn, 'w')
+    _print_flexible(fp, header)
+    if isinstance( db, list):
+        for i in len(db):
+            sh = db[i].shape
+            if len(sh)==2:
+                if bReverse:
+                    for j in range(sh[-1]):
+                        for k in range(sh[0]):
+                            print >> fp, '%f ' % db[i][k,j],
+                        print >> fp, ''
+                else:
+                    for j in range(sh[0]):
+                        for k in range(sh[-1]):
+                            print >> fp, '%f ' % db[i][j,k],
+                        print >> fp, ''
+            if bAmpersand:
+                print >> fp, '&'
+    elif isinstance( db, np.ndarray):
+        sh = db.shape
+        if len(sh)==2:
+            if bReverse:
+                for j in range(sh[-1]):
+                    for k in range(sh[0]):
+                        print >> fp, '%f ' % db[k,j],
+                    print >> fp, ''
+            else:
+                for j in range(sh[0]):
+                    for k in range(sh[-1]):
+                        print >> fp, '%f ' % db[j,k],
+                    print >> fp, ''
+        if bAmpersand:
+            print >> fp, '&'
+
+    fp.close()
+
+def print_xvg_complex(fn, x, dataBlock, header='', bType=False, bTarget=False, graph=0):
+    fp = open(fn, 'w')
+    sh = dataBlock.shape
+    nVals = len(x)
+    _print_flexible(fp, header)
+    # 3D - multiple plots sharing the same X
+    if len(sh) == 3:
+        if bType:
+            if sh[1] == 2:
+                print >> fp, '@type xydy'
+            elif sh[1] == 1:
+                print >> fp, '@type xy'
+        series=0
+        # Each axis-0 in dataBlock represents a graph that must be plotted.
+        for i in range(sh[0]):
+            if bTarget:
+                print >> fp, '@target g%i.s%i' % (graph, series)
+            for h in range(nVals):
+                print >> fp, '%g ' % x[h],
+                for j in range(sh[1]):
+                    print >> fp, '%g ' % dataBlock[i,j,h],
+                print >> fp, ''
+            print >> fp, '&'
+            series+=1
+    # 2D - a single plot with a separate X.
+    elif len(sh) == 2:
+        if bType:
+            if sh[0] == 2:
+                print >> fp, '@type xydy'
+            elif sh[0] == 1:
+                print >> fp, '@type xy'
+        if bTarget:
+            print >> fp, '@target g%i.s%i' % (graph, series)
+        for h in range(nVals):
+            print >> fp, '%g ' % x[h],
+            for j in range(sh[0]):
+                print >> fp, '%g ' % dataBlock[j,h],
+            print >> fp, ''
+        print >> fp, '&'
+    # 1D - single plot again with separate X.
+    elif len(sh) == 1:
+        if bType:
+            print >> fp, '@type xy'
+        for h in range(nVals):
+            print >> fp, '%g %g' % (x[h], dataBlock[h])
+        print >> fp, '&'
+
+    fp.close()

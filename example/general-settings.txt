@@ -47,3 +47,5 @@ linear_fitting_error_trials 100
 analysis_output_folder      ./analysis
 analysis_fit_errormode      noise2sig
 analysis_fit_trials         50
+
+analysis_comparison_fit_metric  chi

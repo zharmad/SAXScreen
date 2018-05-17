@@ -4,9 +4,9 @@ set cbrange [0:5]
 set palette defined (0 "black", 1 '#2233bb', 2 "yellow",  3 "red", 4 "pink", 5 "white")
 #set palette defined (0 "black", 1 "red", 3 "yellow",  5 "blue")
 set size square
-set yrange  [7.5:-0.5]
-set x2range [-0.5:7.5]
-set xrange  [-0.5:7.5]
+set yrange  [11.5:-0.5]
+set x2range [-0.5:11.5]
+set xrange  [-0.5:11.5]
 set xtics format ""
 
 set x2tics ( "RNA01" 0, "RNA02" 1, "RNA03" 2, "RNA04" 3, "RNA05" 4, "RNA06" 5, "RNA07" 6, "RNA08" 7, "RNA09" 8, "RNA10" 9, "RNA11" 10, "RNA12" 11 ) \
@@ -24,8 +24,8 @@ set term pngcairo enhanced color \
 
 ratiolist='0.0 0.1 0.2 0.4 0.6 0.8 0.9 1.0 '
 do for [ratio in ratiolist] {
-    filename='chimatrix-'.ratio.'-chiMatrix.dat'
-    outfn='./chimatrix-'.ratio.'-chiMatrix.png'
+    filename='fitted_chi_'.ratio.'_matrix.dat'
+    outfn='./fitted_chi_'.ratio.'_matrix.png'
     #outfn='./chiMatrix-linear-fc-'.ratio.'.pdf'
     #outfn='./chiMatrix-linear-fc-'.ratio.'.svg'
     set output outfn

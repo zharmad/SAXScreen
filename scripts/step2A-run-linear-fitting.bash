@@ -45,6 +45,7 @@ do
     echo "= = Running linearity fitting for ${1} ${2}"
 
     outpref=$ofold/${1}_${2}
+    [ -e ${outpref}_model.dat ] && continue
     python $script_location/calculate-linearity.py \
         -a $q_min -b $q_max --doError --ntrials $linear_fitting_error_trials \
         -f $target_file -o $outpref \
