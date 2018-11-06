@@ -105,6 +105,56 @@ def intensityDiff(pos, *args):
         sys.exit(1)
     return value
 
+def populationIntensityDiff(pos, *args):
+    yT = args[0][0,0]  ; yTsig = args[0][0,1]
+    yP = args[0][1:,0] ; yPsig = args[0][1:,1]
+    fitMetric   = args[1]
+    bUseWeights = args[2]
+    bNoConst    = args[3]
+    stride      = args[4]
+    numRounds   = args[5]
+
+    if fitMetric == 'V_R':
+        f = np.insert(pos[:-1], 0, 1.0) ; c = pos[-1]
+    elif bNoConst:
+        f = pos ; c=0.0
+    else:
+        f = pos[:-1] ; c = pos[-1]
+    y2 = np.mean(f[:,None]*yP, axis=0)+c ; y2sig = np.mean(f[:,None]*yPsig, axis=0)
+
+    if fitMetric == 'chi':
+        if bUseWeights:
+            value=sc.chi_square(yT,y2, dx1=yTsig, dx2=y2sig)
+        else:
+            value=sc.chi_square(yT,y2)
+    elif fitMetric == 'log_chi':
+        # Check for negative values first.
+        if np.any(y2 < 0.0):
+            #print >> sys.stderr, "= = WARNING: for values of f %g and c %g there exists invalid logs." % (f, c)
+            return 1e20
+        if bUseWeights:
+            value=sc.log_chi_square(yT,y2, dx1=yTsig, dx2=y2sig)
+        else:
+            value=sc.log_chi_square(yT,y2)
+    elif fitMetric == 'chi_free':
+        nParams=len(pos)
+        if bUseWeights:
+            value = sc.chi_square_free(yT, y2, dx1=yTsig, dx2=y2sig, stride=stride, nParams=nParams, nRounds=numRounds)
+        else:
+            value = sc.chi_square_free(yT, y2, stride=stride, nParams=nParams, nRounds = numRounds)
+    elif fitMetric == 'V_R':
+        value = sc.volatility_ratio(yT, y2, stride=stride )
+    elif fitMetric == 'cormap' or fitMetric == 'cormap_matrix':
+        runs = sc.run_distribution( yT > y2 )
+        value = len(runs)
+        # prob = sc.cormap_value( yT, y2 )
+        # value = 1.0 - sc.cormap_value( yT, y2 )
+    else:
+        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+        sys.exit(1)
+    print value
+    return value
+
 #####################################
 # MAIN PROGRAM ######################
 
@@ -114,14 +164,17 @@ random.seed();
 parser = argparse.ArgumentParser(description="Fits a set of curves by minimising differences according to some popular metrics,"
                         "utilising Powell-minimisation (sequential step-wise search over each variable) over one of two of the "
                         "variables overall scaling *f* and constant subtraction *c*. "
-                        "These two variables approximate uncertainties in sample concentration/beam intensities and basic buffer subtraction.",
+                        "These two variables approximate uncertainties in sample concentration/beam intensities and basic buffer subtraction."
+                        "Note that there are some combinations of arguments that won't work well, like cormap with Powell minimization.",
                         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('files', metavar='N', type=str, nargs='*',
                     help="The list of files to be manipulated and fitted. For modes 0 and 1, the first file given acts as the reference point"
                         "by which other files are comparied with. The first file will also serve to define the set of independent-variable"
                         "(scattering-angle q) to act as the basis for interpolation.")
 parser.add_argument('-mode', type=int, default=0, help="Determine which curves to fit with which. Mode 0: Fit all other files to the first"
-                        "Mode 1: Fit first file to all others. Mode 2: Fit all files to each other (!).")
+                        "Mode 1: Fit first file to all others. Mode 2: Fit all files to each other (!)."
+                        "Mode 3: Use population mode. Fit other files as a population to the first."
+                        "(ToDo) Mode 4: Use population mode. Use the first again as the target, fit combination of others." )
 parser.add_argument('-metric', type=str, default='chi', help="Determine the metric to use as comparison."
                         "Options are: chi | log_chi | chi_free | V_R | cormap | cormap_matrix "
                         "chi_free is as defined by Rambo and Tainer, Nature, 2013."
@@ -234,7 +287,7 @@ dataModelInterp = np.zeros( dataBlock.shape )
 # Put original default data into this second block.
 dataModelInterp[0] = dataBlock[0]
 
-if fitMode != 2:
+if fitMode < 2:
     # = = = Fit data between 1st and all others. = = =
     for i in range(1,len(fileList)):
         if bVerbose:
@@ -242,6 +295,8 @@ if fitMode != 2:
 
         if bEstimateF0:
             fInit=np.mean( dataBlock[0,0,0:f0EstInterval] ) / np.mean( dataBlock[i,0,0:f0EstInterval] )
+            if fitMode == 1:
+                fInit=1/fInit
         if bVerbose:
             print >> sys.stderr, '      ...estimated F0 to be %g' % fInit
         if bEstimateC0:
@@ -272,6 +327,7 @@ if fitMode != 2:
             sys.exit(20)
 
         xopt = fminOut[0] ; funcopt = fminOut[1]
+
         if fitMetric == 'V_R':
             c = fminOut[0]
             # Here it's simply defined as the fill ratio.
@@ -308,7 +364,6 @@ if fitMode != 2:
             diffSpec = subtract_spectra( dataModelInterp[0], dataModelInterp[i])
             gs.print_xvg_complex( outFile, qBasis, diffSpec, header)
 
-        #Now calculate Tainer's chi_free measure for the fitted
         outFile='%s-Exp-%i.xvg' % (outpref, i)
         fileHeader=[]
         fileHeader.append( '#npts_fit = %8i'  % len(qBasis) )
@@ -370,7 +425,7 @@ elif fitMode == 2:
         if bEstimateC0:
             cInit=0
             y2min = np.min( dataBlock[j,0] )
-            if (fInit*y2min + cInit < 0 ):
+            if fitMetric == 'log_chi' and (fInit*y2min + cInit < 0 ):
                 print '= = WARNING: Adjusted initial c to prevent legative logarithms.'
                 cInit = 1 - fInit*y2min
             if bVerbose:
@@ -418,3 +473,119 @@ elif fitMode == 2:
     outFile='%s_matrix.dat' % outpref
     gs.print_xvg_matrix( outFile, valueMatrix, header, bReverse=False, bAmpersand=False)
 
+if fitMode == 3:
+    # = = = Begin population fit model.
+    # There will be N scaling factor, plus an optional 1 constant subtraction.
+    # chi ~ ( I_exp - (f1*I1 + f2*I2 + ... + c) )
+    if bVerbose:
+        print >> sys.stderr, "= = = Starting population modelling..."
+
+    if len(fileList) < 3:
+        print >> sys.stderr, "= = = ERROR: Population fitting requires at last two component curves and one target curve!"
+        sys.exit(1)
+
+    if bEstimateF0:
+        fInit = np.zeros(len(fileList)-1, dtype=dataBlock.dtype )
+        for i in range(1,len(fileList)):
+            if bEstimateF0:
+                fInit[i-1] =  np.mean( dataBlock[0,0,0:f0EstInterval] ) / np.mean( dataBlock[i,0,0:f0EstInterval] )
+            if bVerbose:
+                print >> sys.stderr, '      ...estimated F0 to be %g' % fInit[-1]
+    else:
+        fInit = np.ones( len(fileList)-1, dtype=dataBlock.dtype )
+    pos = fInit/(len(fileList)-1.0)
+
+    cInit = 0
+    #if bEstimateC0:
+    #    y2min = np.min( dataBlock[i,0] )
+    #    if fitMetric == 'log_chi' and (fInit*y2min + cInit < 0 ):
+    #        print '= = WARNING: Adjusted initial c to prevent legative logarithms.'
+    #        cInit = 1 - fInit*y2min
+    #    if bVerbose:
+    #        print >> sys.stderr, '      ...estimated C0 to be %g' % cInit
+
+    #if fitMetric == 'chi' or fitMetric == 'chi_free' or fitMetric == 'cormap':
+    if fitMetric == 'V_R':
+        # Remove one scaling factor variable since V_R autoscales, and set all ratios to be equal at first.
+        pos = np.append( np.ones(len(fileList)-2, dtype=dataBlock.dtype ), cInit )
+    elif not bNoConst :
+        pos = np.append( pos, cInit )
+
+    fminOut = fmin_powell(populationIntensityDiff, pos, args=( dataBlock, \
+                    fitMetric, bUseWeights, bNoConst, numPointsPerChannel, numRounds), full_output=True)
+
+    print xopt
+
+    # = = = Parse results
+    xopt = fminOut[0] ; funcopt = fminOut[1]
+    yTarget = dataBlock[0,0]
+    if fitMetric == 'V_R':
+        # The fit for volatility ratios is different from the others.
+        f = np.insert( fminOut[0][:-1], 0, 1.0 )
+        c = fminOut[0][-1]
+        fact = sc.volatility_ratio_scaling( yTarget , np.mean( f[:,None]*dataBlock[1:,0], axis=0 ) + c )
+        f *= fact ; c*= fact
+        yModel  = np.mean( f[:,None]*dataBlock[1:,0], axis=0 ) + c
+        dyModel = np.mean( f[:,None]*dataBlock[1:,1], axis=0 )
+        #y2 = np.mean(f[:,None]*yP, axis=0)+c ; y2sig = np.mean(f[:,None]*yPsig, axis=0)
+    else:
+        if not bNoConst:
+            f = fminOut[0][:-1] ; c = fminOut[0][-1]
+        else:
+            xopt = fminOut[0] ; funcopt = fminOut[1]
+            f = fminOut[0] ; c = 0
+        #dataModel.append( np.stack( (dataRaw[i][0], f*dataRaw[i][1]+c, f*dataRaw[i][2] ), axis=0 ) )
+        yModel  = np.mean( f[:,None]*dataBlock[1:,0], axis=0 ) + c
+        dyModel = np.mean( f[:,None]*dataBlock[1:,1], axis=0 )
+
+    if bDiffSpec:
+        outFile='%s-DiffSpec-pop.xvg' % (outpref)
+        header='# Difference spectra. Fit mode %i\n# Original file A: %s\n# Original file B: %s\n# Optimised Params: %s' \
+                % (fitMode, fileList[0], fileList[i], xopt)
+        diffSpec = subtract_spectra( yTarget, yModel)
+        gs.print_xvg_complex( outFile, qBasis, diffSpec, header)
+
+    outFile='%s-Exp-pop.xvg' % (outpref)
+    fileHeader=[]
+    fileHeader.append( '#npts_fit = %8i'  % len(qBasis) )
+    fileHeader.append( '#qmin_fit = %8g' % qBasis[0]    )
+    fileHeader.append( '#qmax_fit = %8g' % qBasis[-1]   )
+    for i in range(len(f)):
+        fileHeader.append( '#f%i    = %12g' % (i+1, f[i] ) )
+
+    fileHeader.append( '#c    = %12g' % c               )
+    if fitMetric == 'chi' or fitMetric == 'log_chi':
+        fileHeader.append( '#chi2 = %12g' % funcopt )
+        fileHeader.append( '#chi  = %12g' % math.sqrt(funcopt) )
+    elif fitMetric == 'chi_free':
+        fileHeader.append( '#chi2Free = %12g' % funcopt )
+        fileHeader.append( '#chiFree  = %12g' % math.sqrt( funcopt ) )
+        fileHeader.append( '#DMaxPar  = %12g' % Dmax )
+        fileHeader.append( '#nPoints  = %i' % numPointsPerChannel )
+        fileHeader.append( '#nRounds  = %i' % numRounds )
+    elif fitMetric == 'V_R':
+        fileHeader.append( '#V_R = %12g' % funcopt )
+        fileHeader.append( '#DMaxPar  = %12g' % Dmax )
+        fileHeader.append( '#nPoints  = %i' % numPointsPerChannel )
+    elif fitMetric == 'cormap':
+        fileHeader.append( '#maxRun  = %i' % funcopt )
+        prob = sc.probability_cormap_either( len(qBasis), funcopt )
+        if prob > 0.0:
+            log10p = -1*np.log10(prob)
+        else:
+            log10p = 99
+        fileHeader.append( '#probExc = %g' % prob )
+        fileHeader.append( '#-log10P = %g' % log10p )
+        print "= = Probability that difference is due completely to random noise = %g"  % prob
+    elif fitMetric == 'cormap_matrix':
+        mat = sc.cormap_matrix( yTarget, yModel )
+        outFile='%s-CorMapMatrix-pop.dat' % (outpref)
+        fp = open( outFile, 'w')
+        sc.print_cormap_matrix( fp, mat )
+        fp.close()
+        # Break out into the next combo!
+    else:
+        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+        sys.exit(1)
+
+    gs.print_xy(outFile, qBasis, yModel, dy=dyModel, header=fileHeader)

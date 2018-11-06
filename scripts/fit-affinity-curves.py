@@ -191,7 +191,7 @@ def split_datablock( raw_block ):
 
 
 # Specific for the format of the datablock above.
-def estimate_initial_parameters_modelA( datablock ):
+def estimate_initial_parameters_modelA_old( datablock ):
     valA=[]
     valB=[]
     param = [] # The other params here are Kds of individial series.
@@ -224,38 +224,64 @@ def remove_conc_from_datablock( datablock, conc):
         out.append(np.array(o))
     return out
 
-def write_fitted_modelA(outfn, params, db):
-    valA=params[0]
-    valB=params[1]
-    Kds =params[2:]
+def write_fitted_modelA(outfn, legends, params, db):
+    ncurves=len(db)
+    delta, bases, Kds = extract_params_modelA(params, ncurves)
+    Kds = np.fabs( Kds )
     fp = open(outfn, 'w')
     write_xvg_header_simexp(fp, 8)
     #write_xvg_legends(fp, "K\\sd\\N =", "\\xm\\f{}M", Kds, 2)
+    if len(db[0][0])==3:
+        bErr=False
+    elif len(db[0][0])==4:
+        bErr=True
     s=0
     for i in range(len(Kds)):
 #        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
         print >> fp, "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
         s+=2
     for i in range(len(db)):
+        print >> fp, "@type xy"
         for j in range(len(db[i])):
-            inP, inQ, targ = db[i][j]
+            inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
-            model_val = (P/inP)*valA + (PQ/inP)*valB
+            model_val = (P/inP)*bases + (PQ/inP)*(bases+delta)
             print >> fp, "%g %g" % (inQ/inP, model_val)
         print >> fp, "&"
+        if bErr:
+            print >> fp, "@type xydy"
+        else:
+            print >> fp, "@type xy"
         for j in range(len(db[i])):
-            inP, inQ, targ = db[i][j]
-            print >> fp, "%g %g" % (inQ/inP, targ)
+            inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
+            if bErr:
+                print >> fp, "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3])
+            else:
+                print >> fp, "%g %g" % (inQ/inP, db[i][j][2])
         print >> fp, "&"
     fp.close()
+#    for i in range(len(db)):
+#        for j in range(len(db[i])):
+#            inP, inQ, targ = db[i][j]
+#            P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
+#            model_val = (P/inP)*valA + (PQ/inP)*valB
+#            print >> fp, "%g %g" % (inQ/inP, model_val)
+#        print >> fp, "&"
+#        for j in range(len(db[i])):
+#            inP, inQ, targ = db[i][j]
+#            print >> fp, "%g %g" % (inQ/inP, targ)
+#        print >> fp, "&"
+#    fp.close()
 
 # Fit function for modelA
 def fitfunc_modelA(params, *args):
-    valA=params[0]
-    valB=params[1]
-    Kds=params[2:]
-    Kds = np.fabs( Kds )
-    data=args[0]
+    ncurves=args[0]
+    data=args[1]
+    delta, bases, Kds = extract_params_modelA(params, ncurves)
+    #valA=params[0]
+    #valB=params[1]
+    #Kds=params[2:]
+    #Kds = np.fabs( Kds )
     chi2=0.0
     count=0
     for i in range(len(data)):
@@ -263,10 +289,41 @@ def fitfunc_modelA(params, *args):
             inP, inQ, target = data[i][j]
             #print "...minimising...", inP, inQ, target
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
-            model_val = (P/inP)*valA + (PQ/inP)*valB
+            model_val = (P/inP)*bases + (PQ/inP)*(bases+delta)
+            #model_val = (P/inP)*valA + (PQ/inP)*valB
             chi2  += ( target - model_val )**2.0
             count += 1
     return 1.0*chi2/count
+
+def extract_params_modelA(params, ncurves):
+    delta=params[0]
+    bases=params[1]
+    Kds=params[1:1+ncurves]
+    return delta, bases, Kds
+
+def concat_params_modelA(delta, baseline, Kds):
+    return [ delta ] + [ baseline ] + list(Kds)
+
+def estimate_initial_parameters_modelA( datablock ):
+    mins = []
+    deltas = []
+    Kds = [] # The other params here are Kds of individial series.
+    for i in range(len(datablock)):
+        db=datablock[i]
+        loc1=np.argmin( db[:,1] )
+        setmin = db[loc1,2]
+        loc2=np.argmax( db[:,1] )
+        setmax = db[loc2,2]
+        mins.append( setmin )
+        if loc2 > loc1 :
+            #print "1:", setmax-setmin
+            deltas.append( setmax-setmin )
+        else:
+            #print "2:", setmin-setmax
+            deltas.append( setmin-setmax )
+        Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
+    params = [ np.mean(deltas) ] + [ np.mean(mins) ] + Kds
+    return params
 
 # = = = = = MODEL B: = = = = =
 # We permit the fact that each apo has a different starting concentration.
@@ -716,21 +773,25 @@ if mode==2:
         print "= = = Written model and targets to %s ." % fileModel
 
     elif True:
+        # Some hacking here to switch between model A and B
         # Adopt a model where, for each titration series, the apo-baseline can and will change,
         # but the magnitude of the change is conserved
-        # Reminder: Parameters are, 1 delta, N minimums, and N K_D for each concentration series in datablock.
+        # Reminder: Parameters are, 1 shared delta, 1 shared minima, and N K_D for each concentration series in datablock.
+        # This is model A
         # i.e.: N_series + 2 parameters
+        # Model B gives N minima instead of just one.
         if errMode=='none':
             params = estimate_initial_parameters_modelB( data_block )
             ncurves = len(data_block)
             print "= = = Initial parameter estimates:"
             print params
-            fminOut = fmin_powell(fitfunc_modelB, params, args=(ncurves, data_block),
-                                  full_output=True)
+            fminOut = fmin_powell(fitfunc_modelA, params, args=(ncurves, data_block), full_output=True)
+            #fminOut = fmin_powell(fitfunc_modelB, params, args=(ncurves, data_block), full_output=True)
             xopt    = fminOut[0] ; funcopt = fminOut[1]
             print "= = Optimised parameters: "
             print xopt
-            write_fitted_modelB( fileModel, legends, xopt, data_block )
+            write_fitted_modelA( fileModel, legends, xopt, data_block )
+            #write_fitted_modelB( fileModel, legends, xopt, data_block )
             print "= = = Written model and targets to %s ." % fileModel
         elif errMode=='1-point':
             params = estimate_initial_parameters_modelB( data_block )
@@ -742,12 +803,11 @@ if mode==2:
             logKd=[]
             for c in conc_list:
                 db=remove_conc_from_datablock(data_block, c)
-                #params = estimate_initial_parameters_modelB( data_block )
                 fminOut = fmin_powell(fitfunc_modelB, params, args=(ncurves, db),
                                   full_output=True)
                 xopt    = fminOut[0] ; funcopt = fminOut[1]
                 delta, bases, Kds = extract_params_modelB(xopt, ncurves)
-                tmp =  np.clip(np.log10(np.fabs(Kds)),-2.0,4.0) ; print "= = log10-Kd:", tmp
+                tmp =  np.clip(np.log10(np.fabs(Kds)),-2.0,5.0) ; print "= = log10-Kd:", tmp
                 logKd.append( tmp )
             logKd=np.array(logKd)
             mean = np.mean(logKd,axis=0)
@@ -765,25 +825,31 @@ if mode==2:
             ncurves=len(data_block)
             ntrials=args.ntrials
             deltas=np.zeros(ntrials)
-            baselines=np.zeros( (ntrials,ncurves) )
+            baselines=np.zeros( ntrials )
+            #baselines=np.zeros( (ntrials,ncurves) )
             logKd=np.zeros( (ntrials,ncurves) )
             i=0 ; nRedo=0 ; nRedoTot=0
             while True:
             #for i in range(ntrials):
                 print "= = = Conducting trial %i of %i ..." % (i+1, ntrials)
                 db=gaussian_noise_datablock(data_block, scale=efact)
-                params = estimate_initial_parameters_modelB( db )
-                fminOut = fmin_powell(fitfunc_modelB, params, args=(ncurves, db),
-                                  full_output=True)
+                #print "Debug:", db
+                params = estimate_initial_parameters_modelA( db )
+                #print "Debug:", params
+                fminOut = fmin_powell(fitfunc_modelA, params, args=(ncurves, db), full_output=True)
+                #params = estimate_initial_parameters_modelB( db )
+                #fminOut = fmin_powell(fitfunc_modelB, params, args=(ncurves, db), full_output=True)
                 xopt    = fminOut[0] ; funcopt = fminOut[1]
 
-                deltas[i], baselines[i], Kds = extract_params_modelB(xopt, ncurves)
+                deltas[i], baselines[i], Kds = extract_params_modelA(xopt, ncurves)
+                #deltas[i], baselines[i], Kds = extract_params_modelB(xopt, ncurves)
+
                 #if True:
                 #    # Debug to temporary file.
                 #    write_fitted_modelB( 'temp-Kds-%i.dat' % i, legends, xopt, db )
                 print "= = Optimised delta:", deltas[i]
                 print "= = Optimised Baselines:", baselines[i]
-                logKd[i] = np.clip(np.log10(np.fabs(Kds)),-2.0,4.0) ; print "= = log10-Kd:", logKd[i]
+                logKd[i] = np.clip(np.log10(np.fabs(Kds)),-2.0,5.0) ; print "= = log10-Kd:", logKd[i]
                 # = = = Note: I think this is an outdated check
                 if bSmallPerturb and np.any( np.fabs(deltas[i]) > np.fabs(baselines[i]) ):
                     nRedo+=1 ; nRedoTot+=1
@@ -810,9 +876,12 @@ if mode==2:
             write_distrib_file( opref+'_Deltas.xvg', ['Shared-Delta'], deltas, header='# Fitted Deltas\n# Number of trials: %i' % ntrials)
             #write_score_file( fileScore1, legends, np.stack( (logKd_mean, logKd_std), axis=-1 ), header='# Number of trials: %i' % ntrials )
             #write_score_file( fileScore2, legends, np.stack( (Kd_mean, Kd_std), axis=-1 ), header='# Number of trials: %i' % ntrials )
-            write_logKd_histogram(fileHist, legends, logKd, xmin=-2.0, xmax=4.0)
-            xopt_avg = concat_params_modelB( np.mean(deltas), np.mean(baselines, axis=0), np.power(10, logKd_mean) )
-            write_fitted_modelB(fileModel, legends, xopt_avg, data_block )
+            write_logKd_histogram(fileHist, legends, logKd, xmin=-2.0, xmax=5.0)
+
+            xopt_avg = concat_params_modelA( np.mean(deltas), np.mean(baselines), np.power(10, logKd_mean) )
+            write_fitted_modelA(fileModel, legends, xopt, data_block )
+            #xopt_avg = concat_params_modelB( np.mean(deltas), np.mean(baselines, axis=0), np.power(10, logKd_mean) )
+            #write_fitted_modelB(fileModel, legends, xopt_avg, data_block )
 
     else:
         # Adopt a simpler model where all apo-baselines are assumed to be the same.

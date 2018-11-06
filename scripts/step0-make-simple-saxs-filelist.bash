@@ -33,7 +33,7 @@ if [[ "$1" == "-not" ]] ; then
 fi
 search_pattern=$(echo $* | sed 's/ /\\|/g')
 template_1=${titration_dictionary}_template
-rm -r $template_1 $sample_buffer_list $ligand_buffer_list $ligand_dictionary
+rm -f $template_1 $sample_buffer_list $ligand_buffer_list $ligand_dictionary
 case $synchrotron_source in
     Grenoble)
         # For Grenoble the title/code is contained in the first line.

@@ -33,7 +33,8 @@ do
     [[ "$line" == "" || "${line:0:1}" == "#" ]] && continue
     set -- $line
     # Note: The dictionary is expected to be of form
-    # Ligand_ID  Ligand:Protein_ratio  ligand:sample_raw_fraction  Synchrotron_number  File_location
+    # Ligand_ID  Ligand:Protein_ratio  ligand:sample_raw_fraction File_location
+    # The Synchrotron numbering system varies and will be determined by the file name and type.
 
     oroot=${1}_${2}
     ofile=$ofold/${oroot}_${buffer_subtracted_saxs_suffix}.dat

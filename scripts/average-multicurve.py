@@ -6,6 +6,8 @@ from math import *
 import argparse
 import general_scripts as gs
 
+from distutils.version import LooseVersion
+
 def read_file(fn, field, key="none"):
     legs=[]
     nplots=0
@@ -139,4 +141,12 @@ if __name__ == '__main__':
     ystd=ylist.std(axis=0)/sqrt(nfiles-1)
     print >> sys.stderr, " ...average finished."
 
-    gs.print_sxylist(out_filename, leglist[0], x[0], np.stack((yavg,ystd), axis=-1) )
+    if LooseVersion(np.version.version) >= LooseVersion('1.10'):
+        gs.print_sxylist(out_filename, leglist[0], x[0], np.stack((yavg,ystd), axis=-1) )
+    else:
+        shape=list(yavg.shape)
+        shape.append(2)
+        tmp = np.zeros( shape, dtype=yavg.dtype )
+        tmp[...,0] = yavg
+        tmp[...,1] = ystd
+        gs.print_sxylist(out_filename, leglist[0], x[0], tmp )

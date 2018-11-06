@@ -37,6 +37,38 @@ def build_interpolated_block( xBasis, dataRaw ):
 
     return outBlock
 
+def get_value(y1, y2, fitMetric, stride=1, nRounds=1):
+    value=None
+    if fitMetric=='chi':
+        if bNoWeights:
+            value=sc.chi_square(y1[0], y2[0])
+        else:
+            value=sc.chi_square(y1[0], y2[0], dx1=y1[1], dx2=y2[1])
+        value=np.sqrt(value)
+    elif fitMetric=='log_chi':
+        if bNoWeights:
+            value=sc.log_chi_square(y1[0], y2[0])
+        else:
+            value=sc.log_chi_square(y1[0], y2[0], dx1=y1[1], dx2=y2[1])
+        value=np.sqrt(value)
+    elif fitMetric == 'chi_free':
+        if bNoWeights:
+            value = sc.chi_square_free(y1[0], y2[0], stride = stride, nRounds = nRounds)
+        else:
+            value = sc.chi_square_free(y1[0], y2[0], dx1=y1[1], dx2=y2[1], \
+                    stride = stride, nRounds = nRounds)
+        value=np.sqrt(value)
+    elif fitMetric == 'V_R':
+        value = sc.volatility_ratio(y1[0], y2[0], stride = stride )
+        #value = sc.volatility_ratio(y1[0], y2[0], stride = stride, bElementwise=True )
+    elif fitMetric == 'cormap':
+        #runs = sc.run_distribution( y1 > f*y2+c )
+        value = sc.cormap_value( y1[0], y2[0] )
+    else:
+        print >> sys.stderr, "= = = ERROR: fitting metric not recognised! %s" % fitMetric
+
+    return value
+
 #####################################
 # MAIN PROGRAM ######################
 
@@ -45,6 +77,10 @@ parser = argparse.ArgumentParser(description="Fits two curves (the second to the
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('files', metavar='N', type=str, nargs='*',
                     help="The files to be manipulated and fitted. The first file will supply the basis-X on which other files will be interpolated.")
+parser.add_argument('-mode', type=int, default=0,
+                    help="Mode-0: Compare all others to the first curve."
+                         "Mode-1: Compare the first curve to all other."
+                         "Mode-2: Build a matrix between all curves.")
 parser.add_argument('-metric', type=str, default='chi', help="Determine the metric to use as comparison."
                         "Options are: chi | log_chi | chi_free | V_R | cormap | cormap_matrix ."
                         "log_chi is the logarithmic version of chi to remove scale dependence in fits."
@@ -94,6 +130,7 @@ if not np.isnan(Dmax):
     deltaQ = qBasis[1] - qBasis[0]
     numPointsPerChannel = int( np.pi / Dmax / deltaQ )
     numChannels = 1.0*len(qBasis)/numPointsPerChannel
+    print "# = = = Detected number of channels and points per channel: %i , %i" % (numChannels, numPointsPerChannel)
 else:
     numPointsPerChannel = 1
 
@@ -101,39 +138,49 @@ else:
 # It is of arrangement( file, y&dy&etc., vals )
 dataBlock = build_interpolated_block( qBasis, dataRaw )
 
-for i in range(1,nFiles):
-    if fitMetric=='chi':
-        if bNoWeights:
-            value=sc.chi_square(dataBlock[0,0], dataBlock[i,0])
+if args.mode==0:
+    for i in range(1,nFiles):
+        if fitMetric == 'cormap_matrix':
+            mat = sc.cormap_matrix( dataBlock[0,0], dataBlock[i,0] )
+            sc.print_cormap_matrix( sys.stdout, mat )
+            value=""
         else:
-            value=sc.chi_square(dataBlock[0,0], dataBlock[i,0], dx1=dataBlock[i,1], dx2=dataBlock[i,1])
-        value=np.sqrt(value)
-    elif fitMetric=='log_chi':
-        if bNoWeights:
-            value=sc.log_chi_square(dataBlock[0,0], dataBlock[i,0])
-        else:
-            value=sc.log_chi_square(dataBlock[0,0], dataBlock[i,0], dx1=dataBlock[i,1], dx2=dataBlock[i,1])
-        value=np.sqrt(value)
-    elif fitMetric == 'chi_free':
-        if bNoWeights:
-            value = sc.chi_square_free(dataBlock[0,0], dataBlock[i,0], \
-                    stride=numPointsPerChannel, nRounds = numRounds)
-        else:
-            value = sc.chi_square_free(dataBlock[0,0], dataBlock[i,0], dx1=dataBlock[i,1], dx2=dataBlock[i,1], \
-                    stride=numPointsPerChannel, nRounds=numRounds)
-        value=np.sqrt(value)
-    elif fitMetric == 'V_R':
-        value = sc.volatility_ratio(dataBlock[0,0], dataBlock[i,0], stride=numPointsPerChannel )
-    elif fitMetric == 'cormap':
-        #runs = sc.run_distribution( y1 > f*y2+c )
-        value = sc.cormap_value( dataBlock[0,0], dataBlock[i,0] )
-    elif fitMetric == 'cormap_matrix':
-        mat = sc.cormap_matrix( dataBlock[0,0], dataBlock[i,0] )
-        sc.print_cormap_matrix( sys.stdout, mat )
-        value=""
-    else:
-        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
-        sys.exit(1)
+            value = get_value( dataBlock[0], dataBlock[i], fitMetric, numPointsPerChannel, numRounds)
+#        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+#        sys.exit(1)
+        print value
 
-    print value
+elif args.mode==1:
+    for i in range(1,nFiles):
+        if fitMetric == 'cormap_matrix':
+            mat = sc.cormap_matrix( dataBlock[i,0], dataBlock[0,0] )
+            sc.print_cormap_matrix( sys.stdout, mat )
+            value=""
+        else:
+            value = get_value( dataBlock[i], dataBlock[0], fitMetric, numPointsPerChannel, numRounds)
+            print value
+#        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+#        sys.exit(1)
+        print value
+
+elif args.mode==2:
+    for i in range(nFiles):
+        for j in range(nFiles):
+            if fitMetric == 'cormap_matrix':
+                mat = sc.cormap_matrix( dataBlock[i,0], dataBlock[j,0] )
+                sc.print_cormap_matrix( sys.stdout, mat )
+                continue
+            else:
+                value = get_value( dataBlock[i], dataBlock[j], fitMetric, numPointsPerChannel, numRounds)
+#        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+#        sys.exit(1)
+                #print np.sum(value), ":", len(value), ":", value
+                print "%8f " % value,
+        print ""
+
+else:
+    print >> sys.stderr, "= = = ERROR, mode not recognised! %f" % args.mode
+    sys.exit(1)
+
+
 

@@ -16,7 +16,7 @@ function collect-I0() {
 }
 
 function collect-Rg() {
-    grep "Real space:" $1 | awk '{print $5, $7}'
+    grep "Real space Rg:" $1 | awk '{print $(NF-2), $NF}'
 }
 
 function compute-integral() {
@@ -28,7 +28,7 @@ function compute-PorodInvariant() {
 }
 
 function compute-PorodVolume() {
-    datporod $1 | awk '{print $1, 0 }'
+    datporod $1 | awk '{print $(NF-1), 0 }'
 }
 
 function compute-ParticleVolume() {
@@ -50,6 +50,21 @@ function compute-Vc() {
     Val=$(= $I0/$Int)
     dVal=$(= sqrt[[$dI0/$I0]^2+[$dInt/$Int]^2]*$Val)
     echo $Val $dVal
+}
+
+function compute-VR() {
+    [ -e temp-Exp-1.xvg ] && rm temp-Exp-1.xvg
+    python $script_location/fit-saxs-curves.py \
+        -metric V_R -Dmax $analysis_comparison_Dmax \
+        -o temp \
+        -qmin $q_min -qmax $q_max \
+        $1 $2 > /dev/stderr
+    if [ -e temp-Exp-1.xvg ] ; then
+        grep V_R temp-Exp-1.xvg | awk '{print $NF}'
+        rm -f temp-Exp-1.xvg
+    else
+        echo "= = ERROR in compute-VR from compute-quantity.bash! The input to the function does not generate an output file!" > /dev/stderr
+    fi
 }
 
 function compute-UnitlessKratky() {
@@ -80,6 +95,7 @@ if [ ! $2 ] ; then
     echo "= = Usage: ./script <Quantity to collect>"
     echo "    ...examples:
     Vc - Volume of Correlation
+    VR - Volatility Ratio
     I0 - I(0)
     Rg - Radius of Gyration
     Q  - Porod Invariant
@@ -99,6 +115,7 @@ args=$*
 case $mode in
     chi) cmdPref=collect-chi ;;
     Vc)  cmdPref=compute-Vc  ;;
+    VR)  cmdPref=compute-VR  ;;
     I0)  cmdPref=collect-I0  ;;
     Rg|Rgyr) cmdPref=collect-Rg ;;
     Q)   cmdPref=compute-PorodInvariant ;;
@@ -111,5 +128,5 @@ case $mode in
         exit 1
         ;;
 esac
-
 $cmdPref $file $args
+

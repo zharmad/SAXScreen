@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.stats import sem
+import numpy.ma as ma
+from scipy.stats import sem, gmean
 import math
 import random
 import sys
@@ -21,6 +22,22 @@ def block_average(x, stride, bSEM=False):
         return np.stack((s,ds)).T
     else:
         return np.nanmean(t, axis=1)
+
+def block_gmean(x, stride):
+    """
+    Returns a block geometric mean for an array of length X.
+    Fast if and only if the stride divides the length of X, as gmean does not support np.nan filling.
+    """
+    l=len(x)
+    rem=l%stride ; nBins = l/stride
+    if rem==0:
+        return gmean(x.reshape(nBins,stride),axis=1)
+    else:
+        tmp=np.array(x)
+        out=np.zeros(nBins+1, dtype=tmp.dtype)
+        out[:-1]=gmean(tmp[:-rem].reshape(l/stride,stride),axis=1)
+        out[-1]=gmean(tmp[nBins*stride:])
+        return out
 
 def block_sum(x, stride):
     if len(x) % stride != 0:
@@ -159,28 +176,51 @@ def print_cormap_matrix( fp, mat ):
         print >> fp, ''
 #        print >> fp, ' '.join(str(mat[i].astype(int))).strip('[]')
 
-def volatility_ratio(x1, x2, stride=1, bElementwise=False, bReweightFractionalBin=True):
+def volatility_ratio_scaling(x1, x2):
+    return np.mean( np.divide(x1,x2) )
+
+def volatility_ratio(x1, x2, stride=1, floor=1e-6, bElementwise=False, bKeepPartialBin=False, bReweightPartialBin=True):
     """
     Implementation of Hura et. al, Nat. Methods, 2013.
-          N_bins-1 | R(q_i) - R(q_{i+1}) |
-    V_R =    Sum   | ------------------- |
-             i=1   | R(q_i) + R(q_{i+1}) |
-    Where R is the average value of the ratios found within a bin.
-    Partial bins are down-weighted so as to reduce their impact on the total ratio.
+          N_bins-1 |  R(q_i) - R(q_{i+1})    |
+    V_R =    Sum   |  -------------------    |
+             i=1   | (R(q_i) + R(q_{i+1}))/2 |
+    Where R is the geometric-mean value of the ratios found within a bin.
+    Partial bins are simply removed unless an argument is made to preserve them,
+    whereupon they are down-weighted so as to reduce their impact on the total ratio.
     e.g., the last bin might be only 20% of the size of a full bin. Its contribution is then multipled by 0.2.
     """
+    if np.any(x1<=0) or np.any(x2<=0):
+        print >> sys.stderr, "= = = WARNING: negative values encountered in the volatility ratio calculations. " \
+                "To avoid NaN returns, these values will be masked - which will reduce the speed of calculations."
+        x1=np.ma.masked_array(x1,mask=(x1<=0))
+        x2=np.ma.masked_array(x2,mask=(x2<=0))
+#                "To avoid NaN returns, this will be adjusted to a floor value of %g" % floor
+#        x1=np.max(np.vstack((x1,np.repeat(floor,len(x1)))),axis=0)
+#        x2=np.max(np.vstack((x2,np.repeat(floor,len(x2)))),axis=0)
+
     ratio=np.divide(x1,x2)
     ratio/=np.mean(ratio)
     if stride>1:
-        remainder = 1.0*(len(x1)%stride)/stride
-        ratio=block_average(ratio, stride)
-    V_R = np.array([ 2.0*math.fabs((ratio[i]-ratio[i+1])/(ratio[i]+ratio[i+1])) for i in range(0,len(ratio)-1) ])
-    if bReweightFractionalBin and stride>1 and remainder > 0.0 :
-        V_R[-1] *= remainder
-    if bElementwise:
-        return V_R
+        rem   = len(x1)%stride ; nBins = len(x1)/stride
+        if not bKeepPartialBin and rem>0:
+            ratio = block_gmean(ratio[:-rem],stride)
+        else:
+            ratio = block_gmean(ratio,stride)
+    # = = If we're keeping the partial bin, the length of ratio will be 1 longer. = =
+    V_R = 2.0*np.fabs( (ratio[:-1]-ratio[1:])/(ratio[:-1]+ratio[1:]) )
+
+    if bReweightPartialBin and stride>1 and rem > 0 :
+        V_R[-1] *= 1.0*(len(x1)%stride)/stride
+        if bElementwise:
+            return V_R
+        else:
+            return np.sum(V_R)
     else:
-        return np.sum(V_R)
+        if bElementwise:
+            return V_R
+        else:
+            return np.sum(V_R)
 
 def log_chi_square(x1, x2, dx1=[], dx2=[], stride=1, bElementwise=False):
     if dx1 == [] and dx2 == []:

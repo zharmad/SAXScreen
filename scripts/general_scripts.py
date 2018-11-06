@@ -70,8 +70,14 @@ def load_xydy(fn):
     x=[]
     y=[]
     dy=[]
+    bWarned=True
     for l in open(fn):
         if l[0]=="#" or l[0]=="@" or l[0]=="&" or l=="" or l=="\n":
+            continue
+        if (l[0]).isalpha():
+            if bWarned:
+                print >> sys.stderr, "= = WARNING: Input file %s to load_xydy contains uncommented text." % fn
+                bWarned=False
             continue
         lines = l.split()
         x.append(float(lines[0]))

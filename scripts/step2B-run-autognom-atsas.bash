@@ -29,6 +29,8 @@ get_general_parameters
 autorg=$ATSAS_location/autorg$ATSAS_suffix
 datgnom=$ATSAS_location/datgnom$ATSAS_suffix
 
+assert_file $autorg $datgnom
+
 ofold=$autognom_output_folder
 if [ ! -e $ofold ] ; then
     mkdir $ofold
@@ -42,7 +44,7 @@ do
     # Note: The dictionary is expected to be of form
     # Ligand_ID  Ligand:Protein_ratio  ligand:sample_raw_fraction File_location
 
-    source_file=$(ls $buffer_subtracted_saxs_folder/${1}_${2}_man01.dat )
+    source_file=$(ls $buffer_subtracted_saxs_folder/${1}_${2}_${buffer_subtracted_saxs_suffix}.dat )
     assert_file $source_file
     [[ "$source_file" == "" ]] && continue
 
@@ -63,7 +65,7 @@ do
 
     # Convert P(r) to the smoothed-I(q)
     python $script_location/analyse-distribution.py \
-            --int_type Pr --integrate --err \
+            --int_type Pr --integrate --err --qmax $q_max \
             -f ${out_final}_Pr.dat > ${out_final}_Iq.dat
 
     rm -f temp-inp.dat
