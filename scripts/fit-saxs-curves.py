@@ -89,7 +89,7 @@ def intensityDiff(pos, *args):
             value = sc.chi_square_free(y1, f*y2+c, dx1=y1sig, dx2=f*y2sig, stride=stride, nParams=nParams, nRounds=numRounds)
         else:
             value = sc.chi_square_free(y1, f*y2+c, stride=stride, nParams=nParams, nRounds = numRounds)
-    elif fitMetric == 'V_R':
+    elif fitMetric == 'vr':
         c = pos
         value = sc.volatility_ratio(y1, y2+c, stride=stride )
     elif fitMetric == 'cormap' or fitMetric == 'cormap_matrix':
@@ -114,7 +114,7 @@ def populationIntensityDiff(pos, *args):
     stride      = args[4]
     numRounds   = args[5]
 
-    if fitMetric == 'V_R':
+    if fitMetric == 'vr':
         f = np.insert(pos[:-1], 0, 1.0) ; c = pos[-1]
     elif bNoConst:
         f = pos ; c=0.0
@@ -142,7 +142,7 @@ def populationIntensityDiff(pos, *args):
             value = sc.chi_square_free(yT, y2, dx1=yTsig, dx2=y2sig, stride=stride, nParams=nParams, nRounds=numRounds)
         else:
             value = sc.chi_square_free(yT, y2, stride=stride, nParams=nParams, nRounds = numRounds)
-    elif fitMetric == 'V_R':
+    elif fitMetric == 'vr':
         value = sc.volatility_ratio(yT, y2, stride=stride )
     elif fitMetric == 'cormap' or fitMetric == 'cormap_matrix':
         runs = sc.run_distribution( yT > y2 )
@@ -176,9 +176,9 @@ parser.add_argument('-mode', type=int, default=0, help="Determine which curves t
                         "Mode 3: Use population mode. Fit other files as a population to the first."
                         "(ToDo) Mode 4: Use population mode. Use the first again as the target, fit combination of others." )
 parser.add_argument('-metric', type=str, default='chi', help="Determine the metric to use as comparison."
-                        "Options are: chi | log_chi | chi_free | V_R | cormap | cormap_matrix "
+                        "Options are: chi | log_chi | chi_free | volatility | cormap | cormap_matrix "
                         "chi_free is as defined by Rambo and Tainer, Nature, 2013."
-                        "V_R is the Volatility Ratio as defined by Hura et al. (2013)."
+                        "Volatility is the Volatility Ratio as defined by Hura et al. (2013). Can be given as 'vr' instead for short."
                         "cormap is the Correlation Map as defined by Franke et al. (2015)")
 parser.add_argument('-o', type=str, dest='outpref', default='fitted', help='Output prefix. Files will be written as <out>-fittedExp.xvg, etc. ')
 parser.add_argument('-debug', dest='bDebug', action='store_true', help='Debug mode.')
@@ -196,7 +196,7 @@ parser.add_argument('-noc', dest='bNoConst', action='store_true', help='Do not u
 parser.add_argument('-c0', type=float, default=np.nan, help='Start fitting with given background constant C0 instead of by estimation.')
 parser.add_argument('-f0', type=float, default=np.nan, help='Start fitting with given scaling constant F0 instead of by estimation.')
 
-# = = = Parameters for chi_free and/or V_R
+# = = = Parameters for chi_free and/or vr
 parser.add_argument('-Dmax', type=float, default=np.nan, help='Give the maximum molecular extent D_max, required to compute number of Shannon channels '
                     'as used in chi_free and volatility ratio computations. NB: can compute using other utilities, e.g. ATSAS datgnom.')
 parser.add_argument('-nRounds', type=int, default=500, help='In Tainer\'s chi_free modelling, the number of replicates to determine median chi.')
@@ -231,7 +231,16 @@ if (args.qrange != ''):
 else:
     qmin=args.qmin ; qmax=args.qmax
 
-if fitMetric == 'V_R':
+# = = = Sanitise fitMetric and check for inconsistent given arguments.
+fitMetric = fitMetric.lower()
+if fitMetric == 'v_r' or fitMetric == 'volatrat' or fitMetric == 'volatility':
+    fitMetric = 'vr'
+elif fitMetric == 'chifree':
+    fitMetric = 'chi_free'
+elif fitMetric == 'log' or fitMetric == 'logchi':
+    fitMetric = 'log_chi'
+
+if fitMetric == 'vr':
     if bNoConst:
         print >> sys.stderr, '= = = ERROR: The volatility ratio has only 1 free parameter for constant subtraction. Cannot be used with argument -noc.'
         sys.exit(1)
@@ -309,7 +318,7 @@ if fitMode < 2:
                 print >> sys.stderr, '      ...estimated C0 to be %g' % cInit
 
         #if fitMetric == 'chi' or fitMetric == 'chi_free' or fitMetric == 'cormap':
-        if fitMetric == 'V_R':
+        if fitMetric == 'vr':
             pos = [ cInit ]
         elif not bNoConst:
             pos = [ fInit, cInit ]
@@ -328,7 +337,7 @@ if fitMode < 2:
 
         xopt = fminOut[0] ; funcopt = fminOut[1]
 
-        if fitMetric == 'V_R':
+        if fitMetric == 'vr':
             c = fminOut[0]
             # Here it's simply defined as the fill ratio.
             f = np.mean(dataBlock[0][0]/dataBlock[i][0])
@@ -380,8 +389,8 @@ if fitMode < 2:
             fileHeader.append( '#DMaxPar  = %12g' % Dmax )
             fileHeader.append( '#nPoints  = %i' % numPointsPerChannel )
             fileHeader.append( '#nRounds  = %i' % numRounds )
-        elif fitMetric == 'V_R':
-            fileHeader.append( '#V_R = %12g' % funcopt )
+        elif fitMetric == 'vr':
+            fileHeader.append( '#volatRat = %12g' % funcopt )
             fileHeader.append( '#DMaxPar  = %12g' % Dmax )
             fileHeader.append( '#nPoints  = %i' % numPointsPerChannel )
         elif fitMetric == 'cormap':
@@ -431,7 +440,7 @@ elif fitMode == 2:
             if bVerbose:
                 print >> sys.stderr, '      ...estimated C0 to be %g' % cInit
 
-        if fitMetric == 'V_R':
+        if fitMetric == 'vr':
             pos = [ cInit ]
         elif not bNoConst:
             pos  = [ fInit, cInit ]
@@ -448,7 +457,7 @@ elif fitMode == 2:
         # = = = Enter final value into matrix.
         if fitMetric == 'chi' or fitMetric == 'log_chi' or fitMetric == 'chi_free' :
             valueMatrix[i,j] = math.sqrt(fminOut[1])
-        elif fitMetric == 'V_R':
+        elif fitMetric == 'vr':
             valueMatrix[i,j] = fminOut[1]
         elif fitMetric == 'cormap':
             #valueMatrix[i,j] = fminOut[1]
@@ -458,7 +467,7 @@ elif fitMode == 2:
             else:
                 valueMatrix[i,j] = 20.0
 
-        if fitMetric == 'V_R':
+        if fitMetric == 'vr':
             fMatrix[i,j] = np.mean(dataBlock[i][0]/dataBlock[j][0])
         elif not bNoConst:
             fMatrix[i,j] = fminOut[0][0]
@@ -505,8 +514,8 @@ if fitMode == 3:
     #        print >> sys.stderr, '      ...estimated C0 to be %g' % cInit
 
     #if fitMetric == 'chi' or fitMetric == 'chi_free' or fitMetric == 'cormap':
-    if fitMetric == 'V_R':
-        # Remove one scaling factor variable since V_R autoscales, and set all ratios to be equal at first.
+    if fitMetric == 'vr':
+        # Remove one scaling factor variable since vr autoscales, and set all ratios to be equal at first.
         pos = np.append( np.ones(len(fileList)-2, dtype=dataBlock.dtype ), cInit )
     elif not bNoConst :
         pos = np.append( pos, cInit )
@@ -519,7 +528,7 @@ if fitMode == 3:
     # = = = Parse results
     xopt = fminOut[0] ; funcopt = fminOut[1]
     yTarget = dataBlock[0,0]
-    if fitMetric == 'V_R':
+    if fitMetric == 'vr':
         # The fit for volatility ratios is different from the others.
         f = np.insert( fminOut[0][:-1], 0, 1.0 )
         c = fminOut[0][-1]
@@ -563,8 +572,8 @@ if fitMode == 3:
         fileHeader.append( '#DMaxPar  = %12g' % Dmax )
         fileHeader.append( '#nPoints  = %i' % numPointsPerChannel )
         fileHeader.append( '#nRounds  = %i' % numRounds )
-    elif fitMetric == 'V_R':
-        fileHeader.append( '#V_R = %12g' % funcopt )
+    elif fitMetric == 'vr':
+        fileHeader.append( '#volatRat = %12g' % funcopt )
         fileHeader.append( '#DMaxPar  = %12g' % Dmax )
         fileHeader.append( '#nPoints  = %i' % numPointsPerChannel )
     elif fitMetric == 'cormap':

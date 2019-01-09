@@ -60,7 +60,7 @@ function compute-VR() {
         -qmin $q_min -qmax $q_max \
         $1 $2 > /dev/stderr
     if [ -e temp-Exp-1.xvg ] ; then
-        grep V_R temp-Exp-1.xvg | awk '{print $NF}'
+        grep volatRat temp-Exp-1.xvg | awk '{print $NF}'
         rm -f temp-Exp-1.xvg
     else
         echo "= = ERROR in compute-VR from compute-quantity.bash! The input to the function does not generate an output file!" > /dev/stderr

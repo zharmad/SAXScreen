@@ -189,10 +189,11 @@ def volatility_ratio(x1, x2, stride=1, floor=1e-6, bElementwise=False, bKeepPart
     Partial bins are simply removed unless an argument is made to preserve them,
     whereupon they are down-weighted so as to reduce their impact on the total ratio.
     e.g., the last bin might be only 20% of the size of a full bin. Its contribution is then multipled by 0.2.
+    Note that negative values are masked out to prevent instability.
     """
     if np.any(x1<=0) or np.any(x2<=0):
-        print >> sys.stderr, "= = = WARNING: negative values encountered in the volatility ratio calculations. " \
-                "To avoid NaN returns, these values will be masked - which will reduce the speed of calculations."
+#        print >> sys.stderr, "= = = WARNING: negative values encountered in the volatility ratio calculations. " \
+#                "To avoid NaN returns, these values will be masked - which will reduce the speed of calculations."
         x1=np.ma.masked_array(x1,mask=(x1<=0))
         x2=np.ma.masked_array(x2,mask=(x2<=0))
 #                "To avoid NaN returns, this will be adjusted to a floor value of %g" % floor

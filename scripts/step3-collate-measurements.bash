@@ -97,10 +97,9 @@ do
             echo "@type xy"
         fi
         s=$((s+1))
-        apoFile=$file
     fi
     if [[ "$quant" == "VR" ]] ; then
-        args=$apoFile
+        args=$average_subtracted_sample
     else
         args=""
     fi

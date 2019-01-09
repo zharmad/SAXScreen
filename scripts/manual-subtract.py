@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Does a manual subtraction using bu
 parser.add_argument('-s', '--sample', type=str, dest='sfile', default='', required=True,
                     help='Name of the sample intensity file.')
 parser.add_argument('buffers', metavar='Buffer_file', type=str, nargs='+',
-                    help='Files of all relevant buffers. Please use at least 2.')
+                    help='Files of all relevant buffers. Please use at least 2 when taking from the raw synchrotron measurements.')
 parser.add_argument('-o', '--out', type=str, dest='ofile', default='', required=True,
                     help='Name of the output intensity file.')
 parser.add_argument('-f1', '--scale_sample', type=float, dest='scale1', default=1.0,
@@ -63,9 +63,14 @@ for i in range(nbuf):
         sys.exit()
 
 #bx_av=np.average(bx,0)
-by_av=np.average(by,0)
-bdy_av=np.average(bdy,0)
-print by.shape, by_av.shape
+if nbuf > 1:
+    by_av=np.average(by,0)
+    bdy_av=np.average(bdy,0)
+    print by.shape, by_av.shape
+else:
+    by_av=by[0]
+    bdy_av=bdy[0]
+
 #Average buffer and subtract
 oy  = f3*( f1*sy - f2*by_av )
 ody = f3*( np.power( f1*f1*np.power(sdy,2) + f2*f2*np.power(bdy_av,2) , 0.5 ) )

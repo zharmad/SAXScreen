@@ -115,8 +115,8 @@ parser = argparse.ArgumentParser(description='Calculate the extent to which a cu
                                 'a linear sum of another set of curves over the same x-coordinates, where the '
                                 'fitted amplitude for each are forced to be non-negative.',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-f', type=str, dest='tfile', default='', required=True,
-                    help='Target file to be linearly modelled.')
+parser.add_argument('-f', '-t', type=str, dest='tfile', default='', required=True,
+                    help='Target composite scattering curve to be linearly modelled by its constituents.')
 parser.add_argument('-x', type=str, dest='bfile', default='', required=False,
                     help='Empty-cell curve to be included in modeling. This is permitted to be negative.')
 parser.add_argument('cfiles', metavar='cfiles', type=str, nargs='+',
