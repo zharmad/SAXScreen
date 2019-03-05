@@ -16,6 +16,20 @@ function get_general_parameters() {
     done < $settings
 }
 
+# ReceptorName ReceptorConc LigandName LigandReceptorRatio LigandBufferRatio FileLocation
+function count_headers() {
+    head -n 1 $1 | sed 's/[#@%]//g' | awk '{print NF}'
+}
+
+# Given an integer, form the string ${1}_${2}_...${N}
+function form_substring()  {
+    out='$'{1}
+    for i in `seq 2 $1` ; do
+        out=${out}_'$'{$i}
+    done
+    echo $out
+}
+
 get_general_parameters
 
 if [[ "$use_ligand_scattering" == "yes" ]] ; then
@@ -37,8 +51,13 @@ do
     [[ "$line" == "" || "${line:0:1}" == "#" ]] && continue
     set -- $line
     # Note: The dictionary is expected to be of form
-    # Ligand_ID  Ligand:Protein_ratio  ligand:sample_raw_fraction  File_location
-    target_file=$4
+
+    nHead=$(count_headers $titration_dictionary)
+    nHead=$((nHead-2))
+    eval input_prefix=$(form_substring $nHead)
+    output_prefix=$input_prefix
+
+    target_file="${@: -1}"
     assert_file $target_file
     if [[ "$use_ligand_scattering" == "yes" ]] ; then
         # Look up the raw ligand scattering file corresponding to the name of the titration
@@ -53,9 +72,9 @@ do
         bufferLigand=""
     fi
 
-    echo "= = Running linearity fitting for ${1} ${2}"
+    echo "= = Running linearity fitting for $output_prefix"
 
-    outpref=$ofold/${1}_${2}
+    outpref=$ofold/$output_prefix
     [ -e ${outpref}_model.dat ] && continue
     python $script_location/calculate-linearity.py \
         -a $q_min -b $q_max --doError --ntrials $linear_fitting_error_trials \

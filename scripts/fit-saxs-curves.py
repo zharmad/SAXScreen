@@ -8,6 +8,7 @@ from ast import literal_eval as make_tuple
 # Used to call datgnom and outsource Dmax determination.
 import general_scripts as gs
 import saxscalc as sc
+import saxsio
 
 def read_xvgs_all(filelist):
     out_list=[]
@@ -92,6 +93,9 @@ def intensityDiff(pos, *args):
     elif fitMetric == 'vr':
         c = pos
         value = sc.volatility_ratio(y1, y2+c, stride=stride )
+        # If the entire strip is masked return 1e99. This usually indicates some form of domain error in the underlying calculation.
+        if np.ma.is_masked(value):
+            value=1e99
     elif fitMetric == 'cormap' or fitMetric == 'cormap_matrix':
         # Will need a two-stage eliminator, perhaps, but essentially we'll need a system that minimises the number
         # of sequential runs.

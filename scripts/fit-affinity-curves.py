@@ -1024,7 +1024,7 @@ if mode==2:
                 #if True:
                 #    # Debug to temporary file.
                 #    write_fitted_modelC( 'temp-Kds-%i.dat' % i, legends, xopt, db )
-                print "    ...trial %i goodness-of-fit:", funcopt
+                print "    ...trial %i goodness-of-fit:" % i, funcopt
                 print "    ...optimised deltas:", deltas[i]
                 print "    ...optimised Baseline:", baselines[i]
                 logKd[i] = np.clip(np.log10(np.fabs(Kds)),KDClipMin,KDClipMax) ; print "= = log10-Kd:", logKd[i]

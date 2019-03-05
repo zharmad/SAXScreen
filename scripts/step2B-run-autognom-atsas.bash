@@ -24,6 +24,31 @@ function get_general_parameters() {
     done < $settings
 }
 
+# ReceptorName ReceptorConc LigandName LigandReceptorRatio LigandBufferRatio FileLocation
+function count_headers() {
+    head -n 1 $1 | sed 's/[#@%]//g' | awk '{print NF}'
+}
+
+# Given an integer, form the string ${1}_${2}_...${N}
+function form_substring()  {
+    out='$'{1}
+    for i in `seq 2 $1` ; do
+        out=${out}_'$'{$i}
+    done
+    echo $out
+}
+
+function pick_if_multiple() {
+    if [[ $# -gt 2 ]] ; then
+        field=$1 ; shift
+        echo "= = WARNING: more than one file found according to the settings given for file trawling! : $*" > /dev/stderr
+        echo "    ...will use the file #$field." > /dev/stderr
+        echo $* | awk "{print \$$field}"
+    else
+        echo $2
+    fi
+}
+
 get_general_parameters
 
 autorg=$ATSAS_location/autorg$ATSAS_suffix
@@ -41,29 +66,39 @@ while read line
 do
     [[ "$line" == "" || "${line:0:1}" == "#" ]] && continue
     set -- $line
-    # Note: The dictionary is expected to be of form
-    # Ligand_ID  Ligand:Protein_ratio  ligand:sample_raw_fraction File_location
-
-    source_file=$(ls $buffer_subtracted_saxs_folder/${1}_${2}_${buffer_subtracted_saxs_suffix}.dat )
+   
+    # ReceptorName ReceptorConc LigandName LigandRatio LigRecRatio fileLocation
+    # Get number of headers and remove the last two columns as they are special.
+    nHead=$(count_headers $titration_dictionary)
+    nHead=$((nHead-2))
+    eval input_prefix=$(form_substring $nHead)
+    output_prefix=$input_prefix
+    source_file=$(ls $buffer_subtracted_saxs_folder/${input_prefix}_${buffer_subtracted_saxs_suffix}.dat)
+    source_file=$(pick_if_multiple NF $source_file)
     assert_file $source_file
+
     [[ "$source_file" == "" ]] && continue
 
     echo "= = Processing $source_file ..."
-    out_final=$ofold/${1}_${2}_${autognom_output_designation}
+    out_final=$ofold/${output_prefix}_${autognom_output_designation}
     [ -e ${out_final}_Iq.dat ] && continue
 
     # Cleave off low and high-angle components.
     awk "\$1 > $q_min && \$1 < $q_max { print }" $source_file > temp-inp.dat
 
-    # Auto-estimate the Radius of Gyration
+    # = = Auto-estimate the Radius of Gyration
     rgdat=$($autorg temp-inp.dat -f ssv)
-    # Run DATGNOM.
+    # = = Run DATGNOM.
     $datgnom -r ${rgdat%% *} -o $out_final.out temp-inp.dat
+    if [ ! -e ${out_final}.out ] ; then
+        echo "= = WARNING: DATGNOM has failed to generate $out_final.out!"
+        continue
+    fi
 
-    # Extract P(r) from DATGNOM output
+    # = = Extract P(r) from DATGNOM output
     extract-Pr $out_final.out > ${out_final}_Pr.dat
 
-    # Convert P(r) to the smoothed-I(q)
+    # = = Convert P(r) to the smoothed-I(q)
     python $script_location/analyse-distribution.py \
             --int_type Pr --integrate --err --qmax $q_max \
             -f ${out_final}_Pr.dat > ${out_final}_Iq.dat

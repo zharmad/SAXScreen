@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import csv
+import re
 # This function returns a string that contains
 # the value of the function with its error formatted
 # to the same exponent.
@@ -47,10 +48,17 @@ def load_matrix(fn):
 def load_xy(fn):
     x=[]
     y=[]
+    bWarned=False
     for l in open(fn):
         if l[0]=="#" or l[0]=="@" or l[0]=="&" or l=="" or l[0]=="\n":
             continue
         lines = l.split()
+        #if lines[0].isalnum():
+        if re.search('[a-df-zA-DF-Z]', lines[0]):
+            if not bWarned:
+                bWarned=True
+                print >> sys.stderr, "= = WARNING: Input file %s to general_scripts.load_xy contains uncommented alphanumerics: %s" % (fn, lines[0])
+            continue
         x.append(float(lines[0]))
         y.append(float(lines[1]))
     return np.array(x), np.array(y)
@@ -58,10 +66,18 @@ def load_xy(fn):
 def load_xys(fn):
     x=[]
     y=[]
+    bWarned=False
     for l in open(fn):
         if l[0]=="#" or l[0]=="@" or l[0]=="&" or l=="":
             continue
-        vars = [ float(i) for i in l.split() ]
+        lines=l.split()
+        #if lines[0].isalnum():
+        if re.search('[a-df-zA-DF-Z]', lines[0]):
+            if not bWarned:
+                bWarned=True
+                print >> sys.stderr, "= = WARNING: Input file %s to general_scripts.load_xys contains uncommented alphanumerics: %s" % (fn, lines[0])
+            continue
+        vars = [ float(i) for i in lines ]
         x.append(vars[0])
         y.append(vars[1:])
     return np.array(x), np.array(y)
@@ -70,16 +86,17 @@ def load_xydy(fn):
     x=[]
     y=[]
     dy=[]
-    bWarned=True
+    bWarned=False
     for l in open(fn):
         if l[0]=="#" or l[0]=="@" or l[0]=="&" or l=="" or l=="\n":
             continue
-        if (l[0]).isalpha():
-            if bWarned:
-                print >> sys.stderr, "= = WARNING: Input file %s to load_xydy contains uncommented text." % fn
-                bWarned=False
-            continue
         lines = l.split()
+        #if lines[0].isalnum():
+        if re.search('[a-df-zA-DF-Z]', lines[0]):
+            if not bWarned:
+                print >> sys.stderr, "= = WARNING: Input file %s to general_scripts.load_xydy contains uncommented alphanumeric text: %s" % (fn, lines[0])
+                bWarned=True
+            continue
         x.append(float(lines[0]))
         y.append(float(lines[1]))
         if len(lines) <=2:
@@ -217,6 +234,7 @@ def load_sxydylist(fn, key="legend"):
         return leglist, np.array(xlist), np.array(ylist), np.array(dylist)
     else:
         return leglist, np.array(xlist), np.array(ylist), []
+
 
 # = = = Printing functions = = =
 

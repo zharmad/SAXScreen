@@ -22,7 +22,13 @@ def read_file(fn, field, key="none"):
         with open(fn) as fp:
             for line in fp:
                 l = line.split()
-                if (line[0] == '#' or line[0] == '@' or line == '\n'):
+                if line[0] == '#' or line[0] == '@' or line == '\n':
+                    continue
+                if l[0].isalnum():
+                    continue
+                # Hamburg and Australian Synchrotron specific, to catch
+                # opening arguements that are not technically alphanumeric.
+                if l[0].endswith(';') or l[0].endswith(':'):
                     continue
                 elif (line[0] == '&'):
                     nlines.append(tmp)
@@ -114,29 +120,51 @@ if __name__ == '__main__':
 
     bFirst = True
     for i in range(nfiles):
-        file_name = args.filelist[i]
-        l, x, y = read_file(file_name, field, args.key)
-        print >> sys.stderr, " ...plot %s read." % file_name
+        fileName = args.filelist[i]
+        if fileName[0] == '#':
+            print >> sys.stderr, "= = NOTE: skipping file argument %s" % fileName
+            continue
+        l, x, y = read_file(fileName, field, args.key)
+        x=np.array(x,dtype=np.float32)
+        y=np.array(y,dtype=np.float32)
+        print >> sys.stderr, " ...plot %s read." % fileName
         nplot = len(l)
         ndat  = len(x[0])
         if bFirst:
             bFirst = False
             leglist=[]
-            xlist=np.zeros((nfiles,nplot,ndat))
-            ylist=np.zeros((nfiles,nplot,ndat))
+            xlist=np.zeros((nfiles,nplot,ndat),dtype=np.float32)
+            ylist=np.zeros((nfiles,nplot,ndat),dtype=np.float32)
             check=(nplot,ndat)
+            leglist.append(l)
+            xlist[i]=x
+            ylist[i]=y
+            continue
         #Sanity check
-        if check != (nplot,ndat):
-            print >> sys.stderr, "= = ERROR: Input data files do not contain the same number of plots/data-points!"
+        if check[0] != nplot:
+            print >> sys.stderr, "= = ERROR: Input data files do not contain the same number of plots!"
             sys.exit(2)
-
-        leglist.append(l)
-        xlist[i]=x
-        ylist[i]=y
-
+        # Check if X-values are identical!
+        # print xlist[0].shape, x.shape
+        # print np.array_equal( xlist[0], x)
+        if not np.array_equal( xlist[0], x):
+            # Try to interpolate instead.
+            print >> sys.stderr, "= = WARNING: The latest input data file %s does not contain identical X-values!" % fileName
+            print >> sys.stderr, "= = ...will use interpolation."
+            y2=np.zeros(check)
+            for j in range(nplot):
+                #print "Debug:", type(xlist[i,j]), type(x[j])
+                yTemp = np.interp(xlist[0,j,:],x[j,:],y[j,:])
+            for k in range(ndat):
+                y2[0,k] = yTemp[k] 
+            leglist.append(l)
+            xlist[i]=xlist[0]
+            ylist[i]=y2
+        else:
+            leglist.append(l)
+            xlist[i]=x
+            ylist[i]=y
     print >> sys.stderr, " ...all plots read. Conducting averaging."
-    print ylist.shape
-    print ylist[:,0,-1]
     yavg=ylist.mean(axis=0)
     ystd=ylist.std(axis=0)/sqrt(nfiles-1)
     print >> sys.stderr, " ...average finished."
