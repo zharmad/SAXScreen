@@ -36,7 +36,7 @@ def write_xvg_header_simexp(fp, nCurves):
     cmax=31
     s=0
     c=0
-    print >> fp, '@with g0'
+#   print >> fp, '@with g0'
     print >> fp, '@ view 0.1, 0.1, 0.7, 0.95'
     print >> fp, '@ legend 0.7, 0.95'
     print >> fp, '@ legend char size 0.75'
@@ -64,6 +64,31 @@ def write_xvg_legends(fp, prefix, suffix, vals, skip=1):
     for i in range(len(vals)):
         print >> fp, "@s%i legend \"%s %5.3g %s\"" % (s, prefix, vals[i], suffix)
         s+=skip
+
+def write_fit_results(fn, nCurves, nTrials, legends, meanKd, sigKd, meanBaseline, sigBaseline, meanDelta, sigDelta, meanQoF, sigQoF, bTestFail):
+    from datetime import datetime
+    fp=open(fn, 'w')
+    print >> fp, "= = = Summary of fitting."
+    print >> fp, "= = = Date: %s" % datetime.now().strftime("%Y.%m.%d %H:%M:%S") 
+    print >> fp, ""
+    print >> fp, "mean QoF over %i trials : %g +- %g" % ( nTrials, meanQoF, sigQoF )
+    print >> fp, ''
+    for i in range(nCurves):
+        print >> fp, "Statistics for curve %i - %s :" % (i+1, legends[i])
+        print >> fp, "Kd : %g +- %g" % ( meanKd[i], sigKd[i] )
+        if meanBaseline != () :
+            print >> fp, "baseline : %g +- %g" % ( meanBaseline[i], sigBaseline[i] )
+        else:
+            print >> fp, "baseline : %g +- %g" % ( meanBaseline, sigBaseline )
+        if meanDelta != () :
+            print >> fp, "delta : %g +- %g" % ( meanDelta[i], sigDelta[i] )
+        else:
+            print >> fp, "delta : %g +- %g" % ( meanDelta, sigDelta )
+
+        print >> fp, "Failed quality check? : %s" % bTestFail[i]
+        print >> fp, ''
+
+    fp.close()
 
 def write_score_file(fn, legs, logKd, header=''):
     fp=open(fn,'w')
@@ -759,7 +784,7 @@ parser = argparse.ArgumentParser(description='Conduct a fit of effective K_D giv
                                 'In mode 1, the measure for each rec:lig is a full curve, with the assumption that the complex curve is unknown.'
                                 'The script assumes that, for each *different* ligand titrated, the change in the receptor apo-curve is identical,'
                                 'and thus can be derived from their respective apo curves.'
-                                'In mode two, the measure for each rec:lig is a single value, agains with the asusmption that the complexation'
+                                'In mode two, the measure for each rec:lig is a single value, agains with the assumption that the complexation'
                                 'produces an identical change upon the apo curve.'
                                 'For both modes, an apo-receptor measure is expected at the beginning of each ligand titration series.'
                                 'All data will then be fitted together.',
@@ -847,6 +872,7 @@ if args.tfile != '':
     mode=2
     efiles = args.tfile
     concRec= args.concRec
+
 # Sanity check
 if mode == 0:
     print >> sys.stderr, "= = ERROR: The script must operate in either mode 1 or mode 2. Please check help  with -h."
@@ -974,11 +1000,11 @@ if mode==2:
             xopt    = fminOut[0] ; funcopt = fminOut[1]
             deltaAll, baselineAll, KdAll = extract_params_modelC(xopt, nCurves)
             logKdAll = np.clip(np.log10(np.fabs(KdAll)),KDClipMin,KDClipMax)
-            logKd_mean = np.mean(logKd,axis=0)
-            logKd_std  = np.std(logKd,axis=0)
-            Kd_mean, Kd_std = convert_log_statistics( 10.0, logKd_mean, logKd_std)
+            meanLogKd = np.mean(logKd,axis=0)
+            sigLogKd  = np.std(logKd,axis=0)
+            meanKd, sigKd = convert_log_statistics( 10.0, meanLogKd, sigLogKd)
             for i in range(nCurves):
-                print " ... full log10(Kd) value ( %d ) versus mean from analysis: %g vs. %g +- %g" % ( i, logKdAll[i], logKd_mean[i], logKd_std[i] )
+                print " ... full log10(Kd) value ( %d ) versus mean from analysis: %g vs. %g +- %g" % ( i, logKdAll[i], meanLogKd[i], sigLogKd[i] )
 
             nTrials = nConcs
 
@@ -1046,9 +1072,9 @@ if mode==2:
 
             if nRedoTot > 0:
                 print "= = = NOTE: A total of %i trials have been redone due to tripping the error signal." % nRedoTot
-            logKd_mean = np.mean(logKd,axis=0)
-            logKd_std  = np.std(logKd,axis=0)
-            Kd_mean, Kd_std = convert_log_statistics( 10.0, logKd_mean, logKd_std)
+            meanLogKd = np.mean(logKd,axis=0)
+            sigLogKd  = np.std(logKd,axis=0)
+            meanKd, sigKd = convert_log_statistics( 10.0, meanLogKd, sigLogKd)
         else:
             print >> sys.stderr, "= = ERROR: invalid error mode selected?"
             sys.exit(1)
@@ -1058,7 +1084,7 @@ if mode==2:
     # = = = output raw fitting files
     headerStr=""
     for i in range(nCurves):
-        reportString="# Titration %s (#%i) raw affinity estimate: %g +- %g" % ( legends[i], i+1, Kd_mean[i], Kd_std[i] )
+        reportString="# Titration %s (#%i) raw Kd estimate: %g +- %g" % ( legends[i], i+1, meanKd[i], sigKd[i] )
         print "= = = %s" % reportString
         headerStr=headerStr+reportString+"\n"
     print "    ... this information will also be stored in the header comments of %s" % ( opref+'_logKd.xvg' )
@@ -1067,56 +1093,74 @@ if mode==2:
     write_logKd_histogram(fileHist, legends, logKd, xmin=KDClipMin, xmax=KDClipMax)
 
     if len(deltas.shape) == 2:
-        outDelta = np.mean(deltas, axis=0)
+        meanDelta = np.mean(deltas, axis=0)
+        outDelta = np.copy(meanDelta)
+        sigDelta = np.std( deltas, axis=0)
         write_distrib_file( opref+'_deltas.xvg', legends, deltas.T, header='# Fitted deltas\n# Number of trials: %i' % nTrials)
     else:
-        outDelta = np.mean(deltas)
+        meanDelta = np.mean(deltas)
+        sigDelta = np.sig( deltas)
         write_distrib_file( opref+'_deltas.xvg', ['Shared-Delta'], deltas, header='# Fitted deltas\n# Number of trials: %i' % nTrials)
+
     if len(baselines.shape) == 2:
-        outBaseline = np.mean(baselines, axis=0)
+        meanBaseline = np.mean(baselines, axis=0)
+        sigBaseline = np.sig(baselines, axis=0)
         write_distrib_file( opref+'_baselines.xvg', legends, baselines.T, header='# Fitted baselines\n# Number of trials: %i' % nTrials)
     else:
-        outBaseline = np.mean(baselines)
+        meanBaseline = np.mean(baselines)
+        sigBaseline = np.std(baselines)
         write_distrib_file( opref+'_baselines.xvg', ['Shared-Baseline'], baselines, header='# Fitted baselines\n# Number of trials: %i' % nTrials)
 
     # = = Conduct quality checks
-    print "= = Conducting quality checks...."
+    print "= = Conducting quality checks for various trials..."
 
     if bTestGoodnessOfFit:
-        valMean = np.mean(fitQuality) ; valStd = np.std(fitQuality)
-        print "= = = NB: Quality-of-fit statistic from all trials: %g +- %g" % ( valMean, valStd )
-        outliers = [ x for x in fitQuality if x-valMean>3.0*valStd ]
+        # ...Sometimes the minimisation algorithm cannot find a good minimum. Note these exceptions.
+        meanQoF = np.mean(fitQuality) ; sigQoF = np.std(fitQuality)
+        print "= = = NB: Quality-of-fit statistic from all trials: %g +- %g" % ( meanQoF, sigQoF )
+        outliers = [ x for x in fitQuality if x-meanQoF>3.0*sigQoF ]
         print "   ...and particular outliers:", outliers
 
-    bFailArray = [ False for x in range(nTrials) ]
+    # = = = Test for fitting artefacts that contribute to an unphysical outcome.
+    bFailArray = [ False for x in range(nCurves) ]
     if True:
-        # = = = Test obvious failure modes, like a massive delta.
+        # ...One possibility here is that the points lie in a relative straight line.
+        # The Delta between saturated and apo will be very large and not possible
+        # to reach with a standard SAXS measurement.
         for i, x in enumerate(outDelta):
-            if np.fabs(x) > 1e2*valueBounds:
-                print "= = = Curve %d shows unbelievably large delta compared to the limits of target values! This indicates a bad fit. Will reset to completely zero binding."
+            if np.fabs(x) > 20*valueBounds:
+                print "= = = WARNING: Curve %d shows unbelievably large delta compared to the limits of target values! This indicates a bad fit. Will reset to completely zero binding." % (i+1)
                 print "    ... %g >> %g" % ( x, valueBounds)
                 outDelta[i]   = 0.0
-                logKd_mean[i] = KDClipMax
+                meanLogKd[i] = KDClipMax
                 bFailArray[i] = True
 
     if bTestDeltaSignificance:
+        # ...Another posssibility is that the fitted change is small relative to
+        # the uncertainty of the measurement itself.
         testArr = np.mean(deltas, axis=0)
         for i, x in enumerate(testArr):
             testVal = np.fabs(x)
             if apo2sigma > testVal:
-                print "= = = Curve %d does not show significant fitted delta-deviations from 2-sigma apo variations. Will reset to completely zero binding."
+                print "= = = WARNING: Curve %d does not show significant fitted delta-deviations from 2-sigma apo variations. Will reset to completely zero binding."
                 print "    ... %g < %g" % ( testVal, apo2sigma )
                 outDelta[i]   = 0.0
-                logKd_mean[i] = KDClipMax
+                meanLogKd[i] = KDClipMax
                 bFailArray[i] = True
 
     # = = Write summary model output.
-    #xopt_avg = concat_params_modelA( outDelta, outBaseline, np.power(10, logKd_mean) )
+    #xopt_avg = concat_params_modelA( outDelta, meanBaseline, meanKd )
     #write_fitted_modelA(fileModel, legends, xopt, data_block )
-    #xopt_avg = concat_params_modelB( outDelta, outBaseline, np.power(10, logKd_mean) )
-    xopt_avg = concat_params_modelC( outDelta, outBaseline, np.power(10, logKd_mean) )
+    #xopt_avg = concat_params_modelB( outDelta, meanBaseline, meanKd )
+    xopt_avg = concat_params_modelC( outDelta, meanBaseline, meanKd )
     write_fitted_modelC(fileModel, legends, xopt_avg, data_block, bFailArray=bFailArray )
 
+    write_fit_results(opref+'_results.txt', nCurves, nTrials, legends,
+            meanKd, sigKd,
+            meanBaseline, sigBaseline,
+            meanDelta, sigDelta,
+            meanQoF, sigQoF,
+            bFailArray)
 
 if mode==1:
     #Standard mode for taking a full curve for each measurement

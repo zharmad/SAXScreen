@@ -1,11 +1,5 @@
 #!/bin/bash
 
-function assert_file() {
-    for i in $* ; do
-        [ ! -e $i ] && echo "= = WARNING: File $i is not found!" > /dev/stderr
-    done
-}
-
 function get_general_parameters() {
     local settings=./general-settings.txt
     while read line
@@ -16,21 +10,8 @@ function get_general_parameters() {
     done < $settings
 }
 
-# ReceptorName ReceptorConc LigandName LigandReceptorRatio LigandBufferRatio FileLocation
-function count_headers() {
-    head -n 1 $1 | sed 's/[#@%]//g' | awk '{print NF}'
-}
-
-# Given an integer, form the string ${1}_${2}_...${N}
-function form_substring()  {
-    out='$'{1}
-    for i in `seq 2 $1` ; do
-        out=${out}_'$'{$i}
-    done
-    echo $out
-}
-
 get_general_parameters
+source $script_location/header_functions.bash
 
 if [[ "$use_ligand_scattering" == "yes" ]] ; then
     assert_file $average_raw_apo_sample $average_raw_sample_buffer $average_raw_ligand_buffer

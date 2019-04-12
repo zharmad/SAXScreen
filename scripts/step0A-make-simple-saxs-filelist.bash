@@ -1,11 +1,5 @@
 #!/bin/bash
 
-function assert_file() {
-    for i in $* ; do
-        [ ! -e $i ] && echo "= = WARNING: File $i is not found!" > /dev/stderr
-    done
-}
-
 function get_general_parameters() {
     local settings=./general-settings.txt
     while read line
@@ -16,21 +10,8 @@ function get_general_parameters() {
     done < $settings
 }
 
-function uncased_string_match() {
-    awk -v a=$1 -v b=$2 'BEGIN {
-    if ( tolower(a) == tolower(b) ) { print "True" } else { print "False" }
-    }'
-}
-
-# = = = Most synchrotron use a numbering system as follows:
-# <title>_####.dat
-# This is leveraged to grab the unique number.
-function grab_scattering_number() {
-    tmp=${1%.dat}
-    echo ${tmp##*_} | sed 's/^[0]\+//'
-}
-
 get_general_parameters
+source $script_location/header_functions.bash
 
 if [ ! $1 ] ; then
     echo "= = Usage: ./script [-not] <Title of Sample/Ligands synchrotron> [More Titles]"

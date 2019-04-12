@@ -8,12 +8,6 @@ function extract-Iq() {
     sed -n '/J EXP/,/ Distance / p' $1 | awk '$1 != "" {if ( $1 !~ /[0-9]/) { print "#" $0 } else {print $1, $NF} }'
 }
 
-function assert_file() {
-    for i in $* ; do
-        [ ! -e $i ] && echo "= = WARNING: File $i is not found!" > /dev/stderr
-    done
-}
-
 function get_general_parameters() {
     local settings=./general-settings.txt
     while read line
@@ -24,32 +18,8 @@ function get_general_parameters() {
     done < $settings
 }
 
-# ReceptorName ReceptorConc LigandName LigandReceptorRatio LigandBufferRatio FileLocation
-function count_headers() {
-    head -n 1 $1 | sed 's/[#@%]//g' | awk '{print NF}'
-}
-
-# Given an integer, form the string ${1}_${2}_...${N}
-function form_substring()  {
-    out='$'{1}
-    for i in `seq 2 $1` ; do
-        out=${out}_'$'{$i}
-    done
-    echo $out
-}
-
-function pick_if_multiple() {
-    if [[ $# -gt 2 ]] ; then
-        field=$1 ; shift
-        echo "= = WARNING: more than one file found according to the settings given for file trawling! : $*" > /dev/stderr
-        echo "    ...will use the file #$field." > /dev/stderr
-        echo $* | awk "{print \$$field}"
-    else
-        echo $2
-    fi
-}
-
 get_general_parameters
+source $script_location/header_functions.bash
 
 autorg=$ATSAS_location/autorg$ATSAS_suffix
 datgnom=$ATSAS_location/datgnom$ATSAS_suffix

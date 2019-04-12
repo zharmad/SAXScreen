@@ -23,6 +23,7 @@ function get_general_parameters() {
 }
 
 get_general_parameters
+source $script_location/header_functions.bash
 
 ofold=$buffer_subtracted_saxs_folder
 [ ! -e $ofold ] && mkdir $ofold
@@ -36,19 +37,26 @@ do
     # Ligand_ID  Ligand:Protein_ratio  ligand:sample_raw_fraction File_location
     # The Synchrotron numbering system varies and will be determined by the file name and type.
 
-    oroot=${1}_${2}
-    ofile=$ofold/${oroot}_${buffer_subtracted_saxs_suffix}.dat
+    nHead=$(count_headers $titration_dictionary)
+    nHead=$((nHead-2))
+    eval output_prefix=$(form_substring $nHead)
+    colB=$(search_header_column $titration_dictionary ligandBufferRatio)
+    eval ligBuffRatio=\$$colB
+    colB=$(search_header_column $titration_dictionary fileLocation)
+    eval fileLoc=\$$colB
+
+    ofile=$ofold/${output_prefix}_${buffer_subtracted_saxs_suffix}.dat
     if [ -e $ofile ] ; then
         echo "= = NOTE: Output file already exists! Skipping. ( $ofile )"
         shift ; shift
         continue
     fi
-    echo "= = Running for ${oroot}..."
-    if (( $(echo "$3 > 0.0" | bc -l) )) ; then
-        echo "= = = Correcting for buffer differences between protein and ligand buffer: $3 "
-        addstr="--add_file $buffer_difference_file --add_mult $3 "
+    echo "= = Running for ${output_prefix}..."
+    if (( $(echo "$ligBuffRatio > 0.0" | bc -l) )) ; then
+        echo "= = = Correcting for buffer differences between protein and ligand buffer: $ligBuffRatio "
+        addstr="--add_file $buffer_difference_file --add_mult $ligBuffRatio "
     else
-        echo "= = = No buffer correction as $3 evaluates to zero."
+        echo "= = = No buffer correction as $ligBuffRatio evaluates to zero."
         addstr=""
     fi
 
@@ -56,7 +64,7 @@ do
     case $synchrotron_source in
         Grenoble)
             # All files named according to ./1d/*_<SynchID>_ave.dat
-            input=$4
+            input=$fileLoc
             if [ ! -e $input ] ; then
                 echo "= = ERROR: The source file has not been found! ( $input ) Aborting."
                 exit 1

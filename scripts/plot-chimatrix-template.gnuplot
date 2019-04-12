@@ -30,8 +30,8 @@ do for [ratio in ratiolist] {
     #outfn='./chiMatrix-linear-fc-'.ratio.'.svg'
     set output outfn
 
-    labelstr1='smp:lig'
-    labelstr2='1.0:'.ratio
+    labelstr1='lig:rec'
+    labelstr2=ratio.':1.0'
 
     set label labelstr1 at screen 0.94, 0.97 center font "Arial,32"
     set label labelstr2 at screen 0.94, 0.94 center font "Arial-Bold,40"

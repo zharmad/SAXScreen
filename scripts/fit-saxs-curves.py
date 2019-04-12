@@ -8,7 +8,6 @@ from ast import literal_eval as make_tuple
 # Used to call datgnom and outsource Dmax determination.
 import general_scripts as gs
 import saxscalc as sc
-import saxsio
 
 def read_xvgs_all(filelist):
     out_list=[]

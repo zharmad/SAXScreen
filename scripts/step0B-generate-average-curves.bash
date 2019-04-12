@@ -10,23 +10,8 @@ function get_general_parameters() {
     done < $settings
 }
 
-function uncased_string_match() {
-    awk -v a=$1 -v b=$2 'BEGIN {
-    if ( tolower(a) == tolower(b) ) { print "True" } else { print "False" }
-    }'
-}
-
-# ReceptorName ReceptorConc LigandName LigandReceptorRatio LigandBufferRatio FileLocation
-function count_headers() {
-    head -n 1 $1 | sed 's/[#@%]//g' | awk '{print NF}'
-}
-
-function search_header_column() {
-    head -n 1 $1 | sed 's/[#@%]//g' | awk -v targ=$2 \
-    '{ for (i=1;i<=NF;i++) { if ( tolower($i) == tolower(targ)) { printf "%i", i ; exit } } print -1 }'
-}
-
 get_general_parameters
+source $script_location/header_functions.bash
 
 header_query=ligandReceptorRatio
 col=$(search_header_column $titration_dictionary $header_query)

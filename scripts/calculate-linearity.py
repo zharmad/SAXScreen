@@ -144,6 +144,7 @@ n_trials = args.nk
 # Reading input files
 tx, ty, tdy = load_input_file( args.tfile, min=args.xmin, max=args.xmax )
 targ = np.stack( (tx,ty,tdy), axis=0 )
+print "= = Debug: x,y,dy (%s): %f,%f,%f" % (args.tfile, tx[20], ty[20], tdy[20])
 
 bPositive = args.bPos
 # Check for blank.

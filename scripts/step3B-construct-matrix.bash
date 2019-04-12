@@ -1,19 +1,25 @@
 #!/bin/bash
 
-function get_unique_entries() {
-    filename=$1 ; column=$2
-    awk "{print \$$column }" $filename | sort | uniq
-}
+#function get_unique_entries() {
+#    filename=$1 ; column=$2
+#    awk "{print \$$column }" $filename | sort | uniq
+#}
 
-function get_files_with_entry() {
-    filename=$1 ; column=$2 ; value=$3 ; target=$4
-    awk " \$$column == $value {print \$$target} " $filename
-}
+#function get_files_with_entry() {
+#    filename=$1 ; column=$2 ; value=$3 ; target=$4
+#    awk " \$$column == $value {print \$$target} " $filename
+#}
 
-function assert_file() {
-    for i in $* ; do
-        [ ! -e $i ] && echo "= = WARNING: File $i is not found!" > /dev/stderr
+function filter_files() {
+    keys=($2)
+    targ=($3)
+    output=()
+    for i in ${!keys[*]} ; do
+        if [[ "$1" == "${keys[i]}" ]] ; then
+            output+=("${targ[i]}")
+        fi
     done
+    echo ${output[*]}
 }
 
 function get_general_parameters() {
@@ -27,6 +33,7 @@ function get_general_parameters() {
 }
 
 get_general_parameters
+source $script_location/header_functions.bash
 
 if [[ "$analysis_comparison_fit_metric" == "V_R" ]] || [[ "$analysis_comparison_fit_metric" == "chi_free" ]] ; then
     fit_args="-Dmax $analysis_comparison_Dmax"
@@ -34,53 +41,101 @@ else
     fit_args=""
 fi
 
-# Obtain the list of possible titration points from the dictionary.
+# = = = Obtain the list of possible titration points from the dictionary.
+# Get number of headers and remove the last two columns as they are special.
 
-titration_points_list=$(get_unique_entries $titration_dictionary 2 | tr '\n' ' ')
-num_points=$(echo $titration_points_list | wc -w)
-titr_first=$(echo $titration_points_list | awk '{print $1}')
-ID_list=$(get_files_with_entry $titration_dictionary 2 $titr_first 1)
-ID_last=$(echo $ID_list | awk '{print $NF}')
+# Iterate through the titration dictionary can collect data on all files.
+nHead=$(count_headers $titration_dictionary)
+nHead=$((nHead-2))
+colA=$(search_header_column $titration_dictionary ligandName)
+colB=$(search_header_column $titration_dictionary ligandReceptorRatio)
+
+titrationFiles=()
+ligandNames=()
+prevName=""
+ligandRatios=()
+
+while read line
+do
+    [[ "$line" == "" || "${line:0:1}" == "#" ]] && continue
+    set -- $line
+    # Note: The dictionary is expected to be of form
+    eval inputPrefix=$(form_substring $nHead)
+    outputPrefix=$inputPrefix
+
+    # = = = Identify buffer-subtracted surve file(s).
+    sourceFile=$(ls $buffer_subtracted_saxs_folder/${inputPrefix}_${buffer_subtracted_saxs_suffix}.dat)
+    sourceFile=$(pick_if_multiple NF $sourceFile)
+    assert_file $sourceFile
+
+    eval ligName=\$$colA
+    eval ligRatio=\$$colB
+    if [[ "$prevName" != "$ligName" ]] ; then
+        ligandNames+=("$ligName")
+        prevName=$ligName
+    fi
+    ligandRatios+=("$ligRatio")
+    if [[ "$sourceFile" == "" ]] ; then
+        echo "= = WARNING: $sourceFile is missing, although it contains  corresponding titration entry."
+        titrationFiles+=("MISSING_SKIP")
+    else
+        titrationFiles+=("$sourceFile")
+    fi
+
+done < $titration_dictionary
+
+# = = = Now with a complete list, obtain only the unique ligand ratios
+IFS=$'\n' uniqueRatios=($(sort -u <<< "${ligandRatios[*]}"))
+unset IFS
+
+nPoints=${#uniqueRatios[*]}
+nLigands=${#ligandNames[*]}
+#titrFirst=$(echo $uniqueRatios | awk '{print $1}')
+#ID_list=$(get_files_with_entry $titration_dictionary 2 $titr_first 1)
+#ID_last=$(echo $ID_list | awk '{print $NF}')
 
 [ ! -e $analysis_output_folder ] && mkdir $analysis_output_folder
+echo "= = NOTE: a total of $nPoints distinct ligand ratios found."
+echo "    ... ${ligandRatios[*]}"
+echo "= = NOTE: a total of $nLigands ligand titrations detected."
+echo "    ... ${ligandNames[*]}"
 
-echo "= = Note: a total of $num_points distinct titration points found."
-for titr in $titration_points_list ; do
+#echo ${titrationFiles[*]}
 
-    if [ ! -e $analysis_output_folder/fitted_${analysis_comparison_fit_metric}_${titr}_matrix.dat ] ; then
-        echo "= = Running fit at titration point $titr ..."
-        ID_list=$(get_files_with_entry $titration_dictionary 2 $titr 1)
+# = = = For each ligand ratio, create matrix of comparison values
 
-        tag=""
-        for i in $ID_list ; do
-            tag="$tag $buffer_subtracted_saxs_folder/${i}_${titr}_${buffer_subtracted_saxs_suffix}.dat"
-        done
-        ls $tag
+for titr in ${uniqueRatios[*]} ; do
+    outputPrefix=fitted_${analysis_comparison_fit_metric}_${titr}
+    outputFile=$analysis_output_folder/${outputPrefix}_matrix.dat
+    if [ ! -e $outputFile ] ; then
+        echo "= = Running fit across all curves at ligand ratio $titr ..."
+        fileList=$(filter_files $titr "${ligandRatios[*]}" "${titrationFiles[*]}")
+        echo "    ... $fileList"
         python $script_location/fit-saxs-curves.py \
             -metric $analysis_comparison_fit_metric \
             -mode 2 -qmin $q_min -qmax $q_max $fit_args \
-            -o $analysis_output_folder/fitted_${analysis_comparison_fit_metric}_${titr} $tag
+            -o $analysis_output_folder/$outputPrefix \
+            $fileList
     else
-        echo "= = Skipping titration point as the output file has been found."
+        echo "= = Skipping titration point as the output file exists: $outputFile"
     fi
 
 done
 
 # = = = = =
+echo "= = = Fits complete."
 echo "= = = Copying template gnuplot script and customising for this screen..."
-echo "= = = NB: Tnis does not deal with missing titration points."
+echo "= = = NB: This does not deal with missing titration points."
 
 tag2=""
-x=0
-for j in $ID_list ; do
-    tag2="$tag2\"$j\"\\ $x"
-    if [[ "$j" != "$ID_last" ]] ; then
+for j in ${!ligandNames[*]} ; do
+    tag2="$tag2\"${ligandNames[j]}\"\\ $j"
+    if [[ $j -lt $((nLigands-1)) ]] ; then
         tag2="$tag2, "
     fi
-    x=$((x+1))
 done
 
-sed "s/VAR_NUM/$((x-1))/;s/VAR_AXESLABELS/$tag2/;s/VAR_IDLIST/$titration_points_list/;s/VAR_METRIC/$analysis_comparison_fit_metric/;" \
+sed "s/VAR_NUM/$j/;s/VAR_AXESLABELS/$tag2/;s/VAR_IDLIST/${uniqueRatios[*]}/;s/VAR_METRIC/$analysis_comparison_fit_metric/;" \
     $script_location/plot-chimatrix-template.gnuplot \
     > $analysis_output_folder/chimatrix-plot.gnuplot
 

@@ -1,11 +1,5 @@
 #!/bin/bash
 
-function assert_file() {
-    for i in $* ; do
-        [ ! -e $i ] && echo "= = WARNING: File $i is not found!" > /dev/stderr
-    done
-}
-
 function get_general_parameters() {
     local settings=./general-settings.txt
     while read line
@@ -16,37 +10,8 @@ function get_general_parameters() {
     done < $settings
 }
 
-# ReceptorName ReceptorConc LigandName LigandReceptorRatio LigandBufferRatio FileLocation
-function count_headers() {
-    head -n 1 $1 | sed 's/[#@%]//g' | awk '{print NF}'
-}
-
-# Given an integer, form the string ${1}_${2}_...${N}
-function form_substring()  {
-    out='$'{1}
-    for i in `seq 2 $1` ; do
-        out=${out}_'$'{$i}
-    done
-    echo $out
-}
-
-function search_header_column() {
-    head -n 1 $1 | sed 's/[#@%]//g' | awk -v targ=$2 \
-    '{ for (i=1;i<=NF;i++) { if ( tolower($i) == tolower(targ)) { printf "%i", i ; exit } } print -1 }'
-}
-
-function pick_if_multiple() {
-    if [[ $# -gt 2 ]] ; then
-        field=$1 ; shift
-        echo "= = WARNING: more than one file found according to the settings given for file trawling! : $*" > /dev/stderr
-        echo "    ...will use the file #$field." > /dev/stderr
-        echo $* | awk "{print \$$field}"
-    else
-        echo $2
-    fi
-}
-
 get_general_parameters
+source $script_location/header_functions.bash
 
 if [ ! $1 ] ; then
     echo "Usage: ./script <Quantity> - such as Vc Pr Rg I0 chi PV PV2 , etc. "
@@ -120,7 +85,7 @@ do
     colA=$(search_header_column $titration_dictionary ligandName)
     colB=$(search_header_column $titration_dictionary ligandReceptorRatio)
     if [[ $colA -eq -1 ]] || [[ $colB -eq -1 ]] ; then
-        echo " = = ERROR: the header column search from $titration_dictionary failed to match queries for ligandName and ligandReceptorRatio"
+        echo " = = ERROR: the header column search from $titration_dictionary failed to match queries for ligandName and ligandReceptorRatio" > /dev/stderr
         exit 1
     fi
     eval ligName=\$$colA

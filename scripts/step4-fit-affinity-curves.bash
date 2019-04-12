@@ -8,12 +8,6 @@ function determine_xmgrace_xydy() {
     fi
 }
 
-function assert_file() {
-    for i in $* ; do
-        [ ! -e $i ] && echo "= = WARNING: File $i is not found!" > /dev/stderr
-    done
-}
-
 function get_general_parameters() {
     local settings=./general-settings.txt
     while read line
@@ -25,6 +19,7 @@ function get_general_parameters() {
 }
 
 get_general_parameters
+source $script_location/header_functions.bash
 
 if [ ! $1 ] ; then
     echo "Usage: ./script <Quantity> - such as Vc Pr Rg I0 chi , etc. "
