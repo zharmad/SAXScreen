@@ -176,10 +176,23 @@ def print_cormap_matrix( fp, mat ):
         print >> fp, ''
 #        print >> fp, ' '.join(str(mat[i].astype(int))).strip('[]')
 
+
+def _dummy():
+    """
+    Notes for volatility ratio uncertainties:
+    dR/R = sqrt( (dIa/Ia)^2 + (dIb/Ib)^2 ) - at an individual point q_i
+
+    geometric mean: dR/R 
+
+    then,
+    dVR^2 = Sum_i=1^N (Rj*dRi)^2 + (Ri*dRj)^2 ) / (Ri+Rj)^2 
+
+    """
+
 def volatility_ratio_scaling(x1, x2):
     return np.mean( np.divide(x1,x2) )
 
-def volatility_ratio(x1, x2, stride=1, floor=1e-6, bElementwise=False, bKeepPartialBin=False, bReweightPartialBin=True):
+def volatility_ratio(x1, x2, stride=1, bElementwise=False, bKeepPartialBin=False, bReweightPartialBin=True):
     """
     Implementation of Hura et. al, Nat. Methods, 2013.
           N_bins-1 |  R(q_i) - R(q_{i+1})    |
@@ -201,7 +214,8 @@ def volatility_ratio(x1, x2, stride=1, floor=1e-6, bElementwise=False, bKeepPart
 #        x2=np.max(np.vstack((x2,np.repeat(floor,len(x2)))),axis=0)
 
     ratio=np.divide(x1,x2)
-    ratio/=np.mean(ratio)
+    #ratio/=np.mean(ratio)
+    ratio/=gmean(ratio)
     if stride>1:
         rem   = len(x1)%stride ; nBins = len(x1)/stride
         if not bKeepPartialBin and rem>0:

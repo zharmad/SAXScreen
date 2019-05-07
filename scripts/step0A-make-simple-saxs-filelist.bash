@@ -42,7 +42,7 @@ function debug_fileCount() {
 }
 fileCount=0 ; sampleCount=0 ; bufferCount=0 ; ignoreCount=0
 case $synchrotron_source in
-    Grenoble)
+    Grenoble|ESRF)
         # For Grenoble the title/code is contained in the first line.
         echo "= = Conducting sample file list generation..."
         for file in $(ls $synchrotron_data_location_sample/*_ave.dat) ; do
@@ -167,6 +167,35 @@ case $synchrotron_source in
         echo "= = NB: Ligand scattering is not yet coded for this source."
         ;;
 
+    Diamond|Chilton|Oxford)
+        # Diamond does not additionally put labels onto their 96-well plate measurements.
+        # The determination is thus conducted purely on a filename basis, where
+        # all file names with buffer are treated appropriately.
+        echo "= = Conducting sample file list generation..."
+        echo " = = = Diamond Light Source Standards: "
+        echo "    ...using averaged frames in processing/pypline/av_dat"
+        echo "    ...treating all files with name *buffer* as sample buffer files."
+        fileRoot=${synchrotron_data_location_sample}/processing/pypline/av_dat
+        for file in $(ls $fileRoot/*.dat) ; do
+            fileCount=$((fileCount+1))
+            # Check if buffer. Get root file name
+            if [[ $file == *"buffer"* ]] ; then
+                bufferCount=$((bufferCount+1))
+                echo $file >> $sample_buffer_list
+            else
+                sampleCount=$((sampleCount+1))
+                #tmp=${file##*/} ; tmp=${tmp#*_}
+                #title=${tmp%_*}
+                title=$search_pattern
+                echo "$title $sample_concentration lig 1.0 0.0 $file" >> $template_1
+            fi
+            #    ignoreCount=$((ignoreCount+1))
+            #    echo "    ...ignoring file $file , failed to match search pattern."
+            #fi
+        done
+        debug_fileCount
+        echo "= = NB: Ligand scattering is not yet coded for this source."
+        ;;
     *)
         echo "= = ERROR: Synchrotron source unknown! ( $synchrotron_source )"
         exit 1

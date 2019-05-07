@@ -66,7 +66,7 @@ do
     # = = = Identify buffer-subtracted surve file(s).
     sourceFile=$(ls $buffer_subtracted_saxs_folder/${inputPrefix}_${buffer_subtracted_saxs_suffix}.dat)
     sourceFile=$(pick_if_multiple NF $sourceFile)
-    assert_file $sourceFile
+    assert_files $sourceFile
 
     eval ligName=\$$colA
     eval ligRatio=\$$colB

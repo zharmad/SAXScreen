@@ -32,33 +32,6 @@ def debug_data_block ( db ):
         print "......first entry:", db[i][0]
     return
 
-def write_xvg_header_simexp(fp, nCurves):
-    cmax=31
-    s=0
-    c=0
-#   print >> fp, '@with g0'
-    print >> fp, '@ view 0.1, 0.1, 0.7, 0.95'
-    print >> fp, '@ legend 0.7, 0.95'
-    print >> fp, '@ legend char size 0.75'
-    print >> fp, '@ legend length 2'
-    for i in range(nCurves):
-        print >> fp, "@s%i line type 1" % s
-        print >> fp, "@s%i line linewidth 1.0" % s
-        print >> fp, "@s%i line color %i" % (s, 1+c%cmax )
-        print >> fp, "@s%i symbol 0" % s
-        print >> fp, "@s%i symbol size 0.25" % s
-        print >> fp, "@s%i symbol color %i" % (s, 1+c%cmax  )
-        s+=1
-        print >> fp, "@s%i line type 0" % s
-        print >> fp, "@s%i line linewidth 1.0" % s
-        print >> fp, "@s%i line color %i" % (s, 1+c%cmax  )
-        print >> fp, "@s%i errorbar color %i" % (s, 1+c%cmax )
-        print >> fp, "@s%i errorbar size 0.20" % s
-        print >> fp, "@s%i symbol 1" % s
-        print >> fp, "@s%i symbol size 0.25" % s
-        print >> fp, "@s%i symbol color %i" % (s, 1+c%cmax )
-        s+=1 ; c+=1
-
 def write_xvg_legends(fp, prefix, suffix, vals, skip=1):
     s=0
     for i in range(len(vals)):
@@ -90,25 +63,6 @@ def write_fit_results(fn, nCurves, nTrials, legends, meanKd, sigKd, meanBaseline
 
     fp.close()
 
-def write_score_file(fn, legs, logKd, header=''):
-    fp=open(fn,'w')
-    if header != '':
-        print >> fp, header
-    print >> fp, '@type bardy'
-    s=0
-    for i in range(len(legs)):
-        print >> fp, '@s%i line type 0' % s
-        print >> fp, '@s%i symbol fill pattern 6' % s
-        print >> fp, '@s%i symbol size 1.0' % s
-        print >> fp, '@s%i baseline type 3' % s
-        print >> fp, "@s%i errorbar size 0.20" % s
-        xval = ''.join([c for c in legs[i] if c in '1234567890.'])
-        if xval == '':
-            xval=str(s)
-        print >> fp, "%s %g %g" % (xval, logKd[i,0], logKd[i,1])
-        s+=1
-    fp.close()
-
 def write_distrib_file(fn, legs, vlist, header=''):
     fp=open(fn,'w')
     if header != '':
@@ -134,91 +88,16 @@ def write_distrib_file(fn, legs, vlist, header=''):
         sys.exit(1)
     fp.close()
 
-def write_logKd_histogram(fn, legs, logKds, xmin, xmax):
-    nplots=len(legs)
-    fp=open(fn,'w')
-    for i in range(nplots):
-        print >> fp, '@with g%i' % i
-        print >> fp, '@s0 legend "%s"' % legs[i]
-        print >> fp, '@s0 line type 3'
-        h, edges = np.histogram(logKds[:,i], bins=5*int(xmax-xmin), range=(xmin,xmax))
-        for j in range(len(h)):
-            print >> fp, "%g %g" % ( edges[j], h[j] )
-#            print >> fp, "%g %g" % ( 0.5*(np.sum(edges[j:j+2])), h[j] )
-        print >> fp, "%g %g" % (edges[-1], 0)
-        print >> fp, "&"
-    fp.close()
-
 # = = = = Bound ratio as a simple 2-state reaction.
 # = = = = [P]+[Q] <-> [PQ]
 # [PQ] Kd = ([Pinit] - [PQ])*([Qinit] - [PQ] )
 # x*Kd = (A-x)(B-x)
 # x/A  = ( (A+B+Kd) - sqrt( (A+B+Kd)^2 - 4AB ) ) / ( 2*A )
 # Assume A is the state that is trated as a ratio, and B is neglected.
-def boundconc_2state(inP, inQ, Kd, bFrac=False):
+def boundconc_2state(inP, inQ, Kd):
     s=inP+inQ+math.fabs(Kd)
     PQ=0.5*(s-math.sqrt(s*s-4*inP*inQ))
-    if bFrac:
-        return PQ/inP
-    else:
-        return inP-PQ, inQ-PQ, PQ
-
-# = = = General fast estimate of KD assuming somewhat well-shaped curve?
-def estimate_Kd( dbOne ):
-    # Assumes dataBlock as a set of titration-points, with each point as [Rec],[Lig], M, dM
-    
-    # = = Assuming that this is a consstant-[Rec] titration,
-    #     obtain the average of three [Lig-values] closest to the midpoint between min(M) max(M),
-    #     as a way of estimating the half-maximum point.
-    #     This is ~Kd for theoretical binding where Kd > fixed-[R]
-    midM = 0.5*( np.min(dbOne[:,2])+np.max(dbOne[:,2]) )
-    listDiff = np.fabs(dbOne[:,2]-midM)
-    dbSorted = dbOne[ np.argsort(listDiff) ]
-    #print "= = Debug: [Lig,M]:", dbOne[:,1:3]
-    #print "= = Debug: [Lig] closest to the midpoint:", dbSorted[0:3,1:3]
-    print "= = Debug: Comparison of new Kd estimate with trivial:", np.mean(dbSorted[0:3,1]), 0.8*np.min(dbOne[:,1])+0.2*np.max(dbOne[:,1])
-    return np.mean(dbSorted[0:3,1])
-    # = = Trivial estimate. Use the observed range [Lig]
-    #return 0.8*np.min(dbOne[:,1])+0.2*np.max(dbOne[:,1])
-
-# This function assumes that the concentration of species P is fixed,
-# and the X-data of the rows are in terms of P:Q ratios.
-def load_targets_multifile_modelA( filelist, concA ):
-    output=[]
-    for i in range(len(filelist)):
-        x, y = gs.load_xy(efiles[i])
-        series = np.zeros( (len(x),3) )
-        for j in range(len(x)):
-            series[j] = [ concA, concA*x[j], y[j] ]
-        output.append( series )
-    return output
-
-# datablock format:
-# a list of N-titrations. Each with its own set of [inP],[inQ], and titrations
-def load_targets_singlefile( fn, concA, bGetSig=False ):
-    """
-    Load the target metric data and convert to a MxNx3or4 list
-    each containing:
-    [Receptor] [Ligand] Metric dMetric
-    M is the number of titrations curves, N is the number of titration points in each titration.
-    """
-    output=[]
-    errors=[]
-    legs, xlist, ylist, dylist = gs.load_sxydylist(fn)
-    if bGetSig:
-        for i in range(len(xlist)):
-            series = np.zeros( (len(xlist[i]),4) )
-            for j in range(len(xlist[i])):
-                series[j] = [ concA, concA*xlist[i][j], ylist[i][j], dylist[i][j] ]
-            output.append( series )
-    else:
-        for i in range(len(xlist)):
-            series = np.zeros( (len(xlist[i]),3) )
-            for j in range(len(xlist[i])):
-                series[j] = [ concA, concA*xlist[i][j], ylist[i][j]]
-            output.append( series )
-    return output, legs
-
+    return inP-PQ, inQ-PQ, PQ
 
 def gaussian_noise_datablock(raw_block, scale=1.0):
     out=[]
@@ -232,6 +111,15 @@ def gaussian_noise_datablock(raw_block, scale=1.0):
             i+=1
         out.append(series)
     return out
+
+def generate_datablock(yApo, yHolo, PList, QList, KdList, sigmaList):
+    nPts=len(PList)
+    nTitr=len(KdList)
+    for Kd in KdList:
+        for i in range(nPts):
+            P, Q, PQ = boundconc_2state(PList[i], QList[i], Kd)
+            y = (yApo*P + yHolo*PQ)/(P+PQ)
+
 
 def split_datablock( raw_block ):
     o1=[]
@@ -381,7 +269,7 @@ def estimate_initial_parameters_modelA( datablock ):
         else:
             #print "2:", setmin-setmax
             deltas.append( setmin-setmax )
-        Kds.append( estimate_Kd( db ) )
+        Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = [ np.mean(deltas) ] + [ np.mean(mins) ] + Kds
     return params
 
@@ -415,7 +303,7 @@ def estimate_initial_parameters_modelB( datablock ):
         else:
             #print "2:", setmin-setmax
             deltas.append( setmin-setmax )
-        Kds.append( estimate_Kd( db ) )
+        Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = [ np.mean(deltas) ] + mins + Kds
     return params
 
@@ -507,7 +395,7 @@ def estimate_initial_parameters_modelC( datablock ):
         else:
             #print "2:", setmin-setmax
             deltas.append( setmin-setmax )
-        Kds.append( estimate_Kd( db ) )
+        Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = concat_params_modelC( deltas, np.mean(baseline), Kds )
     return params
 
@@ -602,7 +490,7 @@ def estimate_initial_parameters_modelD( datablock, apo_conc ):
         else:
             print "2:", setmin-setmax
             deltas.append( (setmin-setmax)/apo_conc )
-        Kds.append( estimate_Kd( db ) )
+        Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
         #deltas_lig.append( -0.1*deltas[-1] )
 
     #params = [ np.mean(deltas) ] + [ np.mean(deltas)*-0.1 ] + mins + Kds
@@ -665,6 +553,13 @@ def fitfunc_modelD(params, *args):
 # In Model E, we will permit K_Ds to change per titration.
 # This decouples all of the titrations from each other.
 
+def csp_ratio_from_conc( inP, inQ, Kd ):
+    # From Williamson 2013, which is basically identical to a direct ratio in the limit of fast exchange.. -_-
+    # P, Q, PQ = boundconc_2state( inP, inQ, Kd )
+    s = inP + inQ + math.fabs(Kd)
+    csp_ratio = ( s - math.sqrt(s*s-4*inP*inQ ) )/(2.0*inP)
+    return csp_ratio
+
 def extract_params_modelD(params, nCurves):
     deltas=params[0:nCurves]
     Kd=params[nCurves]
@@ -689,7 +584,7 @@ def estimate_initial_parameters_modelD( datablock ):
         else:
             #print "2:", setmin-setmax
             deltas.append( setmin-setmax )
-        Kds.append( estimate_Kd( db ) )
+        Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = list(deltas) + [ np.mean(Kds) ]
     return params
 
@@ -712,7 +607,8 @@ def write_fitted_modelD(outfn, legends, params, db, conc_rec):
         print >> fp, "@type xy"
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
-            model_val = boundconc_2state( inP, inQ, Kd, bFrac=True ) * deltas[i]
+            model_val = csp_ratio_from_conc( inP, inQ, Kd ) * deltas[i]
+            #P, Q, PQ = boundconc_2state( inP, inQ, Kd )
             #model_val = (PQ/inP)*deltas[i]
             print >> fp, "%g %g" % (inQ/inP, model_val)
         print >> fp, "&"
@@ -739,155 +635,14 @@ def fitfunc_modelD(params, *args):
         for j in range(len(data[i])):
             inP, inQ, target = data[i][j]
             #print "...minimising...", inP, inQ, target
-            model_val = boundconc_2state( inP, inQ, Kd, bFrac=True ) * deltas[i]
+            model_val = csp_ratio_from_conc( inP, inQ, Kd ) * deltas[i]
+            #P, Q, PQ = boundconc_2state( inP, inQ, Kd )
+            #model_val = (PQ/inP)*deltas[i]
             chi2  += ( target - model_val )**2.0
             count += 1
     return 1.0*chi2/count
 
-# = = NMR chemical-shift perturbation based titration.
-#     This will utilise a slightly more advanced CSP model than assuming everything is in fast exchange.
-
-#def estimate_initial_parameters_NMR_CSP( dataBlock ):
-#def fitfunc_modelCSP( params, args=(nCurves, data_block):
-#write_fitted_modelCSP( fileModel, legends, xopt, data_block, concRec )
-
-def extract_params_modelCSP(params, nCurves):
-    deltas=params[0:nCurves]
-    taus =params[nCurves:2*nCurves]
-    Kd=params[2*nCurves]
-    return deltas, taus, Kd
-
-def concat_params_modelCSP(deltas, taus, Kd):
-    return list( deltas ) + list(taus) + [ Kd ]
-
-def fitfunc_modelCSP(params, *args):
-    nCurves=args[0]
-    data=args[1]
-    deltas, taus, Kd = extract_params_modelCSP(params, nCurves)
-    chiSq=0.0 ; count=0
-    for i in range(len(data)):
-        for j in range(len(data[i])):
-            inP, inQ, target = data[i][j]
-            boundFrac = boundconc_2state( inP, inQ, Kd, bFrac=True ) 
-            modelValue = mix_CSP( 0.0, deltas[i], boundFrac, taus[i] )
-            # = = = Will return three values in medium/slow-exchange. Pick the closest one of three.
-            chiSq  += np.min( np.power( target - modelValue, 2.0) )
-            count += 1
-    return 1.0*chiSq/count
-
-def estimate_initial_parameters_modelCSP( dataBlock ):
-    deltas = [] ; taus = []
-    Kds = [] # The other params here are Kds of individial series.
-    for i in range(len(dataBlock)):
-        db=dataBlock[i]
-        loc1=np.argmin( db[:,1] )
-        setmin = db[loc1,2]
-        loc2=np.argmax( db[:,1] )
-        setmax = db[loc2,2]
-        if loc2 > loc1 :
-            #print "1:", setmax-setmin
-            deltas.append( setmax-setmin )
-        else:
-            #print "2:", setmin-setmax
-            deltas.append( setmin-setmax )
-        # = = = Assume 0.5 of tau_critical, although I think the units are wrong?
-        taus.append( 0.5*np.sqrt(2)/np.pi/deltas[-1] )
-        Kds.append( estimate_Kd( db ) )
-    params = list(deltas) + list(taus) + [ np.mean(Kds) ]
-    return params
-
-def write_fitted_modelCSP( outFile, legends, params, dataBlock, concRec ):
-    nCurves=len(dataBlock)
-    deltas, taus, Kd = extract_params_modelCSP(params, nCurves)
-    Kd = np.fabs( Kd )
-    fp = open(outFile, 'w')
-    write_xvg_header_simexp(fp, nCurves)
-    if len(dataBlock[0][0])==3:
-        bErr=False
-    elif len(dataBlock[0][0])==4:
-        bErr=True
-    print >> fp, "@subtitle \"K\\sD\\N: %5.3g \\xm\\f{}M ; [rec]: %g \\xm\\f{}M \"" % ( Kd, concRec )
-    s=0
-    for i in range(len(deltas)):
-        print >> fp, "@s%i legend \"%s\"" % (s, legends[i])
-        s+=2
-    for i in range(len(dataBlock)):
-        # = = Model curve = =
-        print >> fp, "@type xy"
-        for j in range(len(dataBlock[i])):
-            inP = dataBlock[i][j][0] ; inQ = dataBlock[i][j][1] ; targ=dataBlock[i][j][2]
-            boundFrac = boundconc_2state( inP, inQ, Kd, bFrac=True )
-            modelValue = mix_CSP( 0.0, deltas[i], boundFrac, taus[i] )
-            if len(modelValue)>1:
-                loc = np.argmin( np.power(modelValue - dataBlock[i][j][2],2.0) )
-            else:
-                loc = 0
-            # = = = Will return three values in medium/slow-exchange. Pick the closest one of three.
-            print >> fp, "%g %g" % (inQ/inP, modelValue[loc])
-        print >> fp, "&"
-        # = = Target Curve = =
-        if bErr:
-            print >> fp, "@type xydy"
-        else:
-            print >> fp, "@type xy"
-        for j in range(len(dataBlock[i])):
-            inP = dataBlock[i][j][0] ; inQ = dataBlock[i][j][1] ; targ=dataBlock[i][j][2]
-            if bErr:
-                print >> fp, "%g %g %g" % (inQ/inP, dataBlock[i][j][2], dataBlock[i][j][3])
-            else:
-                print >> fp, "%g %g" % (inQ/inP, dataBlock[i][j][2])
-        print >> fp, "&"
-    fp.close()
-
-def mix_CSP(wFree, wBound, pBound, tauBound):
-    """
-    Computes the chemical shift of the peak in a mixture of
-    free and bound populations in the following 2-state reaction:
-    [ FreeProtein ] + ligand <-> [ BoundProtein ]
-    Based on London, J. Magn. Reson., 1993 ;
-    who further cites Lyondenn-Bell, Prog. NMR. Spectrosc., 1967.
-
-    Arguments:
-    - wFree and wBound are the chemical shifts of the free and bound states
-    - pBound is the fraction of bound state population,
-      where pFree + pBound = 1
-    - tauBound is the lifetime of the bound population,
-      is therefore the inverse of k^-1
-
-    Returns the rotts of the cubic solution, which will either be
-    one or three chemical shift values depending on the input.
-
-    Derivation:
-    According to Eq. 1 (London, 1993), the spectral intensity of the mix is:
-            p_f . p_b . (w_f - w_b)^2
-    I(w) = --------------------------                                 ,
-            [ tau(w_f - w) (w_b - w) ]^2 + [p_f w_f + p_b w_b - w ]^2 
-    where p_f + p_b = 1,
-    p_f / p_b = tau_f / tau_b,
-    thus: tau = tau_b . tau_f / (tau_b + tau_f) = (1 - p_b).tau_b
-    Note transition pointsnear tau_c = sqrt(2) / ( pi dv)
-
-    The peak positions are obtained by setting d I(w) / dw = 0
-
-    This implies solving:
-      [2 tau^2] w^3 - [3 tau^2(w_f+w_b)] w^2
-    + [tau^2( (w_f + w_b)^2 + 2 w_f w_b ) + 1] w
-    - [w_f w_b (w_f + w_b) + p_fw_f + p_b w_b]
-    = 0 
-    We will use np.roots to solbe the degree-3 polynomial
-    """
-    tauSq =  np.power( (1.0-pBound)*tauBound, 2.0)
-    fbSum =  wFree+wBound
-    A     =  2.0*tauSq
-    B     = -3.0*tauSq*fbSum
-    C     =  tauSq*(fbSum*fbSum+2.0*wFree*wBound)+1.0
-    D     = -1.0*(fbSum*wFree*wBound+(1.0-pBound)*wFree+pBound*wBound)
-
-    wOut = np.roots([A,B,C,D])
-    # = = Return only the real solutions.
-    return [ w.real for w in wOut if w.imag == 0 ]
-
-# = = = = = End MNR CSP section.
+# = = = = =
 
 def modelfunc_2state(y1, y2, popB):
     return (1-popB)*y1+popB*y2
@@ -978,7 +733,7 @@ parser.add_argument('--errormode', type=str, dest='err_type', default='none',
                     help='Define a model of error-analysis. Options are: none, 1-point, noise2sig, noise1sig.'
                     '1-point : to remove data at one ratio at a time and analyse the difference. This method does not require uncertainty estimates at each point.'
                     'noise1sig / noise2sig : add random noise to the mean value scaled to the uncertainty,'
-                    'where 1sig and 2sig represents taking either the 64%% or 95%% confidence interval for a guassian noise model.')
+                    'where 1sig and 2sig represents taking either the 64% or 95%% confidence interval for a guassian noise model.')
 parser.add_argument('--nTrials', type=int, dest='ntrials', default=50,
                     help='In Error analyses that require trials, run this many trials. Applicable to, e.g. noise1sig.')
 parser.add_argument('--bSmallPerturb', action='store_true',
@@ -1032,18 +787,14 @@ if mode == 0:
 
 if mode==2:
     # Standard mode for taking a single measure per titration point.
-    # This assumes that the receptor concentration is held constant throughout the titration series.
     # = = =
-    # Pose data array as 3D entries [ titratio-series, titration-points, 2or3]
-    # X-values in our target are ligand-receptor ratios. Y-values and dY values  M +- dM
-    # This is converted to [Rec] [Lig] M dM
+    # Pose data array as 3D entries:
+    # X-values in our target are the ratios of receptor ligand.
     data_block, legends = load_targets_singlefile( efiles, concRec, bReadSig )
     #data_block, err_block = split_datablock( data_block )
     debug_data_block( data_block )
 
-    # = = Begin setup for quality checks.
-    #   - First gather the scatter of apo measurements to test if model deviation is too small.
-    #   - Then gather the maximum observed range in titration to test model deviation is too large.
+    # = = = Grab self reproducibility by looking for the apo measurements
     apoMeasures=[]
     valueRange=[]
     for titr in data_block:
@@ -1055,14 +806,10 @@ if mode==2:
         bTestDeltaSignificance = True
         apo2sigma = 2.0*np.std( apoMeasures )
         print "= = Quality check section: from %d repeats, the 2-sigma of apo measurement deviations is %g" % ( len(apoMeasures), apo2sigma )
-        if apo2sigma > 0:
-            print "= = Turning on Delta-Significance testing."
-            bTestDeltaSignificance = True
     else:
         bTestDeltaSignificance = False
         print "= = NOTE: no or only one receptor-apo measurements have been found. Cannot do significance checks."
     valueBounds = np.max( valueRange ) - np.min( valueRange )
-    # = = = End set up for quality checks
 
     # = = = Big IF block to process different kinds of applications.
     bTestGoodnessOfFit = False
@@ -1086,19 +833,18 @@ if mode==2:
         print "= = = Written model and targets to %s ." % fileModel
     elif args.bNMRTitration:
     	# Adopt NMR titration mode using chemical shift perturbation.
-        # This means computing both an on/off rate as well as the overall affinity Kd
-        # the range of parameters are: [N*delta_max, N*tauBound, Kd ]
-        params = estimate_initial_parameters_modelCSP( data_block )
+	# Which corresponds to model-D in this script.
+        params = estimate_initial_parameters_modelD( data_block )
         nCurves = len(data_block)
         print "= = = Initial parameter estimates:"
         print params
-        fminOut = fmin_powell(fitfunc_modelCSP, params, args=(nCurves, data_block),
+        fminOut = fmin_powell(fitfunc_modelD, params, args=(nCurves, data_block),
                               full_output=True)
         xopt    = fminOut[0]
         funcopt = fminOut[1]
         print "= = Optimised parameters: "
         print xopt
-        write_fitted_modelCSP( fileModel, legends, xopt, data_block, concRec )
+        write_fitted_modelD( fileModel, legends, xopt, data_block, concRec )
         print "= = = Written model and targets to %s ." % fileModel
 
     elif True:
@@ -1157,7 +903,7 @@ if mode==2:
                 logKd[i] = np.clip(np.log10(np.fabs(Kds)),KDClipMin,KDClipMax) ; print "= = log10-Kd:", logKd[i]
                 print ""
 
-            # = = = Compute the value from the full curve.
+            # = = = Compute the vlue from the full curve.
             fminOut = fmin_powell(fitfunc_modelC, params, args=(nCurves, db), full_output=True)
             xopt    = fminOut[0] ; funcopt = fminOut[1]
             deltaAll, baselineAll, KdAll = extract_params_modelC(xopt, nCurves)
@@ -1245,10 +991,6 @@ if mode==2:
 
     # = = = output raw fitting files
     headerStr=""
-    if args.bNMRTitration:
-        print "= = Fit complete. kD value is %f" % ( np.fabs(xopt[-1]) )
-        sys.exit()
-
     for i in range(nCurves):
         reportString="# Titration %s (#%i) raw Kd estimate: %g +- %g" % ( legends[i], i+1, meanKd[i], sigKd[i] )
         print "= = = %s" % reportString

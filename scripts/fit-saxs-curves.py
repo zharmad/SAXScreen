@@ -91,7 +91,7 @@ def intensityDiff(pos, *args):
             value = sc.chi_square_free(y1, f*y2+c, stride=stride, nParams=nParams, nRounds = numRounds)
     elif fitMetric == 'vr':
         c = pos
-        value = sc.volatility_ratio(y1, y2+c, stride=stride )
+        value = sc.volatility_ratio(y1-c, y2+c, stride=stride )
         # If the entire strip is masked return 1e99. This usually indicates some form of domain error in the underlying calculation.
         if np.ma.is_masked(value):
             value=1e99
@@ -118,12 +118,16 @@ def populationIntensityDiff(pos, *args):
     numRounds   = args[5]
 
     if fitMetric == 'vr':
-        f = np.insert(pos[:-1], 0, 1.0) ; c = pos[-1]
+        # = = Try to maintain symmetry.
+        c = pos[-1]
+        yT -= c 
+        y2 = np.mean(yP, axis=0)+c ; y2sig = np.mean(yPsig, axis=0)
     elif bNoConst:
         f = pos ; c=0.0
+        y2 = np.mean(f[:,None]*yP, axis=0)+c ; y2sig = np.mean(f[:,None]*yPsig, axis=0)
     else:
         f = pos[:-1] ; c = pos[-1]
-    y2 = np.mean(f[:,None]*yP, axis=0)+c ; y2sig = np.mean(f[:,None]*yPsig, axis=0)
+        y2 = np.mean(f[:,None]*yP, axis=0)+c ; y2sig = np.mean(f[:,None]*yPsig, axis=0)
 
     if fitMetric == 'chi':
         if bUseWeights:

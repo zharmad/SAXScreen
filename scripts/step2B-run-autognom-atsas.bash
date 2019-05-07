@@ -24,7 +24,7 @@ source $script_location/header_functions.bash
 autorg=$ATSAS_location/autorg$ATSAS_suffix
 datgnom=$ATSAS_location/datgnom$ATSAS_suffix
 
-assert_file $autorg $datgnom
+assert_files $autorg $datgnom
 
 ofold=$autognom_output_folder
 if [ ! -e $ofold ] ; then
@@ -45,7 +45,7 @@ do
     output_prefix=$input_prefix
     source_file=$(ls $buffer_subtracted_saxs_folder/${input_prefix}_${buffer_subtracted_saxs_suffix}.dat)
     source_file=$(pick_if_multiple NF $source_file)
-    assert_file $source_file
+    assert_files $source_file
 
     [[ "$source_file" == "" ]] && continue
 

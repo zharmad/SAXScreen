@@ -26,9 +26,12 @@ def read_file(fn, field, key="none"):
                     continue
                 if l[0].isalnum():
                     continue
-                # Hamburg and Australian Synchrotron specific, to catch
-                # opening arguements that are not technically alphanumeric.
+                if line[0].isalpha():
+                    # Catch Diamond q(Angs) header.
+                    continue
                 if l[0].endswith(';') or l[0].endswith(':'):
+                    # Hamburg and Australian Synchrotron specific, to catch
+                    # opening arguements that are not technically alphanumeric.
                     continue
                 elif (line[0] == '&'):
                     nlines.append(tmp)
@@ -125,16 +128,16 @@ if __name__ == '__main__':
             print >> sys.stderr, "= = NOTE: skipping file argument %s" % fileName
             continue
         l, x, y = read_file(fileName, field, args.key)
-        x=np.array(x,dtype=np.float32)
-        y=np.array(y,dtype=np.float32)
+        x=np.array(x,dtype=np.float64)
+        y=np.array(y,dtype=np.float64)
         print >> sys.stderr, " ...plot %s read." % fileName
         nplot = len(l)
         ndat  = len(x[0])
         if bFirst:
             bFirst = False
             leglist=[]
-            xlist=np.zeros((nfiles,nplot,ndat),dtype=np.float32)
-            ylist=np.zeros((nfiles,nplot,ndat),dtype=np.float32)
+            xlist=np.zeros((nfiles,nplot,ndat),dtype=np.float64)
+            ylist=np.zeros((nfiles,nplot,ndat),dtype=np.float64)
             check=(nplot,ndat)
             leglist.append(l)
             xlist[i]=x

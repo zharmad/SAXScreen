@@ -14,9 +14,9 @@ get_general_parameters
 source $script_location/header_functions.bash
 
 if [[ "$use_ligand_scattering" == "yes" ]] ; then
-    assert_file $average_raw_apo_sample $average_raw_sample_buffer $average_raw_ligand_buffer
+    assert_files $average_raw_apo_sample $average_raw_sample_buffer $average_raw_ligand_buffer
 else
-    assert_file $average_raw_apo_sample $average_raw_sample_buffer
+    assert_files $average_raw_apo_sample $average_raw_sample_buffer
 fi
 
 # The Blank file is not currently used.
@@ -39,7 +39,7 @@ do
     output_prefix=$input_prefix
 
     target_file="${@: -1}"
-    assert_file $target_file
+    assert_files $target_file
     if [[ "$use_ligand_scattering" == "yes" ]] ; then
         # Look up the raw ligand scattering file corresponding to the name of the titration
         ligand_file=$(awk -v sp=$1 '$1 == sp {print $NF}' $ligand_dictionary )

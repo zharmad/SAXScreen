@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function assert_file() {
+function assert_files() {
     for i in $* ; do
         [ ! -e $i ] && echo "= = WARNING: File $i is not found!" > /dev/stderr
     done
@@ -32,8 +32,12 @@ function form_substring()  {
 function pick_if_multiple() {
     if [[ $# -gt 2 ]] ; then
         field=$1 ; shift
-        echo "= = WARNING: more than one file found according to the settings given for file trawling! : $*" > /dev/stderr
-        echo "    ...will use the file #$field." > /dev/stderr
+        echo "= = WARNING: more than one file found in a wildcard file search query : $*" > /dev/stderr
+        if [[ "$field" == "NF" ]] ; then
+            echo "    ...will use the last file in list." > /dev/stderr
+        else
+            echo "    ...will use the file #$field." > /dev/stderr
+        fi
         echo $* | awk "{print \$$field}"
     else
         echo $2

@@ -161,7 +161,10 @@ datablock = load_component_files( args.cfiles, min=args.xmin, max=args.xmax )
 
 if not np.array_equal( datablock[0,0], tx ):
     print >> sys.stderr, "= = ERROR encountered: the sources and target do not have the same x-values!"
-    print >> sys.stderr, "    ...the lengths are %i and %i." % ( len(datablock[1]), len(tx) )
+    print >> sys.stderr, "    ...the lengths are %i and %i." % ( len(datablock[0,0]), len(tx) )
+    for i in range(len(tx)):
+        if datablock[0,0,i] !=  tx[i]:
+            print >> sys.stderr, datablock[0,0,i], "!=", tx[i]
     sys.exit(1)
 else:
     print "= = ...X-value check complete, all points at same x."
