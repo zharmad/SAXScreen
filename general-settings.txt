@@ -61,10 +61,13 @@ linear_fit_output_folder    ./linearfit
 linear_fit_chi_summary_file chi-all.dat
 linear_fitting_error_trials 100
 
-# The paper utilised 5000 trials. This can be cut down to 10 for fast prototyping, and in practice 1000 should be enough.
-analysis_output_folder      ./analysis
-analysis_fit_errormode      noise2sig
-analysis_fit_trials         1000
+# The original 2018 paper utilised 5000 trials, noise2sig, and no rejection
+threshold.
+# In practice, 500 trials, noise1sig, and a rejection threshold of 2.0 sigma should be ok.
+analysis_output_folder        ./analysis
+analysis_fit_errormode        noise1sig
+analysis_fit_trials           1000
+analysis_fit_reject_threshold  2.0
 
 # The comparison matrix can take on a number of different metrics: chi, log_chi, chi_free, V_R, and cormap.
 analysis_comparison_fit_metric  chi

@@ -52,6 +52,15 @@ case $quant in
         ofile=$analysis_output_folder/PV_summary.xvg
         file_prefix=$autognom_output_folder
         file_suffix=_${autognom_output_designation}.out
+        bError=False
+        ;;
+    PVb)
+        ofile=$analysis_output_folder/PVb_summary.xvg
+        file_prefix=$buffer_subtracted_saxs_folder
+        file_suffix=_${buffer_subtracted_saxs_suffix}.dat
+        #file_suffix=*
+        bError=False
+        quant=PV
         ;;
     PV2)
         ofile=$analysis_output_folder/PV2_summary.xvg

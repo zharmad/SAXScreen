@@ -31,26 +31,25 @@ if [ ! -e $ofold ] ; then
     mkdir $ofold
 fi
 
+# ReceptorName ReceptorConc LigandName LigandRatio LigRecRatio fileLocation
+# Get number of headers and remove the last two columns as they are special.
+nHead=$(count_headers $titration_dictionary)
+nHead=$((nHead-2))
 # Iterate through the titration dictionary
 while read line
 do
     [[ "$line" == "" || "${line:0:1}" == "#" ]] && continue
     set -- $line
-   
-    # ReceptorName ReceptorConc LigandName LigandRatio LigRecRatio fileLocation
-    # Get number of headers and remove the last two columns as they are special.
-    nHead=$(count_headers $titration_dictionary)
-    nHead=$((nHead-2))
-    eval input_prefix=$(form_substring $nHead)
-    output_prefix=$input_prefix
-    source_file=$(ls $buffer_subtracted_saxs_folder/${input_prefix}_${buffer_subtracted_saxs_suffix}.dat)
+    eval inputPrefix=$(form_substring $nHead)
+    outputPrefix=$inputPrefix
+    source_file=$(ls $buffer_subtracted_saxs_folder/${inputPrefix}_${buffer_subtracted_saxs_suffix}.dat)
     source_file=$(pick_if_multiple NF $source_file)
     assert_files $source_file
 
     [[ "$source_file" == "" ]] && continue
 
     echo "= = Processing $source_file ..."
-    out_final=$ofold/${output_prefix}_${autognom_output_designation}
+    out_final=$ofold/${outputPrefix}_${autognom_output_designation}
     [ -e ${out_final}_Iq.dat ] && continue
 
     # Cleave off low and high-angle components.

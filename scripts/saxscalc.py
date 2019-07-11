@@ -254,6 +254,9 @@ def log_chi_square(x1, x2, dx1=[], dx2=[], stride=1, bElementwise=False):
         return np.sum(chi2)
 
 def chi_square(x1, x2, dx1=[], dx2=[], stride=1, bElementwise=False):
+    """
+    The chi_square here is not divided by the number of q-points, and is simply the sum across all points
+    """
     if dx1 == [] and dx2 == []:
         chi2 = np.square( x1 - x2 )
     elif dx1 != [] and dx2 != []:
@@ -305,3 +308,6 @@ def chi_square_free(x1, x2, stride, nParams=0, dx1=[], dx2=[], nRounds=500, bEle
         return chilist
     else:
         return chilist[nRounds/2]
+
+def Shannon_channels(x, Dmax):
+    return (x[-1]-x[0])*Dmax/np.pi

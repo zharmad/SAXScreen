@@ -56,7 +56,7 @@ def intensityDiff(pos, *args):
     bNoConst    = args[4]
     stride      = args[5]
     numRounds   = args[6]
-    if fitMetric == 'chi':
+    if fitMetric == 'chi' or fitMetric == 'chi_red':
         if bNoConst:
             f = pos[0] ; c=0.0
         else:
@@ -129,6 +129,7 @@ def populationIntensityDiff(pos, *args):
         f = pos[:-1] ; c = pos[-1]
         y2 = np.mean(f[:,None]*yP, axis=0)+c ; y2sig = np.mean(f[:,None]*yPsig, axis=0)
 
+    # Don't suport chi_red just yet.
     if fitMetric == 'chi':
         if bUseWeights:
             value=sc.chi_square(yT,y2, dx1=yTsig, dx2=y2sig)
@@ -246,6 +247,8 @@ elif fitMetric == 'chifree':
     fitMetric = 'chi_free'
 elif fitMetric == 'log' or fitMetric == 'logchi':
     fitMetric = 'log_chi'
+elif fitMetric == 'chired' or fitMetric == 'chi_reduced':
+    fitMetric = 'chi_red'
 
 if fitMetric == 'vr':
     if bNoConst:
@@ -255,9 +258,9 @@ if fitMetric == 'vr':
         print >> sys.stderr, '= = = ERROR: Volatility ratio requires the definition of Dmax in order to operate!'
         sys.exit(1)
 
-if fitMetric == 'chi_free':
+if fitMetric == 'chi_free' or fitMetric == 'chi_red':
     if np.isnan(Dmax):
-        print >> sys.stderr, '= = = ERROR: Chi_free ratio requires the definition of Dmax in order to operate!'
+        print >> sys.stderr, '= = = ERROR: Chi_free and chi_red ratios requires the definition of Dmax in order to operate!'
         sys.exit(1)
 
 if fitMetric == 'cormap_matrix' and fitMode == 2:
@@ -284,10 +287,15 @@ if bVerbose:
 if not np.isnan(Dmax):
     deltaQ = qBasis[1] - qBasis[0]
     numPointsPerChannel = int( np.pi / Dmax / deltaQ )
-    numChannels = 1.0*len(qBasis)/numPointsPerChannel
+    numChannels = (qBasis[-1]-qBasis[0])*Dmax/np.pi
+    #1.0*len(qBasis)/numPointsPerChannel
     if bVerbose:
         print >> sys.stderr, '= = Determined the number of Channels to be %g based on input data, resulting in %i points per channel' \
                 % ( numChannels,  numPointsPerChannel )
+    if bNoConst:
+        redFactor=numChannels/(numChannels-1)
+    else:
+        redFactor=numChannels/(numChannels-2)
 else:
     numPointsPerChannel = 1
 
@@ -390,6 +398,9 @@ if fitMode < 2:
         if fitMetric == 'chi' or fitMetric == 'log_chi':
             fileHeader.append( '#chi2 = %12g' % funcopt )
             fileHeader.append( '#chi  = %12g' % math.sqrt(funcopt) )
+        elif fitMetric == 'chi_red':
+            fileHeader.append( '#chi2 = %12g' % (funcopt*redFactor*redFactor) )
+            fileHeader.append( '#chi  = %12g' % (math.sqrt(funcopt)*redFactor) )
         elif fitMetric == 'chi_free':
             fileHeader.append( '#chi2Free = %12g' % funcopt )
             fileHeader.append( '#chiFree  = %12g' % math.sqrt( funcopt ) )
@@ -464,6 +475,8 @@ elif fitMode == 2:
         # = = = Enter final value into matrix.
         if fitMetric == 'chi' or fitMetric == 'log_chi' or fitMetric == 'chi_free' :
             valueMatrix[i,j] = math.sqrt(fminOut[1])
+        elif fitMetric == 'chi_red':
+            valueMatrix[i,j] = math.sqrt(fminOut[1])*redFactor
         elif fitMetric == 'vr':
             valueMatrix[i,j] = fminOut[1]
         elif fitMetric == 'cormap':
@@ -473,6 +486,9 @@ elif fitMode == 2:
                 valueMatrix[i,j] = -np.log10(prob)
             else:
                 valueMatrix[i,j] = 20.0
+        else:
+            print >> sys.stderr, "= = ERROR: fitMetric not recognised in loop! This is a coding error."
+            sys.exit(1)
 
         if fitMetric == 'vr':
             fMatrix[i,j] = np.mean(dataBlock[i][0]/dataBlock[j][0])

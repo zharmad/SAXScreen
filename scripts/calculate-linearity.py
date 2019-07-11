@@ -28,6 +28,7 @@ def gaussian_noise_datablock(db, scale=1.0):
     return out
 
 def chi_linear_fit(params, *args):
+    # = = Use the slower nanmean at the end to ignore any random nans that pop out of L-BFGS !!
     n_par = len(params)
     targ      = args[0]
     #datablock = args[1]
@@ -35,7 +36,7 @@ def chi_linear_fit(params, *args):
     scaled_dy = params[...,None]*args[1][2]
     chi_raw = np.power( np.sum(scaled_y, axis=0) - targ[1],  2 )
     weights = np.power( np.sum( np.power(scaled_dy, 2) + np.power(targ[2], 2), axis=0 ), 0.5 )
-    chisq = np.average( chi_raw / weights )
+    chisq = np.nanmean( chi_raw / weights )
     #print "= = ...optimization step over %i variables, chi%s: %g" % (n_par, params, chisq)
     return chisq
 
@@ -175,7 +176,7 @@ n_comps = shape[1]
 n_vals  = shape[2]
 
 if bBlank:
-    guess  = np.repeat( 1.0, n_comps-1)
+    guess  = np.repeat( 1.0/(n_comps-1), n_comps-1)
     guess  = np.insert(guess, 0, 0.0)
     if bPositive:
         bounds = np.tile( (0.0, None), (n_comps-1,1) )
@@ -183,7 +184,7 @@ if bBlank:
         bounds = np.tile( (None, None), (n_comps-1,1) )
     bounds = np.insert(bounds, 0, (None, None), axis=0)
 else:
-    guess  = np.repeat( 1.0, n_comps)
+    guess  = np.repeat(1.0/n_comps, n_comps)
     if bPositive:
         bounds = np.tile( (0.0, None), (n_comps,1) )
     else:
@@ -200,10 +201,13 @@ else:
         targ_this = gaussian_noise_curve( targ, scale=1.0 )
         # print "= = Debug: y= %f+-%f y= %f+-%f " % ( targ[1,20], targ[2,20], targ_this[1,20], targ_this[2,20] )
         func_opt = optimize.fmin_l_bfgs_b( chi_linear_fit, x0=guess, bounds=bounds, args=(targ_this, datablock), approx_grad=True )
-        # print func_opt[0]
-        # print np.sqrt( func_opt[1] )
-        opt_pars[i]  = func_opt[0]
-        chi_block[i] = np.sqrt( func_opt[1] )
+        if func_opt[2]['warnflag']>0:
+            print >> sys.stderr, "= = WARNING: error encountered in L-BFGS-B minimization, code:", func_opt[2]['warnflag']
+            print >> sys,stderr, "   Grad/#Calls/#Iterations:", func_opt[2]['grad'], func_opt[2]['funcalls'], func_opt[2]['nits']
+            sys.exit(1)
+        else:
+            opt_pars[i]  = func_opt[0]
+            chi_block[i] = np.sqrt( func_opt[1] )
 
 #opt_pars=func_opt[0]
 #opt_chi=np.sqrt(func_opt[1])

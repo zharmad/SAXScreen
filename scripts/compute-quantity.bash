@@ -12,11 +12,15 @@ function collect-chi() {
 }
 
 function collect-I0() {
-    awk '{ if ($1==0) {print $2, $3; exit } }' $1
+    # = = Default use: get value from smoothed I(q) curve. Otherwise call autorg to evalute curve.
+    out=$(awk '{ if ($1==0.0) {print $2, $3; exit } }' $1)
+    [[ "$out" != "" ]] && echo $out || autorg $1 | awk '$1 == "I(0)" {print $3, $5 ; exit}'
 }
 
 function collect-Rg() {
-    grep "Real space Rg:" $1 | awk '{print $(NF-2), $NF}'
+    # = = Default use: get value from GNOM output. Otherwise call autorg to evaluate curve.
+    out=$(grep "Real space Rg:" $1 | awk '{print $(NF-2), $NF}')
+    [[ "$out" != "" ]] && echo $out || autorg $1 | awk '$1 == "Rg" {print $3, $5 ; exit}'
 }
 
 function compute-integral() {
@@ -28,10 +32,17 @@ function compute-PorodInvariant() {
 }
 
 function compute-PorodVolume() {
-    datporod $1 | awk '{print $(NF-1), 0 }'
+    # = = default use on GNOM output. Otherwise call autorg to provide estimates.
+    if [[ "${1##*.}" == "out" ]] ; then
+        datporod $1 | awk '{print $(NF-1)}'
+    else
+        read -r Rg I0 <<<$(autorg $1 | awk 'NR==1 {Rg=$3} NR==2 {I0=$3} END {print Rg, I0}')
+        datporod --rg=$Rg --i0=$I0 $1 | awk '{print $(NF-1)}'
+    fi
 }
 
 function compute-ParticleVolume() {
+    # = = Do not use. Is unreliable.
     factor=$(= 2.0*3.1415927^2)
     tmp1=$(collect-I0 $1)
     tmp2=$(compute-PorodInvariant $1)
@@ -68,14 +79,15 @@ function compute-VR() {
 }
 
 function compute-UnitlessKratky() {
-    buffer=$(guinier-plot -f $1 -qmax $2 -nofile)
-    Rg=$(echo "$buffer" | awk '$1 == "Rg" {print $(NF-2)}')
-    I0=$(echo "$buffer" | awk '$1 == "I0" {print $(NF-2)}')
-    echo "$buffer" > /dev/stderr
-    factor=$(= $Rg^2/$I0)
-    echo "= = = $Rg ^2 / $I0 equals $factor " > /dev/stderr
-    echo "# Using automated Rgyr computation from gnuplot-4 fit using qmax of $2"
-    echo "$buffer" | awk '{print "#" $0}'
+    #buffer=$(guinier-plot -f $1 -qmax $2 -nofile)
+    #Rg=$(echo "$buffer" | awk '$1 == "Rg" {print $(NF-2)}')
+    #I0=$(echo "$buffer" | awk '$1 == "I0" {print $(NF-2)}')
+    #echo "$buffer" > /dev/stderr
+    #factor=$(= $Rg^2/$I0)
+    #echo "= = = $Rg ^2 / $I0 equals $factor " > /dev/stderr
+    #echo "# Using automated Rgyr computation from gnuplot-4 fit using qmax of $2"
+    #echo "$buffer" | awk '{print "#" $0}'
+    read -r Rg I0 factor <<<$(autorg $1 | awk 'NR==1 {Rg=$3} NR==2 {I0=$3} END {print Rg, I0, Rg*Rg/I0}')
     python $script_location/analyse-distribution.py --xscale $Rg --yscale $factor --transform -f $1 --int_type x^2 --error
 }
 
@@ -94,15 +106,15 @@ get_general_parameters
 if [ ! $2 ] ; then
     echo "= = Usage: ./script <Quantity to collect>"
     echo "    ...examples:
-    Vc - Volume of Correlation
-    VR - Volatility Ratio
+    Vc - Volume of Correlation.
+    VR - Volatility of Ratio (minimized). Fits VR ( I_A+c , I_B-c ) over constant scattering c to remove potential buffer differences.
     I0 - I(0)
-    Rg - Radius of Gyration
-    Q  - Porod Invariant
-    PV - Porod Volume directly from DATPOROD.
-    PV2 - Particle Volume from Porod Invariant
+    Rg - Radius of Gyration. 
+    Q  - Porod Invariant. Computes just the q^2I(q) integral without considering complications.
+    PV - Porod Volume directly from DATPOROD. Accepts either P(r) via GNOM output with *.out extension, or I(q) as anything else.
+    PV2 - Particle Volume from Porod Invariant, without considering complications.
     qIq - integral for Vc
-    UKr - Unitless Kratky curve. Requires an additional xmax argument to estimare Rgyr.
+    UKr - Unitless Kratky curve. Requires an additional xmax argument to estimate Rgyr.
     "
     exit
 fi
@@ -122,7 +134,7 @@ case $mode in
     PV)  cmdPref=compute-PorodVolume ;;
     PV2)  cmdPref=compute-ParticleVolume  ;;
     qIq) cmdPref=compute-integral  ;;
-    UKr)  cmdPref=compute-UnitlessKratk  ;;
+    UKr)  cmdPref=compute-UnitlessKratky  ;;
     *)
         echo " = = ERROR: argument not recognised! ( $mode ) " > /dev/stderr
         exit 1
