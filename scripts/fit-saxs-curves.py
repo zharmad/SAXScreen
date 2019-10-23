@@ -411,6 +411,15 @@ if fitMode < 2:
             fileHeader.append( '#volatRat = %12g' % funcopt )
             fileHeader.append( '#DMaxPar  = %12g' % Dmax )
             fileHeader.append( '#nPoints  = %i' % numPointsPerChannel )
+            # = = = Hack: report the individual ratio bins by recomputing the volatility ratio
+            # value = sc.volatility_ratio(y1-c, y2+c, stride=stride )
+            if   fitMode == 0:
+                ratios = sc.volatility_ratio( dataBlock[0][0]-c, dataBlock[i][0]+c, stride=numPointsPerChannel, bElementwise=True)
+            elif fitMode == 1:
+                ratios = sc.volatility_ratio( dataBlock[i][0]-c, dataBlock[0][0]+c, stride=numPointsPerChannel, bElementwise=True)
+            for nR, R in enumerate(ratios):
+                fileHeader.append( '#VRBins %i   = %g' % (nR, R) )
+
         elif fitMetric == 'cormap':
             fileHeader.append( '#maxRun  = %i' % funcopt )
             prob = sc.probability_cormap_either( len(qBasis), funcopt )
