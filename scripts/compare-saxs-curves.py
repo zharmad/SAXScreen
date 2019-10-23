@@ -144,6 +144,13 @@ if args.mode==0:
             mat = sc.cormap_matrix( dataBlock[0,0], dataBlock[i,0] )
             sc.print_cormap_matrix( sys.stdout, mat )
             value=""
+        elif fitMetric == 'ratio_curve':
+            ratio = sc.normalised_ratio_curve( dataBlock[0,0], dataBlock[i,0] )
+            outQ = np.ma.masked_array(qBasis, ratio.mask)
+            for outX,outY in zip(outQ.compressed(),ratio.compressed()):
+                print outX, outY
+            print "&"
+            value=""
         else:
             value = get_value( dataBlock[0], dataBlock[i], fitMetric, numPointsPerChannel, numRounds)
 #        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
@@ -156,9 +163,15 @@ elif args.mode==1:
             mat = sc.cormap_matrix( dataBlock[i,0], dataBlock[0,0] )
             sc.print_cormap_matrix( sys.stdout, mat )
             value=""
+        elif fitMetric == 'ratio_curve':
+            ratio = sc.normalised_ratio_curve( dataBlock[i,0], dataBlock[0,0] )
+            outQ = np.ma.masked_array(qBasis, ratio.mask)
+            for outX,outY in zip(outQ.compressed(),ratio.compressed()):
+                print outX, outY
+            print "&"
+            value=""
         else:
             value = get_value( dataBlock[i], dataBlock[0], fitMetric, numPointsPerChannel, numRounds)
-            print value
 #        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
 #        sys.exit(1)
         print value
@@ -170,6 +183,13 @@ elif args.mode==2:
                 mat = sc.cormap_matrix( dataBlock[i,0], dataBlock[j,0] )
                 sc.print_cormap_matrix( sys.stdout, mat )
                 continue
+            elif fitMetric == 'ratio_curve':
+                ratio = sc.normalised_ratio_curve( dataBlock[i,0], dataBlock[j,0] )
+                outQ = np.ma.masked_array(qBasis, ratio.mask)
+                for outX,outY in zip(outQ.compressed(),ratio.compressed()):
+                    print outX, outY
+                print "&"
+                value=""
             else:
                 value = get_value( dataBlock[i], dataBlock[j], fitMetric, numPointsPerChannel, numRounds)
 #        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric

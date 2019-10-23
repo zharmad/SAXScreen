@@ -189,6 +189,20 @@ def _dummy():
 
     """
 
+def normalised_ratio_curve(x1, x2):
+    """
+    Returns a sort of geometric difference between two curves.
+    Negative values are outright ignored to preserve stability.
+    ratio = 1/Z * (x1/x2)
+    Z = geometric_mean(ratio)
+    """
+    if np.any(x1<=0) or np.any(x2<=0):
+        x1=np.ma.masked_array(x1,mask=(x1<=0))
+        x2=np.ma.masked_array(x2,mask=(x2<=0))
+    ratio=np.divide(x1,x2)
+    ratio/=gmean(ratio)
+    return ratio
+
 def volatility_ratio_scaling(x1, x2):
     return np.mean( np.divide(x1,x2) )
 
@@ -204,18 +218,7 @@ def volatility_ratio(x1, x2, stride=1, bElementwise=False, bKeepPartialBin=False
     e.g., the last bin might be only 20% of the size of a full bin. Its contribution is then multipled by 0.2.
     Note that negative values are masked out to prevent instability.
     """
-    if np.any(x1<=0) or np.any(x2<=0):
-#        print >> sys.stderr, "= = = WARNING: negative values encountered in the volatility ratio calculations. " \
-#                "To avoid NaN returns, these values will be masked - which will reduce the speed of calculations."
-        x1=np.ma.masked_array(x1,mask=(x1<=0))
-        x2=np.ma.masked_array(x2,mask=(x2<=0))
-#                "To avoid NaN returns, this will be adjusted to a floor value of %g" % floor
-#        x1=np.max(np.vstack((x1,np.repeat(floor,len(x1)))),axis=0)
-#        x2=np.max(np.vstack((x2,np.repeat(floor,len(x2)))),axis=0)
-
-    ratio=np.divide(x1,x2)
-    #ratio/=np.mean(ratio)
-    ratio/=gmean(ratio)
+    ratio=normalised_ratio_curve(x1, x2)
     if stride>1:
         rem   = len(x1)%stride ; nBins = len(x1)/stride
         if not bKeepPartialBin and rem>0:
