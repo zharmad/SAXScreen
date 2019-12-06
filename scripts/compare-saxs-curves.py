@@ -69,6 +69,18 @@ def get_value(y1, y2, fitMetric, stride=1, nRounds=1):
 
     return value
 
+def print_masked_array(fp, xReal, yMask):
+    if np.ma.is_masked(yMask): 
+        outQ = np.ma.masked_array(qBasis, ratio.mask)
+        for outX,outY in zip(outQ.compressed(),ratio.compressed()):
+            print >> fp, outX, outY
+        print >> fp, "&"
+    else:
+        for outX,outY in zip(xReal,yMask):
+            print outX, outY
+        print >> fp, "&"
+    return
+
 #####################################
 # MAIN PROGRAM ######################
 
@@ -146,10 +158,7 @@ if args.mode==0:
             value=""
         elif fitMetric == 'ratio_curve':
             ratio = sc.normalised_ratio_curve( dataBlock[0,0], dataBlock[i,0] )
-            outQ = np.ma.masked_array(qBasis, ratio.mask)
-            for outX,outY in zip(outQ.compressed(),ratio.compressed()):
-                print outX, outY
-            print "&"
+            print_masked_array(sys.stdout, qBasis, ratio)
             value=""
         else:
             value = get_value( dataBlock[0], dataBlock[i], fitMetric, numPointsPerChannel, numRounds)
@@ -165,10 +174,7 @@ elif args.mode==1:
             value=""
         elif fitMetric == 'ratio_curve':
             ratio = sc.normalised_ratio_curve( dataBlock[i,0], dataBlock[0,0] )
-            outQ = np.ma.masked_array(qBasis, ratio.mask)
-            for outX,outY in zip(outQ.compressed(),ratio.compressed()):
-                print outX, outY
-            print "&"
+            print_masked_array(sys.stdout, qBasis, ratio)
             value=""
         else:
             value = get_value( dataBlock[i], dataBlock[0], fitMetric, numPointsPerChannel, numRounds)
@@ -185,10 +191,7 @@ elif args.mode==2:
                 continue
             elif fitMetric == 'ratio_curve':
                 ratio = sc.normalised_ratio_curve( dataBlock[i,0], dataBlock[j,0] )
-                outQ = np.ma.masked_array(qBasis, ratio.mask)
-                for outX,outY in zip(outQ.compressed(),ratio.compressed()):
-                    print outX, outY
-                print "&"
+                print_masked_array(sys.stdout, qBasis, ratio)
                 value=""
             else:
                 value = get_value( dataBlock[i], dataBlock[j], fitMetric, numPointsPerChannel, numRounds)

@@ -61,8 +61,7 @@ linear_fit_output_folder    ./linearfit
 linear_fit_chi_summary_file chi-all.dat
 linear_fitting_error_trials 100
 
-# The original 2018 paper utilised 5000 trials, noise2sig, and no rejection
-threshold.
+# The original 2018 paper utilised 5000 trials, noise2sig, and no rejection threshold.
 # In practice, 500 trials, noise1sig, and a rejection threshold of 2.0 sigma should be ok.
 analysis_output_folder        ./analysis
 analysis_fit_errormode        noise1sig
