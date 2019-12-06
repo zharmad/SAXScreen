@@ -27,6 +27,12 @@ function compute-integral() {
     python $script_location/analyse-distribution.py --integrate -f $1 --int_type x --error
 }
 
+function compute-Rg() {
+#    autorg -o temp.file $1
+#    rm -f temp.file
+    autorg $1 | grep Rg | awk '{print $(NF-3), $(NF-1)}'
+}
+
 function compute-PorodInvariant() {
     python $script_location/analyse-distribution.py --integrate -f $1 --int_type x^2 --error
 }
@@ -104,12 +110,13 @@ function get_general_parameters() {
 get_general_parameters
 
 if [ ! $2 ] ; then
-    echo "= = Usage: ./script <Quantity to collect>"
+    echo "= = Usage: ./script <Curve> <Quantity to collect> [Additional Arguments]"
     echo "    ...examples:
     Vc - Volume of Correlation.
     VR - Volatility of Ratio (minimized). Fits VR ( I_A+c , I_B-c ) over constant scattering c to remove potential buffer differences.
     I0 - I(0)
-    Rg - Radius of Gyration. 
+    Rg - Radius of Gyration from GNOM.
+    autorg - Radius of Gyration from ATSAS autorg utility.
     Q  - Porod Invariant. Computes just the q^2I(q) integral without considering complications.
     PV - Porod Volume directly from DATPOROD. Accepts either P(r) via GNOM output with *.out extension, or I(q) as anything else.
     PV2 - Particle Volume from Porod Invariant, without considering complications.
@@ -130,6 +137,7 @@ case $mode in
     VR)  cmdPref=compute-VR  ;;
     I0)  cmdPref=collect-I0  ;;
     Rg|Rgyr) cmdPref=collect-Rg ;;
+    autorg) cmdPref=compute-Rg ;;
     Q)   cmdPref=compute-PorodInvariant ;;
     PV)  cmdPref=compute-PorodVolume ;;
     PV2)  cmdPref=compute-ParticleVolume  ;;

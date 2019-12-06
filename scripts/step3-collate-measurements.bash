@@ -31,6 +31,11 @@ case $quant in
         file_prefix=$autognom_output_folder
         file_suffix=_${autognom_output_designation}_Iq.dat
         ;;
+    autorg)
+        ofile=$analysis_output_folder/autorg_summary.xvg
+        file_prefix=$buffer_subtracted_saxs_folder
+        file_suffix=_${buffer_subtracted_saxs_suffix}.dat
+        ;;
     Rg|Rgyr)
         ofile=$analysis_output_folder/Rg_summary.xvg
         file_prefix=$autognom_output_folder
