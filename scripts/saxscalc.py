@@ -206,7 +206,7 @@ def normalised_ratio_curve(x1, x2):
 def volatility_ratio_scaling(x1, x2):
     return np.mean( np.divide(x1,x2) )
 
-def volatility_ratio(x1, x2, stride=1, bElementwise=False, bKeepPartialBin=False, bReweightPartialBin=True):
+def volatility_ratio(x1, x2, stride=1, bElementwise=False, bKeepPartialBin=False, bReweightPartialBin=True, bReturnRatio=False):
     """
     Implementation of Hura et. al, Nat. Methods, 2013.
           N_bins-1 |  R(q_i) - R(q_{i+1})    |
@@ -217,14 +217,35 @@ def volatility_ratio(x1, x2, stride=1, bElementwise=False, bKeepPartialBin=False
     whereupon they are down-weighted so as to reduce their impact on the total ratio.
     e.g., the last bin might be only 20% of the size of a full bin. Its contribution is then multipled by 0.2.
     Note that negative values are masked out to prevent instability.
+    If any bin has more than 10% of its bins masked out, then return nan.
     """
+    failRate=0.1
     ratio=normalised_ratio_curve(x1, x2)
+    # = = Check if >10% of all values are nan, or per bin.
+    nPoints=len(x1)
+    if np.ma.is_masked(ratio):
+        if stride>1:
+            for i in np.arange(0,nPoints,stride):
+                j=min(i+stride,nPoints)
+                if np.sum(ratio.mask[i:j]) > failRate*(j-i):
+                    # print >> sys.stderr, "= = ERROR: >10% of input intensities in a Shannon-channel bin of volatility_ratio computations are negative! Returning nan."
+                    return np.nan
+            ### Compare per bin
+        else:
+            if np.sum(ratio.mask) > failRate*nPoints:
+                #print >> sys.stderr, "= = ERROR: >10% of input intensities in volatility_ratio computations are negative! Returning nan."
+                return np.nan
+
     if stride>1:
-        rem   = len(x1)%stride ; nBins = len(x1)/stride
+        rem   = nPoints%stride ; nBins = nPoints/stride
         if not bKeepPartialBin and rem>0:
             ratio = block_gmean(ratio[:-rem],stride)
         else:
             ratio = block_gmean(ratio,stride)
+
+    if bReturnRatio:
+        return ratio
+
     # = = If we're keeping the partial bin, the length of ratio will be 1 longer. = =
     V_R = 2.0*np.fabs( (ratio[:-1]-ratio[1:])/(ratio[:-1]+ratio[1:]) )
 

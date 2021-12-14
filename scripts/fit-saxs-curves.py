@@ -93,7 +93,7 @@ def intensityDiff(pos, *args):
         c = pos
         value = sc.volatility_ratio(y1-c, y2+c, stride=stride )
         # If the entire strip is masked return 1e99. This usually indicates some form of domain error in the underlying calculation.
-        if np.ma.is_masked(value):
+        if np.ma.is_masked(value) or np.isnan(value):
             value=1e99
     elif fitMetric == 'cormap' or fitMetric == 'cormap_matrix':
         # Will need a two-stage eliminator, perhaps, but essentially we'll need a system that minimises the number

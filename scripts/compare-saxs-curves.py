@@ -94,11 +94,12 @@ parser.add_argument('-mode', type=int, default=0,
                          "Mode-1: Compare the first curve to all other."
                          "Mode-2: Build a matrix between all curves.")
 parser.add_argument('-metric', type=str, default='chi', help="Determine the metric to use as comparison."
-                        "Options are: chi | log_chi | chi_free | V_R | cormap | cormap_matrix ."
+                        "Options are: chi | log_chi | chi_free | V_R | cormap | cormap_matrix | ratio_curve\n"
                         "log_chi is the logarithmic version of chi to remove scale dependence in fits."
                         "chi_free is as defined by Rambo and Tainer, Nature, 2013."
                         "V_R is the Volatility Ratio as defined by Hura et al. (2013)."
-                        "cormap is the Correlation Map as defined by Franke et al. (2015). No Bonferronni correction has yet been applied.")
+                        "cormap is the Correlation Map as defined by Franke et al. (2015). No Bonferronni correction has yet been applied."
+                        "ratio_curve is the normalised ratio curves used to compute the volatility ratio." )
 parser.add_argument('-qmin', type=float, default=0.0, help='Minimum x to include in fitting.')
 parser.add_argument('-qmax', type=float, default=10.0, help='Maximum x to include in fitting.')
 parser.add_argument('-qrange', type=str, default='', help='X-range to include in fitting, overrides above. Give as a 2-tuple, e.g. (0,3).')
