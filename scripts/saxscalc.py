@@ -29,13 +29,13 @@ def block_gmean(x, stride):
     Fast if and only if the stride divides the length of X, as gmean does not support np.nan filling.
     """
     l=len(x)
-    rem=l%stride ; nBins = l/stride
+    rem=l%stride ; nBins = int(l/stride)
     if rem==0:
         return gmean(x.reshape(nBins,stride),axis=1)
     else:
         tmp=np.array(x)
         out=np.zeros(nBins+1, dtype=tmp.dtype)
-        out[:-1]=gmean(tmp[:-rem].reshape(l/stride,stride),axis=1)
+        out[:-1]=gmean(tmp[:-rem].reshape(nBins,stride),axis=1)
         out[-1]=gmean(tmp[nBins*stride:])
         return out
 
@@ -156,9 +156,9 @@ def cormap_value(x1, x2):
     numPoints=len(x1)
     runs = run_distribution( (x1>x2), bPrune=True )
     maxRun = len(runs)
-    print >> sys.stderr, "= = Longest sequence found %i in %i tosses." % (maxRun, numPoints)
+    print( "= = Longest sequence found %i in %i tosses." % (maxRun, numPoints), file=sys.stderr )
     probExceed = probability_cormap_either(numPoints, maxRun)
-    print >> sys.stderr, "= = Probability of a single random-sequence exceeding this: %g" % probExceed
+    print( "= = Probability of a single random-sequence exceeding this: %g" % probExceed, file=sys.stderr )
     return probExceed
 
 def cormap_matrix(x1, x2):
@@ -167,15 +167,6 @@ def cormap_matrix(x1, x2):
     """
     boolVec=(x1>x2)
     return boolVec.reshape(len(boolVec),1) ^ boolVec
-
-def print_cormap_matrix( fp, mat ):
-    sh = mat.shape
-    for i in range(sh[0]):
-        for j in range(sh[1]):
-            print >> fp, int(mat[i,j]),
-        print >> fp, ''
-#        print >> fp, ' '.join(str(mat[i].astype(int))).strip('[]')
-
 
 def _dummy():
     """
@@ -228,16 +219,16 @@ def volatility_ratio(x1, x2, stride=1, bElementwise=False, bKeepPartialBin=False
             for i in np.arange(0,nPoints,stride):
                 j=min(i+stride,nPoints)
                 if np.sum(ratio.mask[i:j]) > failRate*(j-i):
-                    # print >> sys.stderr, "= = ERROR: >10% of input intensities in a Shannon-channel bin of volatility_ratio computations are negative! Returning nan."
+                    # print( "= = ERROR: >10% of input intensities in a Shannon-channel bin of volatility_ratio computations are negative! Returning nan.", file=sys.stderr )
                     return np.nan
             ### Compare per bin
         else:
             if np.sum(ratio.mask) > failRate*nPoints:
-                #print >> sys.stderr, "= = ERROR: >10% of input intensities in volatility_ratio computations are negative! Returning nan."
+                #print( "= = ERROR: >10% of input intensities in volatility_ratio computations are negative! Returning nan.", file=sys.stderr )
                 return np.nan
 
     if stride>1:
-        rem   = nPoints%stride ; nBins = nPoints/stride
+        rem   = nPoints%stride ; nBins = int(nPoints/stride)
         if not bKeepPartialBin and rem>0:
             ratio = block_gmean(ratio[:-rem],stride)
         else:
@@ -267,7 +258,7 @@ def log_chi_square(x1, x2, dx1=[], dx2=[], stride=1, bElementwise=False):
     elif dx1 != [] and dx2 != []:
         chi2 = np.divide( np.square(np.log(x1)-np.log(x2)), dx1*dx1/x1/x1+dx2*dx2/x2/x2 )
     else:
-        print >> sys.stderr, "= = ERROR: the uncertainties of both x1 and x2 must be either given or not. Quitting."
+        print( "= = ERROR: the uncertainties of both x1 and x2 must be either given or not. Quitting.", file=sys.stderr )
         sys.exit(1)
     chi2/=len(chi2)
     if stride>1:
@@ -286,7 +277,7 @@ def chi_square(x1, x2, dx1=[], dx2=[], stride=1, bElementwise=False):
     elif dx1 != [] and dx2 != []:
         chi2 = np.divide( np.square( (x1-x2) ), dx1*dx1+dx2*dx2 )
     else:
-        print >> sys.stderr, "= = ERROR: the uncertainties of both x1 and x2 must be either given or not. Quitting."
+        print( "= = ERROR: the uncertainties of both x1 and x2 must be either given or not. Quitting.", file=sys.stderr )
         sys.exit(1)
     chi2/=len(chi2)
     if stride>1:
@@ -309,8 +300,7 @@ def chi_square_free(x1, x2, stride, nParams=0, dx1=[], dx2=[], nRounds=500, bEle
     The final weight is a float value if there is a partial bin at the end.
     """
     chi2=chi_square(x1,x2,dx1,dx2,bElementwise=True)
-    l=len(chi2) ; rem=l%stride
-    nChunks=l/stride
+    l=len(chi2) ; rem=l%stride ; nChunks=int(l/stride)
     if rem==0:
        nDOF=1.0*(nChunks-nParams)
     else:
@@ -331,7 +321,7 @@ def chi_square_free(x1, x2, stride, nParams=0, dx1=[], dx2=[], nRounds=500, bEle
     if bElementwise:
         return chilist
     else:
-        return chilist[nRounds/2]
+        return chilist[int(nRounds/2)]
 
 def Shannon_channels(x, Dmax):
     return (x[-1]-x[0])*Dmax/np.pi

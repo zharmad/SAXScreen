@@ -78,11 +78,11 @@ for e in range(len(conc_list)):
     #in_file='Grenoble3_SXL10GS/saxs-0.9-chiMatrix.dat'
     in_file='./fitted_chi_'+conc_list[e]+'matrix.dat'
     X = gs.load_matrix(in_file)
-    print type(X)
+    print( type(X) )
     # Rescale and symmetrize matrix.
     Xp = np.maximum( np.zeros( X.shape ), X-1.0 )
     Xp = 0.5*( Xp + Xp.T )
-    print is_valid_dm(Xp)
+    print( is_valid_dm(Xp) )
     if bFirst:
         bFirst=False
         Xsum=Xp
@@ -136,6 +136,6 @@ dendrogram(Z,
 )
 figC.savefig(out_file)
 
-#print inconsistent(Z)
+#print( inconsistent(Z) )
 
-print "= = Output for %s is complete." % conc_list[e]
+print( "= = Output for %s is complete." % conc_list[e] )

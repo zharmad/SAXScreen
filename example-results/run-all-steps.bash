@@ -1,6 +1,6 @@
 #!/bin/bash
 
-scrfold="../scripts"
+scrfold=../scripts
 
 # = = Generate the average apo-sample and buffer curves for fitting later.
 $scrfold/step0-generate-average-curves.bash

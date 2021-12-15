@@ -65,7 +65,7 @@ def get_value(y1, y2, fitMetric, stride=1, nRounds=1):
         #runs = sc.run_distribution( y1 > f*y2+c )
         value = sc.cormap_value( y1[0], y2[0] )
     else:
-        print >> sys.stderr, "= = = ERROR: fitting metric not recognised! %s" % fitMetric
+        print( "= = = ERROR: fitting metric not recognised! %s" % fitMetric, file=sys.stderr )
 
     return value
 
@@ -73,12 +73,12 @@ def print_masked_array(fp, xReal, yMask):
     if np.ma.is_masked(yMask): 
         outQ = np.ma.masked_array(qBasis, ratio.mask)
         for outX,outY in zip(outQ.compressed(),ratio.compressed()):
-            print >> fp, outX, outY
-        print >> fp, "&"
+            print( outX, outY, file=fp )
+        print( "&", file=fp )
     else:
         for outX,outY in zip(xReal,yMask):
-            print outX, outY
-        print >> fp, "&"
+            print( outX, outY )
+        print( "&", file=fp )
     return
 
 #####################################
@@ -123,14 +123,14 @@ else:
 
 if fitMetric == 'V_R' or fitMetric=='chi_free':
     if np.isnan(Dmax):
-        print >> sys.stderr, '= = = ERROR: A definition of maximum molecular extent Dmax is required use Volatility ratio or chi_free.'
+        print( '= = = ERROR: A definition of maximum molecular extent Dmax is required use Volatility ratio or chi_free.', file=sys.stderr )
         sys.exit(1)
 
 # Read all files now.
 fileList=args.files
 nFiles = len(fileList)
 if nFiles < 2:
-    print >> sys.stderr, '= = ERROR: Script requires at least two files for fitting.'
+    print( '= = ERROR: Script requires at least two files for fitting.', file=sys.stderr )
     sys.exit(1)
 
 # Read and assemble interpolated graphs
@@ -143,7 +143,7 @@ if not np.isnan(Dmax):
     deltaQ = qBasis[1] - qBasis[0]
     numPointsPerChannel = int( np.pi / Dmax / deltaQ )
     numChannels = 1.0*len(qBasis)/numPointsPerChannel
-    print "# = = = Detected number of channels and points per channel: %i , %i" % (numChannels, numPointsPerChannel)
+    print( "# = = = Detected number of channels and points per channel: %i , %i" % (numChannels, numPointsPerChannel) )
 else:
     numPointsPerChannel = 1
 
@@ -155,7 +155,7 @@ if args.mode==0:
     for i in range(1,nFiles):
         if fitMetric == 'cormap_matrix':
             mat = sc.cormap_matrix( dataBlock[0,0], dataBlock[i,0] )
-            sc.print_cormap_matrix( sys.stdout, mat )
+            np.savetxt(sys.stdout.buffer, mat )
             value=""
         elif fitMetric == 'ratio_curve':
             ratio = sc.normalised_ratio_curve( dataBlock[0,0], dataBlock[i,0] )
@@ -163,15 +163,15 @@ if args.mode==0:
             value=""
         else:
             value = get_value( dataBlock[0], dataBlock[i], fitMetric, numPointsPerChannel, numRounds)
-#        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+#        print( "= = = ERROR, metric not recognised! %s" % fitMetric, file=sys.stderr )
 #        sys.exit(1)
-        print value
+        print( value )
 
 elif args.mode==1:
     for i in range(1,nFiles):
         if fitMetric == 'cormap_matrix':
             mat = sc.cormap_matrix( dataBlock[i,0], dataBlock[0,0] )
-            sc.print_cormap_matrix( sys.stdout, mat )
+            np.savetxt(sys.stdout.buffer, mat )
             value=""
         elif fitMetric == 'ratio_curve':
             ratio = sc.normalised_ratio_curve( dataBlock[i,0], dataBlock[0,0] )
@@ -179,16 +179,16 @@ elif args.mode==1:
             value=""
         else:
             value = get_value( dataBlock[i], dataBlock[0], fitMetric, numPointsPerChannel, numRounds)
-#        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+#        print( "= = = ERROR, metric not recognised! %s" % fitMetric, file=sys.stderr )
 #        sys.exit(1)
-        print value
+        print( value )
 
 elif args.mode==2:
     for i in range(nFiles):
         for j in range(nFiles):
             if fitMetric == 'cormap_matrix':
                 mat = sc.cormap_matrix( dataBlock[i,0], dataBlock[j,0] )
-                sc.print_cormap_matrix( sys.stdout, mat )
+                np.savetxt(sys.stdout.buffer, mat )
                 continue
             elif fitMetric == 'ratio_curve':
                 ratio = sc.normalised_ratio_curve( dataBlock[i,0], dataBlock[j,0] )
@@ -196,14 +196,14 @@ elif args.mode==2:
                 value=""
             else:
                 value = get_value( dataBlock[i], dataBlock[j], fitMetric, numPointsPerChannel, numRounds)
-#        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+#        print( "= = = ERROR, metric not recognised! %s" % fitMetric, file=sys.stderr )
 #        sys.exit(1)
-                #print np.sum(value), ":", len(value), ":", value
-                print "%8f " % value,
-        print ""
+                #print( np.sum(value), ":", len(value), ":", value )
+                print( "%8f " % value, )
+        print( "" )
 
 else:
-    print >> sys.stderr, "= = = ERROR, mode not recognised! %f" % args.mode
+    print( "= = = ERROR, mode not recognised! %f" % args.mode, file=sys.stderr )
     sys.exit(1)
 
 

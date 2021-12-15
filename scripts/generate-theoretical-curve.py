@@ -25,66 +25,66 @@ def convert_log_statistics( base, mean, std ):
 
 # = = = = Debugging
 def debug_data_block ( db ):
-    print "= = = Debug data_block."
-    print "...number of conc series :", len(db)
+    print( "= = = Debug data_block." )
+    print( "...number of conc series :", len(db) )
     for i in range(len(db)):
-        print "......series %i has %i values." % (i, len(db[i]))
-        print "......first entry:", db[i][0]
+        print( "......series %i has %i values." % (i, len(db[i])) )
+        print( "......first entry:", db[i][0] )
     return
 
 def write_xvg_legends(fp, prefix, suffix, vals, skip=1):
     s=0
     for i in range(len(vals)):
-        print >> fp, "@s%i legend \"%s %5.3g %s\"" % (s, prefix, vals[i], suffix)
+        print( "@s%i legend \"%s %5.3g %s\"" % (s, prefix, vals[i], suffix), file=fp )
         s+=skip
 
 def write_fit_results(fn, nCurves, nTrials, legends, meanKd, sigKd, meanBaseline, sigBaseline, meanDelta, sigDelta, meanQoF, sigQoF, bTestFail):
     from datetime import datetime
     fp=open(fn, 'w')
-    print >> fp, "= = = Summary of fitting."
-    print >> fp, "= = = Date: %s" % datetime.now().strftime("%Y.%m.%d %H:%M:%S") 
-    print >> fp, ""
-    print >> fp, "mean QoF over %i trials : %g +- %g" % ( nTrials, meanQoF, sigQoF )
-    print >> fp, ''
+    print( "= = = Summary of fitting.", file=fp )
+    print( "= = = Date: %s" % datetime.now().strftime("%Y.%m.%d %H:%M:%S") , file=fp )
+    print( "", file=fp )
+    print( "mean QoF over %i trials : %g +- %g" % ( nTrials, meanQoF, sigQoF ), file=fp )
+    print( '', file=fp )
     for i in range(nCurves):
-        print >> fp, "Statistics for curve %i - %s :" % (i+1, legends[i])
-        print >> fp, "Kd : %g +- %g" % ( meanKd[i], sigKd[i] )
+        print( "Statistics for curve %i - %s :" % (i+1, legends[i]), file=fp )
+        print( "Kd : %g +- %g" % ( meanKd[i], sigKd[i] ), file=fp )
         if meanBaseline != () :
-            print >> fp, "baseline : %g +- %g" % ( meanBaseline[i], sigBaseline[i] )
+            print( "baseline : %g +- %g" % ( meanBaseline[i], sigBaseline[i] ), file=fp )
         else:
-            print >> fp, "baseline : %g +- %g" % ( meanBaseline, sigBaseline )
+            print( "baseline : %g +- %g" % ( meanBaseline, sigBaseline ), file=fp )
         if meanDelta != () :
-            print >> fp, "delta : %g +- %g" % ( meanDelta[i], sigDelta[i] )
+            print( "delta : %g +- %g" % ( meanDelta[i], sigDelta[i] ), file=fp )
         else:
-            print >> fp, "delta : %g +- %g" % ( meanDelta, sigDelta )
+            print( "delta : %g +- %g" % ( meanDelta, sigDelta ), file=fp )
 
-        print >> fp, "Failed quality check? : %s" % bTestFail[i]
-        print >> fp, ''
+        print( "Failed quality check? : %s" % bTestFail[i], file=fp )
+        print( '', file=fp )
 
     fp.close()
 
 def write_distrib_file(fn, legs, vlist, header=''):
     fp=open(fn,'w')
     if header != '':
-        print >> fp, header
-    print >> fp, '@type xy'
+        print( header, file=fp )
+    print( '@type xy', file=fp )
 
     # Determine dimensions.
     shape=vlist.shape
     if len(shape)==1:
-        print >> fp, "@s%i legend \"%s\"" % ( 0, legs[0] )
-        print >> fp, "# MEAN +- SIG: %g %g" % ( np.mean(vlist), np.std(vlist) )
+        print( "@s%i legend \"%s\"" % ( 0, legs[0] ), file=fp )
+        print( "# MEAN +- SIG: %g %g" % ( np.mean(vlist), np.std(vlist) ), file=fp )
         for j in range( shape[-1] ):
-            print >> fp, "%i %g" % ( j, vlist[j] )
+            print( "%i %g" % ( j, vlist[j] ), file=fp )
     elif len(shape)==2:
         for i in range( shape[0] ):
-            print >> fp, "@s%i legend \"%s\"" % ( i, legs[i] )
-            print >> fp, "# MEAN +- SIG: %g %g" % ( np.mean(vlist[i]), np.std(vlist[i]) )
+            print( "@s%i legend \"%s\"" % ( i, legs[i] ), file=fp )
+            print( "# MEAN +- SIG: %g %g" % ( np.mean(vlist[i]), np.std(vlist[i]) ), file=fp )
             for j in range( shape[-1] ):
-                print >> fp, "%i %g" % ( j, vlist[i,j] )
-            print >> fp, '&'
+                print( "%i %g" % ( j, vlist[i,j] ), file=fp )
+            print( '&', file=fp )
     else:
-        print >> sys.stderr, "= = ERROR: Wrong number of dimensions of data!"
+        print( "= = ERROR: Wrong number of dimensions of data!", file=sys.stderr )
         sys.exit(1)
     fp.close()
 
@@ -168,9 +168,9 @@ def remove_conc_from_datablock( datablock, conc):
     return out
 
 def report_parameters(deltas, baselines, Kds, adjective=''):
-    print "= = Reporting %s Deltas:" % adjective, deltas
-    print "= = Reporting %s baselines:" % adjective, baselines
-    print "= = Reporting %s Kds:" % adjective, Kds
+    print( "= = Reporting %s Deltas:" % adjective, deltas )
+    print( "= = Reporting %s baselines:" % adjective, baselines )
+    print( "= = Reporting %s Kds:" % adjective, Kds )
 
 def write_fitted_modelA(outfn, legends, params, db):
     nCurves=len(db)
@@ -185,40 +185,40 @@ def write_fitted_modelA(outfn, legends, params, db):
         bErr=True
     s=0
     for i in range(len(Kds)):
-#        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
-        print >> fp, "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+#        print( "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i]), file=fp )
+        print( "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i]), file=fp )
         s+=2
     for i in range(len(db)):
-        print >> fp, "@type xy"
+        print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
             model_val = (P/inP)*bases + (PQ/inP)*(bases+delta)
-            print >> fp, "%g %g" % (inQ/inP, model_val)
-        print >> fp, "&"
+            print( "%g %g" % (inQ/inP, model_val), file=fp )
+        print( "&", file=fp )
         if bErr:
-            print >> fp, "@type xydy"
+            print( "@type xydy", file=fp )
         else:
-            print >> fp, "@type xy"
+            print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             if bErr:
-                print >> fp, "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3])
+                print( "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3]), file=fp )
             else:
-                print >> fp, "%g %g" % (inQ/inP, db[i][j][2])
-        print >> fp, "&"
+                print( "%g %g" % (inQ/inP, db[i][j][2]), file=fp )
+        print( "&", file=fp )
     fp.close()
 #    for i in range(len(db)):
 #        for j in range(len(db[i])):
 #            inP, inQ, targ = db[i][j]
 #            P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
 #            model_val = (P/inP)*valA + (PQ/inP)*valB
-#            print >> fp, "%g %g" % (inQ/inP, model_val)
-#        print >> fp, "&"
+#            print( "%g %g" % (inQ/inP, model_val), file=fp )
+#        print( "&", file=fp )
 #        for j in range(len(db[i])):
 #            inP, inQ, targ = db[i][j]
-#            print >> fp, "%g %g" % (inQ/inP, targ)
-#        print >> fp, "&"
+#            print( "%g %g" % (inQ/inP, targ), file=fp )
+#        print( "&", file=fp )
 #    fp.close()
 
 # Fit function for modelA
@@ -235,7 +235,7 @@ def fitfunc_modelA(params, *args):
     for i in range(len(data)):
         for j in range(len(data[i])):
             inP, inQ, target = data[i][j]
-            #print "...minimising...", inP, inQ, target
+            #print( "...minimising...", inP, inQ, target )
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
             model_val = (P/inP)*bases + (PQ/inP)*(bases+delta)
             #model_val = (P/inP)*valA + (PQ/inP)*valB
@@ -264,10 +264,10 @@ def estimate_initial_parameters_modelA( datablock ):
         setmax = db[loc2,2]
         mins.append( setmin )
         if loc2 > loc1 :
-            #print "1:", setmax-setmin
+            #print( "1:", setmax-setmin )
             deltas.append( setmax-setmin )
         else:
-            #print "2:", setmin-setmax
+            #print( "2:", setmin-setmax )
             deltas.append( setmin-setmax )
         Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = [ np.mean(deltas) ] + [ np.mean(mins) ] + Kds
@@ -298,10 +298,10 @@ def estimate_initial_parameters_modelB( datablock ):
         setmax = db[loc2,2]
         mins.append( setmin )
         if loc2 > loc1 :
-            #print "1:", setmax-setmin
+            #print( "1:", setmax-setmin )
             deltas.append( setmax-setmin )
         else:
-            #print "2:", setmin-setmax
+            #print( "2:", setmin-setmax )
             deltas.append( setmin-setmax )
         Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = [ np.mean(deltas) ] + mins + Kds
@@ -320,28 +320,28 @@ def write_fitted_modelB(outfn, legends, params, db):
     #write_xvg_legends(fp, "K\\sd\\N =", "\\xm\\f{}M", Kds, 2)
     s=0
     for i in range(len(Kds)):
-#        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
-        print >> fp, "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+#        print( "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i]), file=fp )
+        print( "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i]), file=fp )
         s+=2
     for i in range(len(db)):
-        print >> fp, "@type xy"
+        print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
             model_val = (P/inP)*bases[i] + (PQ/inP)*(bases[i]+delta)
-            print >> fp, "%g %g" % (inQ/inP, model_val)
-        print >> fp, "&"
+            print( "%g %g" % (inQ/inP, model_val), file=fp )
+        print( "&", file=fp )
         if bErr:
-            print >> fp, "@type xydy"
+            print( "@type xydy", file=fp )
         else:
-            print >> fp, "@type xy"
+            print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             if bErr:
-                print >> fp, "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3])
+                print( "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3]), file=fp )
             else:
-                print >> fp, "%g %g" % (inQ/inP, db[i][j][2])
-        print >> fp, "&"
+                print( "%g %g" % (inQ/inP, db[i][j][2]), file=fp )
+        print( "&", file=fp )
     fp.close()
 
 # Fit function for modelB
@@ -354,7 +354,7 @@ def fitfunc_modelB(params, *args):
     for i in range(len(data)):
         for j in range(len(data[i])):
             inP, inQ, target = data[i][j]
-            #print "...minimising...", inP, inQ, target
+            #print( "...minimising...", inP, inQ, target )
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
             model_val = (P/inP)*bases[i] + (PQ/inP)*(bases[i]+delta)
             chi2  += ( target - model_val )**2.0
@@ -390,10 +390,10 @@ def estimate_initial_parameters_modelC( datablock ):
         setmax = db[loc2,2]
         baseline.append( setmin )
         if loc2 > loc1 :
-            #print "1:", setmax-setmin
+            #print( "1:", setmax-setmin )
             deltas.append( setmax-setmin )
         else:
-            #print "2:", setmin-setmax
+            #print( "2:", setmin-setmax )
             deltas.append( setmin-setmax )
         Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = concat_params_modelC( deltas, np.mean(baseline), Kds )
@@ -416,30 +416,30 @@ def write_fitted_modelC(outfn, legends, params, db, bFailArray=None):
     #write_xvg_legends(fp, "K\\sd\\N =", "\\xm\\f{}M", Kds, 2)
     s=0
     for i in range(len(Kds)):
-#        print >> fp, "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
-        print >> fp, "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+#        print( "@s%i legend \"%s: S\\s\\xD\\f{}\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i]), file=fp )
+        print( "@s%i legend \"%s: K\\sD\\N\\S\\eff.\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i]), file=fp )
         if bFailArray[i]:
-            print >> fp, "@s%i line linestyle 2" % s
+            print( "@s%i line linestyle 2" % s, file=fp )
         s+=2
     for i in range(len(db)):
-        print >> fp, "@type xy"
+        print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
             model_val = (P/inP)*baseline + (PQ/inP)*(baseline+deltas[i])
-            print >> fp, "%g %g" % (inQ/inP, model_val)
-        print >> fp, "&"
+            print( "%g %g" % (inQ/inP, model_val), file=fp )
+        print( "&", file=fp )
         if bErr:
-            print >> fp, "@type xydy"
+            print( "@type xydy", file=fp )
         else:
-            print >> fp, "@type xy"
+            print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             if bErr:
-                print >> fp, "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3])
+                print( "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3]), file=fp )
             else:
-                print >> fp, "%g %g" % (inQ/inP, db[i][j][2])
-        print >> fp, "&"
+                print( "%g %g" % (inQ/inP, db[i][j][2]), file=fp )
+        print( "&", file=fp )
     fp.close()
 
 # Fit function for modelC
@@ -452,7 +452,7 @@ def fitfunc_modelC(params, *args):
     for i in range(len(data)):
         for j in range(len(data[i])):
             inP, inQ, target = data[i][j]
-            #print "...minimising...", inP, inQ, target
+            #print( "...minimising...", inP, inQ, target )
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
             model_val = (P/inP)*baseline + (PQ/inP)*(baseline+deltas[i])
             chi2  += ( target - model_val )**2.0
@@ -485,10 +485,10 @@ def estimate_initial_parameters_modelD( datablock, apo_conc ):
         setmax = db[loc2,2]
         mins.append( setmin / apo_conc)
         if loc2 > loc1 :
-            print "1:", setmax-setmin
+            print( "1:", setmax-setmin )
             deltas.append( (setmax-setmin)/apo_conc  )
         else:
-            print "2:", setmin-setmax
+            print( "2:", setmin-setmax )
             deltas.append( (setmin-setmax)/apo_conc )
         Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
         #deltas_lig.append( -0.1*deltas[-1] )
@@ -506,7 +506,7 @@ def write_fitted_modelD(outfn, legends, params, db):
     #write_xvg_legends(fp, "K\\sd\\N =", "\\xm\\f{}M", Kds, 2)
     s=0
     for i in range(len(Kds)):
-        print >> fp, "@s%i legend \"%s: K\\sd\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i])
+        print( "@s%i legend \"%s: K\\sd\\N = %5.3g \\xm\\f{}M\"" % (s, legends[i], Kds[i]), file=fp )
         s+=2
     for i in range(len(db)):
         for j in range(len(db[i])):
@@ -514,12 +514,12 @@ def write_fitted_modelD(outfn, legends, params, db):
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
             Qfrac = -0.01
             model_val = P*bases[i] + PQ*(bases[i]+delta_cplx) + Qfrac*Q*bases[i]
-            print >> fp, "%g %g" % (inQ/inP, model_val)
-        print >> fp, "&"
+            print( "%g %g" % (inQ/inP, model_val), file=fp )
+        print( "&", file=fp )
         for j in range(len(db[i])):
             inP, inQ, targ = db[i][j]
-            print >> fp, "%g %g" % (inQ/inP, targ)
-        print >> fp, "&"
+            print( "%g %g" % (inQ/inP, targ), file=fp )
+        print( "&", file=fp )
     fp.close()
 
 # Fit function for modelD
@@ -532,9 +532,9 @@ def fitfunc_modelD(params, *args):
     for i in range(len(data)):
         for j in range(len(data[i])):
             inP, inQ, target = data[i][j]
-            #print "...minimising...", inP, inQ, target
+            #print( "...minimising...", inP, inQ, target )
             P, Q, PQ = boundconc_2state( inP, inQ, Kds[i] )
-            #print "...minimising2...", P, Q, PQ
+            #print( "...minimising2...", P, Q, PQ )
             Qfrac = -0.01
             model_val = P*bases[i] + PQ*(bases[i]+delta_cplx) + Qfrac*Q*bases[i]
             chi2  += ( target - model_val )**2.0
@@ -579,10 +579,10 @@ def estimate_initial_parameters_modelD( datablock ):
         loc2=np.argmax( db[:,1] )
         setmax = db[loc2,2]
         if loc2 > loc1 :
-            #print "1:", setmax-setmin
+            #print( "1:", setmax-setmin )
             deltas.append( setmax-setmin )
         else:
-            #print "2:", setmin-setmax
+            #print( "2:", setmin-setmax )
             deltas.append( setmin-setmax )
         Kds.append( 0.8*np.min(db[:,1])+0.2*np.max(db[:,1]) )
     params = list(deltas) + [ np.mean(Kds) ]
@@ -598,31 +598,31 @@ def write_fitted_modelD(outfn, legends, params, db, conc_rec):
         bErr=False
     elif len(db[0][0])==4:
         bErr=True
-    print >> fp, "@subtitle \"K\\sD\\N: %5.3g \\xm\\f{}M ; [rec]: %g \\xm\\f{}M \"" % ( Kd, conc_rec )
+    print( "@subtitle \"K\\sD\\N: %5.3g \\xm\\f{}M ; [rec]: %g \\xm\\f{}M \"" % ( Kd, conc_rec ), file=fp )
     s=0
     for i in range(len(deltas)):
-        print >> fp, "@s%i legend \"%s\"" % (s, legends[i])
+        print( "@s%i legend \"%s\"" % (s, legends[i]), file=fp )
         s+=2
     for i in range(len(db)):
-        print >> fp, "@type xy"
+        print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             model_val = csp_ratio_from_conc( inP, inQ, Kd ) * deltas[i]
             #P, Q, PQ = boundconc_2state( inP, inQ, Kd )
             #model_val = (PQ/inP)*deltas[i]
-            print >> fp, "%g %g" % (inQ/inP, model_val)
-        print >> fp, "&"
+            print( "%g %g" % (inQ/inP, model_val), file=fp )
+        print( "&", file=fp )
         if bErr:
-            print >> fp, "@type xydy"
+            print( "@type xydy", file=fp )
         else:
-            print >> fp, "@type xy"
+            print( "@type xy", file=fp )
         for j in range(len(db[i])):
             inP = db[i][j][0] ; inQ = db[i][j][1] ; targ=db[i][j][2]
             if bErr:
-                print >> fp, "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3])
+                print( "%g %g %g" % (inQ/inP, db[i][j][2], db[i][j][3]), file=fp )
             else:
-                print >> fp, "%g %g" % (inQ/inP, db[i][j][2])
-        print >> fp, "&"
+                print( "%g %g" % (inQ/inP, db[i][j][2]), file=fp )
+        print( "&", file=fp )
     fp.close()
 
 def fitfunc_modelD(params, *args):
@@ -634,7 +634,7 @@ def fitfunc_modelD(params, *args):
     for i in range(len(data)):
         for j in range(len(data[i])):
             inP, inQ, target = data[i][j]
-            #print "...minimising...", inP, inQ, target
+            #print( "...minimising...", inP, inQ, target )
             model_val = csp_ratio_from_conc( inP, inQ, Kd ) * deltas[i]
             #P, Q, PQ = boundconc_2state( inP, inQ, Kd )
             #model_val = (PQ/inP)*deltas[i]
@@ -681,7 +681,7 @@ def modelfit_2state(params, *args):
             for i in range(npts):
                 chi2 += (ey[i] - f*( (1-popB)*ay[i] + popB*by[i] ) )**2
 
-    #print "= = = In minimisation function: f=%g popB=%g chi2=%g bWeight=%r" % (f, popB, chi2/npts, bWeight)
+    #print( "= = = In minimisation function: f=%g popB=%g chi2=%g bWeight=%r" % (f, popB, chi2/npts, bWeight) )
     return chi2/npts
 
 scriptname=os.path.basename(__file__)
@@ -733,7 +733,7 @@ parser.add_argument('--errormode', type=str, dest='err_type', default='none',
                     help='Define a model of error-analysis. Options are: none, 1-point, noise2sig, noise1sig.'
                     '1-point : to remove data at one ratio at a time and analyse the difference. This method does not require uncertainty estimates at each point.'
                     'noise1sig / noise2sig : add random noise to the mean value scaled to the uncertainty,'
-                    'where 1sig and 2sig represents taking either the 64% or 95%% confidence interval for a guassian noise model.')
+                    'where 1sig and 2sig represents taking either the 64%% or 95%% confidence interval for a guassian noise model.')
 parser.add_argument('--nTrials', type=int, dest='ntrials', default=50,
                     help='In Error analyses that require trials, run this many trials. Applicable to, e.g. noise1sig.')
 parser.add_argument('--bSmallPerturb', action='store_true',
@@ -775,7 +775,7 @@ if args.rfile != '':
 #Mode 2
 if args.tfile != '':
     if mode != 0:
-        print >> sys.stderr, "= = ERROR: Cannot use both mode 1 and mode 2. Please check your arguments."
+        print( "= = ERROR: Cannot use both mode 1 and mode 2. Please check your arguments.", file=sys.stderr )
         sys.exit(1)
     mode=2
     efiles = args.tfile
@@ -783,7 +783,7 @@ if args.tfile != '':
 
 # Sanity check
 if mode == 0:
-    print >> sys.stderr, "= = ERROR: The script must operate in either mode 1 or mode 2. Please check help  with -h."
+    print( "= = ERROR: The script must operate in either mode 1 or mode 2. Please check help  with -h.", file=sys.stderr )
 
 if mode==2:
     # Standard mode for taking a single measure per titration point.
@@ -805,10 +805,10 @@ if mode==2:
     if len(apoMeasures) > 1:
         bTestDeltaSignificance = True
         apo2sigma = 2.0*np.std( apoMeasures )
-        print "= = Quality check section: from %d repeats, the 2-sigma of apo measurement deviations is %g" % ( len(apoMeasures), apo2sigma )
+        print( "= = Quality check section: from %d repeats, the 2-sigma of apo measurement deviations is %g" % ( len(apoMeasures), apo2sigma ) )
     else:
         bTestDeltaSignificance = False
-        print "= = NOTE: no or only one receptor-apo measurements have been found. Cannot do significance checks."
+        print( "= = NOTE: no or only one receptor-apo measurements have been found. Cannot do significance checks." )
     valueBounds = np.max( valueRange ) - np.min( valueRange )
 
     # = = = Big IF block to process different kinds of applications.
@@ -820,32 +820,32 @@ if mode==2:
         # i.e.: 2N+2 parameters to be fillted.
         params = estimate_initial_parameters_modelD( data_block, concRec )
         nCurves = len(data_block)
-        print "= = = Initial parameter estimates:"
-        print params
+        print( "= = = Initial parameter estimates:" )
+        print( params )
         dummy=0
         fminOut = fmin_powell(fitfunc_modelD, params, args=(nCurves, data_block),
                               full_output=True)
         xopt    = fminOut[0]
         funcopt = fminOut[1]
-        print "= = Optimised parameters: "
-        print xopt
+        print( "= = Optimised parameters: " )
+        print( xopt )
         write_fitted_modelD( fileModel, legends, xopt, data_block )
-        print "= = = Written model and targets to %s ." % fileModel
+        print( "= = = Written model and targets to %s ." % fileModel )
     elif args.bNMRTitration:
     	# Adopt NMR titration mode using chemical shift perturbation.
 	# Which corresponds to model-D in this script.
         params = estimate_initial_parameters_modelD( data_block )
         nCurves = len(data_block)
-        print "= = = Initial parameter estimates:"
-        print params
+        print( "= = = Initial parameter estimates:" )
+        print( params )
         fminOut = fmin_powell(fitfunc_modelD, params, args=(nCurves, data_block),
                               full_output=True)
         xopt    = fminOut[0]
         funcopt = fminOut[1]
-        print "= = Optimised parameters: "
-        print xopt
+        print( "= = Optimised parameters: " )
+        print( xopt )
         write_fitted_modelD( fileModel, legends, xopt, data_block, concRec )
-        print "= = = Written model and targets to %s ." % fileModel
+        print( "= = = Written model and targets to %s ." % fileModel )
 
     elif True:
         # Some hacking here to switch between model A and B
@@ -860,21 +860,21 @@ if mode==2:
             #params = estimate_initial_parameters_modelA( data_block )
             params = estimate_initial_parameters_modelC( data_block )
             nCurves = len(data_block)
-            print "= = = Initial parameter estimates:"
-            print params
+            print( "= = = Initial parameter estimates:" )
+            print( params )
             #fminOut = fmin_powell(fitfunc_modelA, params, args=(nCurves, data_block), full_output=True)
             fminOut = fmin_powell(fitfunc_modelC, params, args=(nCurves, data_block), full_output=True)
             xopt    = fminOut[0] ; funcopt = fminOut[1]
-            print "= = Optimised parameters: "
-            print xopt
+            print( "= = Optimised parameters: " )
+            print( xopt )
             #write_fitted_modelA( fileModel, legends, xopt, data_block )
             write_fitted_modelC( fileModel, legends, xopt, data_block )
-            print "= = = Written model and targets to %s ." % fileModel
+            print( "= = = Written model and targets to %s ." % fileModel )
             sys.exit()
 
         elif errMode=='1-point':
             bTestGoodnessOfFit = True
-            print "= = Error mode requested: single-point removal"
+            print( "= = Error mode requested: single-point removal" )
             #params = estimate_initial_parameters_modelA( data_block )
             params = estimate_initial_parameters_modelC( data_block )
             nCurves = len(data_block)
@@ -883,8 +883,8 @@ if mode==2:
             del a, b, c
             conc_list=obtain_PQ_conc_from_datablock( data_block )
             nConcs = len(conc_list)
-            print "= = List of concentrations detected:"
-            print conc_list
+            print( "= = List of concentrations detected:" )
+            print( conc_list )
             deltas=np.zeros( (nConcs, nCurves) )
             baselines=np.zeros( nConcs )
             logKd=np.zeros( (nConcs, nCurves) )
@@ -892,16 +892,16 @@ if mode==2:
             # = = = Estimate uncertainty here by removing a single titration point.
             for i, c in enumerate(conc_list):
                 db=remove_conc_from_datablock(data_block, c)
-                print "= = Round %d : removing concentration point %s .." % (i+1, str(c))
-                print "= = ... current number of points in each titration set:", [ len(x) for x in db ]
+                print( "= = Round %d : removing concentration point %s .." % (i+1, str(c)) )
+                print( "= = ... current number of points in each titration set:", [ len(x) for x in db ] )
                 #fminOut = fmin_powell(fitfunc_modelA, params, args=(nCurves, db), full_output=True)
                 fminOut = fmin_powell(fitfunc_modelC, params, args=(nCurves, db), full_output=True)
                 xopt    = fminOut[0] ; funcopt = fminOut[1]
                 #deltas, baselines, Kds = extract_params_modelA(xopt, nCurves)
                 fitQuality[i] = funcopt
                 deltas[i], baselines[i], Kds = extract_params_modelC(xopt, nCurves)
-                logKd[i] = np.clip(np.log10(np.fabs(Kds)),KDClipMin,KDClipMax) ; print "= = log10-Kd:", logKd[i]
-                print ""
+                logKd[i] = np.clip(np.log10(np.fabs(Kds)),KDClipMin,KDClipMax) ; print( "= = log10-Kd:", logKd[i] )
+                print( "" )
 
             # = = = Compute the vlue from the full curve.
             fminOut = fmin_powell(fitfunc_modelC, params, args=(nCurves, db), full_output=True)
@@ -912,13 +912,13 @@ if mode==2:
             sigLogKd  = np.std(logKd,axis=0)
             meanKd, sigKd = convert_log_statistics( 10.0, meanLogKd, sigLogKd)
             for i in range(nCurves):
-                print " ... full log10(Kd) value ( %d ) versus mean from analysis: %g vs. %g +- %g" % ( i, logKdAll[i], meanLogKd[i], sigLogKd[i] )
+                print( " ... full log10(Kd) value ( %d ) versus mean from analysis: %g vs. %g +- %g" % ( i, logKdAll[i], meanLogKd[i], sigLogKd[i] ) )
 
             nTrials = nConcs
 
         elif errMode=='noise2sig' or errMode=='noise1sig':
             bTestGoodnessOfFit = True
-            print "= = Error mode requested: noise-addition "
+            print( "= = Error mode requested: noise-addition " )
             if errMode=='noise2sig':
                 efact=0.5
             else:
@@ -935,9 +935,9 @@ if mode==2:
             bFirst=True
             while True:
             #for i in range(nTrials):
-                print "= = = Conducting trial %i of %i ..." % (i+1, nTrials)
+                print( "= = = Conducting trial %i of %i ..." % (i+1, nTrials) )
                 db=gaussian_noise_datablock(data_block, scale=efact)
-                #print "Debug:", db
+                #print( "Debug:", db )
                 #params = estimate_initial_parameters_modelA( db )
                 #fminOut = fmin_powell(fitfunc_modelA, params, args=(nCurves, db), full_output=True)
                 params = estimate_initial_parameters_modelC( db )
@@ -958,20 +958,20 @@ if mode==2:
                 #if True:
                 #    # Debug to temporary file.
                 #    write_fitted_modelC( 'temp-Kds-%i.dat' % i, legends, xopt, db )
-                print "    ...trial %i goodness-of-fit:" % i, funcopt
-                print "    ...optimised deltas:", deltas[i]
-                print "    ...optimised Baseline:", baselines[i]
-                logKd[i] = np.clip(np.log10(np.fabs(Kds)),KDClipMin,KDClipMax) ; print "= = log10-Kd:", logKd[i]
+                print( "    ...trial %i goodness-of-fit:" % i, funcopt )
+                print( "    ...optimised deltas:", deltas[i] )
+                print( "    ...optimised Baseline:", baselines[i] )
+                logKd[i] = np.clip(np.log10(np.fabs(Kds)),KDClipMin,KDClipMax) ; print( "= = log10-Kd:", logKd[i] )
 
                 # = = = Note: I think this is an outdated check
                 if bSmallPerturb and np.any( np.fabs(deltas[i]) > np.fabs(baselines[i]) ):
                     nRedo+=1 ; nRedoTot+=1
                     # Delta is really out of whack. Redo.
                     if nRedo<5:
-                        print "= = = ERROR: optimised delta is greater than twice the baseline! This is wrong. Redoing... (Attempts: %i)" % nRedo
+                        print( "= = = ERROR: optimised delta is greater than twice the baseline! This is wrong. Redoing... (Attempts: %i)" % nRedo )
                         continue
                     else:
-                        print "= = = ABORTING ERROR: Too many redo attempts, bailing! Please check the delta limits in the script and your model."
+                        print( "= = = ABORTING ERROR: Too many redo attempts, bailing! Please check the delta limits in the script and your model." )
                         sys.exit(2)
                 else:
                     i+=1 ; nRedo=0
@@ -979,12 +979,12 @@ if mode==2:
                         break
 
             if nRedoTot > 0:
-                print "= = = NOTE: A total of %i trials have been redone due to tripping the error signal." % nRedoTot
+                print( "= = = NOTE: A total of %i trials have been redone due to tripping the error signal." % nRedoTot )
             meanLogKd = np.mean(logKd,axis=0)
             sigLogKd  = np.std(logKd,axis=0)
             meanKd, sigKd = convert_log_statistics( 10.0, meanLogKd, sigLogKd)
         else:
-            print >> sys.stderr, "= = ERROR: invalid error mode selected?"
+            print( "= = ERROR: invalid error mode selected?", file=sys.stderr )
             sys.exit(1)
         # = = = End of error-mode selection.
     # = = = End of application selection
@@ -993,9 +993,9 @@ if mode==2:
     headerStr=""
     for i in range(nCurves):
         reportString="# Titration %s (#%i) raw Kd estimate: %g +- %g" % ( legends[i], i+1, meanKd[i], sigKd[i] )
-        print "= = = %s" % reportString
+        print( "= = = %s" % reportString )
         headerStr=headerStr+reportString+"\n"
-    print "    ... this information will also be stored in the header comments of %s" % ( opref+'_logKd.xvg' )
+    print( "    ... this information will also be stored in the header comments of %s" % ( opref+'_logKd.xvg' ) )
 
     write_distrib_file( opref+'_logKd.xvg', legends, logKd.T, header=headerStr)
     write_logKd_histogram(fileHist, legends, logKd, xmin=KDClipMin, xmax=KDClipMax)
@@ -1020,14 +1020,14 @@ if mode==2:
         write_distrib_file( opref+'_baselines.xvg', ['Shared-Baseline'], baselines, header='# Fitted baselines\n# Number of trials: %i' % nTrials)
 
     # = = Conduct quality checks
-    print "= = Conducting quality checks for various trials..."
+    print( "= = Conducting quality checks for various trials..." )
 
     if bTestGoodnessOfFit:
         # ...Sometimes the minimisation algorithm cannot find a good minimum. Note these exceptions.
         meanQoF = np.mean(fitQuality) ; sigQoF = np.std(fitQuality)
-        print "= = = NB: Quality-of-fit statistic from all trials: %g +- %g" % ( meanQoF, sigQoF )
+        print( "= = = NB: Quality-of-fit statistic from all trials: %g +- %g" % ( meanQoF, sigQoF ) )
         outliers = [ x for x in fitQuality if x-meanQoF>3.0*sigQoF ]
-        print "   ...and particular outliers:", outliers
+        print( "   ...and particular outliers:", outliers )
 
     # = = = Test for fitting artefacts that contribute to an unphysical outcome.
     bFailArray = [ False for x in range(nCurves) ]
@@ -1037,8 +1037,8 @@ if mode==2:
         # to reach with a standard SAXS measurement.
         for i, x in enumerate(outDelta):
             if np.fabs(x) > 20*valueBounds:
-                print "= = = WARNING: Curve %d shows unbelievably large delta compared to the limits of target values! This indicates a bad fit. Will reset to completely zero binding." % (i+1)
-                print "    ... %g >> %g" % ( x, valueBounds)
+                print( "= = = WARNING: Curve %d shows unbelievably large delta compared to the limits of target values! This indicates a bad fit. Will reset to completely zero binding." % (i+1) )
+                print( "    ... %g >> %g" % ( x, valueBounds) )
                 outDelta[i]   = 0.0
                 meanLogKd[i] = KDClipMax
                 bFailArray[i] = True
@@ -1050,8 +1050,8 @@ if mode==2:
         for i, x in enumerate(testArr):
             testVal = np.fabs(x)
             if apo2sigma > testVal:
-                print "= = = WARNING: Curve %d does not show significant fitted delta-deviations from 2-sigma apo variations. Will reset to completely zero binding."
-                print "    ... %g < %g" % ( testVal, apo2sigma )
+                print( "= = = WARNING: Curve %d does not show significant fitted delta-deviations from 2-sigma apo variations. Will reset to completely zero binding." )
+                print( "    ... %g < %g" % ( testVal, apo2sigma ) )
                 outDelta[i]   = 0.0
                 meanLogKd[i] = KDClipMax
                 bFailArray[i] = True

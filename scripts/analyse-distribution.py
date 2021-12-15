@@ -19,7 +19,7 @@ def run_integration(x, y, dy=[], int_type='1'):
     elif int_type=='x^2':
         yl=y*x*x
     val=np.trapz(yl, x)
-    if dy==[]:
+    if len(dy) == 0:
         return val
     else:
         e1=y-dy ; e2=y+dy
@@ -36,7 +36,7 @@ def run_Pr_integration(r, Pr, dPr=[], qmin=0.0, qmax=5.0, qpts=251):
     q=np.linspace(qmin/tpi, qmax/tpi, qpts)
     Iq=np.zeros(qpts)
 
-    if dy==[]:
+    if len(dPr) == 0:
         for i in range(qpts):
             Iq[i] = 4.0*np.pi*np.trapz( Pr*np.sinc(q[i]*r), r)
         return q, Iq
@@ -142,36 +142,36 @@ if args.bInt:
     if args.bError:
         if args.int_type != 'Pr':
             vol=run_integration(x, y, dy, int_type=args.int_type)
-            print vol[0], vol[1]
+            print( vol[0], vol[1] )
         else:
             q, Iq, dIq = run_Pr_integration(x, y, dy, qmin=args.qmin, qmax=args.qmax, qpts=args.qpts)
-            print '# I(q) derived from P(r)'
+            print( '# I(q) derived from P(r)' )
             for i in range(len(q)):
-                print q[i], Iq[i], dIq[i]
+                print( q[i], Iq[i], dIq[i] )
     else:
         if args.int_type != 'Pr':
             vol=run_integration( x, y, int_type=args.int_type)
-            print vol
+            print( vol )
         else:
             q, Iq = run_Pr_integration(x, y, qmin=args.qmin, qmax=args.qmax, qpts=args.qpts)
-            print '# I(q) derived from P(r)'
+            print( '# I(q) derived from P(r)' )
             for i in range(len(q)):
-                print q[i], Iq[i]
+                print( q[i], Iq[i] )
 
 if args.bPorod:
     xo, yo = run_Porod_integration(x, y)   
     for i in range(len(xo)):
-        print xo[i], yo[i]
+        print( xo[i], yo[i] )
 
 if args.bNormRatio:
     yo = run_normalised_ratio(y, y2)
     for i in range(len(yo)):
-        print x[i], yo[i]
+        print( x[i], yo[i] )
 
 # Moments of inertia section
 if args.bMom:
     mom = gm.calc_central_moments(x, y, args.bSymm)
-    print str(mom).strip('[]')
+    print( str(mom).strip('[]') )
 
 # Transformation section
 if args.bTrans:
@@ -179,6 +179,6 @@ if args.bTrans:
         dy = np.zeros(y)
 
     q, Iq, dIq = run_transformation(x, y, dy, int_type=args.int_type)
-    print '# Transformed curve'
+    print( '# Transformed curve' )
     for i in range(len(q)):
-        print args.xscale*q[i], args.yscale*Iq[i], args.yscale*dIq[i]
+        print( args.xscale*q[i], args.yscale*Iq[i], args.yscale*dIq[i] )

@@ -7,32 +7,48 @@
 # Having this file here also serves as a convenient single location to
 # check the definition between all files and their variables/meanings.
 
-ATSAS_location  /g/software/bin
-ATSAS_suffix    -2.7.1
+# Software locations and suffixes
+ATSAS_location  /mnt/d/ubuntu/programs/ATSAS-3.0.4-2/bin
+ATSAS_suffix
 
-# Synchrotron variables and location of data
+script_location     /home/zharmad/scripts/SAXScreen/scripts
+
+# Determines handling to synchrotron-specific data-file formats.
+# Currently available options are:
+#   - Grenoble
+#   - Hamburg
+#   - Diamond
+#   - Melbourne
 synchrotron_source   Grenoble
 synchrotron_data_location_sample ./sample-1d
 synchrotron_data_location_ligand ./ligand-1d
 #synchrotron_source   Hamburg
-#synchrotron_raw_data_location ./datacollection/data
-script_location      ../scripts
+#synchrotron_data_location_sample ./datacollection/data
+#synchrotron_source   Melbourne
+#synchrotron_data_location_sample ./raw_dat
+#synchrotron_source   Diamond
+#synchrotron_data_location_sample ../sm22154-2 
 
-# Samnple concentration is in arbitrary units, same as that in the dictionary files.
+# The final analysis file implicitly uses micromolar as the unit (uM)
 sample_concentration 50
 
-sample_buffer_list   ./dict-sample-buffer-files.dat
-ligand_buffer_list   ./dict-ligand-buffer-files.dat
+# Four dictionary files that needs to be prepared.
+use_ligand_scattering  yes
+sample_buffer_list   ./dictionary-receptor-buffer-files.txt
+ligand_buffer_list   ./dictionary-ligand-buffer-files.txt
 titration_dictionary ./dictionary-titration.txt
 ligand_dictionary    ./dictionary-ligand-scattering.txt
 
-average_raw_sample_buffer ./raw-average-sample-buffer.dat
+# Averaged raw files for correction and linearity calculation
+average_raw_sample_buffer ./raw-average-receptor-buffer.dat
 average_raw_ligand_buffer ./raw-average-ligand-buffer.dat
-average_raw_apo_sample    ./raw-average-apo-sample.dat
+average_raw_apo_sample    ./raw-average-apo-receptor.dat
+average_subtracted_sample ./raw-subtracted-apo-receptor.dat
 buffer_difference_file    ./saxs-buffer-difference.dat
 
-buffer_subtracted_saxs_folder ./processing
+buffer_subtracted_saxs_folder ./subtracted
 buffer_subtracted_saxs_suffix man01
+buffer_subtracted_saxs_filelist ./subtracted-files.txt
 
 q_min   0.3
 q_max   3.0
@@ -40,12 +56,19 @@ q_max   3.0
 autognom_output_folder      ./autognom
 autognom_output_designation autognom
 
+# The paper utilised 100 trials. This can be cut down to 10 for fast prototyping.
 linear_fit_output_folder    ./linearfit
 linear_fit_chi_summary_file chi-all.dat
 linear_fitting_error_trials 100
 
-analysis_output_folder      ./analysis
-analysis_fit_errormode      noise2sig
-analysis_fit_trials         50
+# The original 2018 paper utilised 5000 trials, noise2sig, and no rejection threshold.
+# In practice, 500 trials, noise1sig, and a rejection threshold of 2.0 sigma should be ok.
+analysis_output_folder        ./analysis
+analysis_fit_errormode        noise1sig
+analysis_fit_trials             50
+analysis_fit_reject_threshold   2.0
 
-analysis_comparison_fit_metric  chi
+# The comparison matrix can take on a number of different metrics: chi, log_chi, chi_free, V_R, and cormap.
+analysis_comparison_fit_metric V_R
+analysis_comparison_Dmax       7.3
+

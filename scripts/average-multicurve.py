@@ -80,7 +80,7 @@ def read_file(fn, field, key="none"):
 
     #Sanity check
     if len(legs) != len(nlines):
-        print >> sys.stderr, "= = ERROR: number of legends(%d) is not equal to the number of plots (%d)!" % (len(legs), len(nlines))
+        print( "= = ERROR: number of legends(%d) is not equal to the number of plots (%d)!" % (len(legs), len(nlines)), file=sys.stderr )
         sys.exit(1)
     #for i in range(len(nlines)):
     #    for j in range(nlines[i]):
@@ -108,13 +108,13 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--field', type=str, dest='field', default='end',
                         help='Which field to use as a key. Defaults to the last field. This is 0-indexed like python standard.')
 
-    time_start = time.clock()
+    time_start = time.time()
     args = parser.parse_args()
 
     out_filename=args.out_file
     nfiles = len(args.filelist)
     if nfiles < 2:
-        print >> sys.stderr, "= = ERROR: this script averages data from multiple curves!"
+        print( "= = ERROR: this script averages data from multiple curves!", file=sys.stderr )
         sys.exit(-1)
     if args.field == "end":
         field=-1
@@ -125,12 +125,12 @@ if __name__ == '__main__':
     for i in range(nfiles):
         fileName = args.filelist[i]
         if fileName[0] == '#':
-            print >> sys.stderr, "= = NOTE: skipping file argument %s" % fileName
+            print( "= = NOTE: skipping file argument %s" % fileName, file=sys.stderr )
             continue
         l, x, y = read_file(fileName, field, args.key)
         x=np.array(x,dtype=np.float64)
         y=np.array(y,dtype=np.float64)
-        print >> sys.stderr, " ...plot %s read." % fileName
+        print( " ...plot %s read." % fileName, file=sys.stderr )
         nplot = len(l)
         ndat  = len(x[0])
         if bFirst:
@@ -145,18 +145,18 @@ if __name__ == '__main__':
             continue
         #Sanity check
         if check[0] != nplot:
-            print >> sys.stderr, "= = ERROR: Input data files do not contain the same number of plots!"
+            print( "= = ERROR: Input data files do not contain the same number of plots!", file=sys.stderr )
             sys.exit(2)
         # Check if X-values are identical!
-        # print xlist[0].shape, x.shape
-        # print np.array_equal( xlist[0], x)
+        # print( xlist[0].shape, x.shape )
+        # print( np.array_equal( xlist[0], x) )
         if not np.array_equal( xlist[0], x):
             # Try to interpolate instead.
-            print >> sys.stderr, "= = WARNING: The latest input data file %s does not contain identical X-values!" % fileName
-            print >> sys.stderr, "= = ...will use interpolation."
+            print( "= = WARNING: The latest input data file %s does not contain identical X-values!" % fileName, file=sys.stderr )
+            print( "= = ...will use interpolation.", file=sys.stderr )
             y2=np.zeros(check)
             for j in range(nplot):
-                #print "Debug:", type(xlist[i,j]), type(x[j])
+                #print( "Debug:", type(xlist[i,j]), type(x[j]) )
                 yTemp = np.interp(xlist[0,j,:],x[j,:],y[j,:])
             for k in range(ndat):
                 y2[0,k] = yTemp[k] 
@@ -167,10 +167,10 @@ if __name__ == '__main__':
             leglist.append(l)
             xlist[i]=x
             ylist[i]=y
-    print >> sys.stderr, " ...all plots read. Conducting averaging."
+    print( " ...all plots read. Conducting averaging.", file=sys.stderr )
     yavg=ylist.mean(axis=0)
     ystd=ylist.std(axis=0)/sqrt(nfiles-1)
-    print >> sys.stderr, " ...average finished."
+    print( " ...average finished.", file=sys.stderr )
 
     if LooseVersion(np.version.version) >= LooseVersion('1.10'):
         gs.print_sxylist(out_filename, leglist[0], x[0], np.stack((yavg,ystd), axis=-1) )

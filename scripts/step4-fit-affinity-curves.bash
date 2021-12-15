@@ -32,14 +32,12 @@ out_prefix=$analysis_output_folder/${quant}_analysis
 
 # = = = Determine if the file has errorbars.
 bError=$(determine_xmgrace_xydy $input_file)
-[ $analysis_fit_reject_threshold ] && args="--rejectThreshold $analysis_fit_reject_threshold" \
-    || { args="" ; echo "= = NOTE: the rejection threshold has not been set, using script defaults."; }
 if [[ "$bError" == "False" ]] || [[ "$analysis_fit_errormode" == "1-point" ]] ; then
     python $script_location/fit-affinity-curves.py \
         --targ $input_file \
         -o $out_prefix \
         --conc_rec $sample_concentration \
-        --errormode 1-point $args
+        --errormode 1-point 
 else
     [ $analysis_fit_reject_threshold ] && args="--rejectThreshold $analysis_fit_reject_threshold" || { args="" ; echo "= = NOTE: the rejection threshold has not been set, using script defaults."; }
     python $script_location/fit-affinity-curves.py \

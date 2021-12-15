@@ -40,8 +40,8 @@ def load_matrix(fn):
             bFirst=False
         else:
             if len(line) != xl:
-                print >> sys.stderr, "= = = WARNING: file read in general_scripts.load_matrix() is not rectangular!"
-                print >> sys.stderr, "= = = ...detected a different row length to the first row read: %d, %d" % (xl, len(line))
+                print( "= = = WARNING: file read in general_scripts.load_matrix() is not rectangular!", file=sys.stderr )
+                print( "= = = ...detected a different row length to the first row read: %d, %d" % (xl, len(line)), file=sys.stderr )
 
     return np.array(x)
 
@@ -57,7 +57,7 @@ def load_xy(fn):
         if re.search('[a-df-zA-DF-Z]', lines[0]):
             if not bWarned:
                 bWarned=True
-                print >> sys.stderr, "= = WARNING: Input file %s to general_scripts.load_xy contains uncommented alphanumerics: %s" % (fn, lines[0])
+                print( "= = WARNING: Input file %s to general_scripts.load_xy contains uncommented alphanumerics: %s" % (fn, lines[0]), file=sys.stderr )
             continue
         x.append(float(lines[0]))
         y.append(float(lines[1]))
@@ -75,7 +75,7 @@ def load_xys(fn):
         if re.search('[a-df-zA-DF-Z]', lines[0]):
             if not bWarned:
                 bWarned=True
-                print >> sys.stderr, "= = WARNING: Input file %s to general_scripts.load_xys contains uncommented alphanumerics: %s" % (fn, lines[0])
+                print( "= = WARNING: Input file %s to general_scripts.load_xys contains uncommented alphanumerics: %s" % (fn, lines[0]), file=sys.stderr )
             continue
         vars = [ float(i) for i in lines ]
         x.append(vars[0])
@@ -94,14 +94,14 @@ def load_xydy(fn):
         #if lines[0].isalnum():
         if re.search('[a-df-zA-DF-Z]', lines[0]):
             if not bWarned:
-                print >> sys.stderr, "= = WARNING: Input file %s to general_scripts.load_xydy contains uncommented alphanumeric text: %s" % (fn, lines[0])
+                print( "= = WARNING: Input file %s to general_scripts.load_xydy contains uncommented alphanumeric text: %s" % (fn, lines[0]), file=sys.stderr )
                 bWarned=True
             continue
         x.append(float(lines[0]))
         y.append(float(lines[1]))
         if len(lines) <=2:
-            print >> sys.stderr, '= = ERROR: in general_scripts.load_xydy, input file does not have a third column as dy! Aborting..'
-            print >> sys.stderr, '- - line content: '+l
+            print( '= = ERROR: in general_scripts.load_xydy, input file does not have a third column as dy! Aborting..', file=sys.stderr )
+            print( '- - line content: '+l, file=sys.stderr )
             sys.exit(1)
         dy.append(float(lines[2]))
     return np.array(x), np.array(y), np.array(dy)
@@ -127,7 +127,7 @@ def load_block_as_numpy(fn, ignores='#@', newblock='&', bVerbose=False ):
         ignores = ignores.replace('alpha','')
 
     if bVerbose:
-        print "= = load_block_as_numpy is reading file %s ..." % fn
+        print( "= = load_block_as_numpy is reading file %s ..." % fn )
     for l in open(fn):
         if any( l[0]==char for char in ignores ):
             continue
@@ -146,7 +146,7 @@ def load_block_as_numpy(fn, ignores='#@', newblock='&', bVerbose=False ):
         out2D.append( [ float(i) for i in lines ] )
 
     if bVerbose:
-        print "= = ... read finished."
+        print( "= = ... read finished." )
     # Now determine dimensionality. Three are three cases.
     if out3D == []:
         # Basic 2D without "&" character.
@@ -252,12 +252,12 @@ def _print_flexible(filePointer, variable):
         return
     t=type(variable)
     if t==type('a') or t==type(1):
-        print >> filePointer, variable
+        print( variable, file=filePointer )
     elif t==type([]) or t==type(()):
         for line in variable:
-            print >> filePointer, line
+            print( line, file=filePointer )
     else:
-        print >> sys.stderr, '= = ERROR in _print_flexible: type %s is not accounted for in the function.' % t
+        print( '= = ERROR in _print_flexible: type %s is not accounted for in the function.' % t, file=sys.stderr )
         sys.exit(1)
 
 def print_xy(fn, x, y, dy=[], header="", footer=""):
@@ -265,10 +265,10 @@ def print_xy(fn, x, y, dy=[], header="", footer=""):
     _print_flexible(fp, header)
     if dy==[]:
         for i in range(len(x)):
-            print >> fp, x[i], y[i]
+            print( x[i], y[i], file=fp )
     else:
         for i in range(len(x)):
-            print >> fp, x[i], y[i], dy[i]
+            print( x[i], y[i], dy[i], file=fp )
     _print_flexible(fp, footer)
     fp.close()
 
@@ -285,65 +285,59 @@ def print_xylist(fn, x, ylist, bCols=False, header=""):
 
     ylist=np.array(ylist)
     shape=ylist.shape
-    print shape
+    print( shape )
     if len(shape)==1:
         for j in range(len(x)):
-            print >> fp, x[j], ylist[j]
-        print >> fp, "&"
+            print( x[j], ylist[j], file=fp )
+        print( "&", file=fp )
     elif len(shape)==2:
         nplot=shape[0]
         nvals=shape[1]
         if bCols:
             for j in range(nvals):
-                print >> fp, x[j],
-                for i in range(nplot):
-                    print >> fp, ylist[i][j],
-                print >> fp, ""
-            print >> fp, "&"
+                s="%g " % x[j] + " ".join("%g" % ylist[i][j] for i in range(nplot))
+                print( s, file=fp )
+            print( "&", file=fp )
         else:
             for i in range(nplot):
                 for j in range(len(x)):
-                    print >> fp, x[j], ylist[i][j]
-                print >> fp, "&"
+                    print( x[j], ylist[i][j], file=fp )
+                print( "&", file=fp )
     fp.close()
 
 def print_sxylist(fn, legend, x, ylist, header=[]):
     fp = open( fn, 'w')
     for line in header:
-        print >> fp, "%s" % line
+        print( "%s" % line, file=fp )
 
     ylist=np.array(ylist)
     shape=ylist.shape
     nplot=len(ylist)
     s=0
     for i in range(nplot):
-        print >> fp, "@s%d legend \"%s\"" % (s, legend[i])
+        print( "@s%d legend \"%s\"" % (s, legend[i]), file=fp )
         for j in range(len(x)):
-            print >> fp, x[j], str(ylist[i][j]).strip('[]')
-        print >> fp, "&"
+            print( x[j], str(ylist[i][j]).strip('[]'), file=fp )
+        print( "&", file=fp )
         s+=1
     fp.close()
 
 def print_s3d(fn, legend, arr, cols, header=[]):
     fp = open( fn, 'w')
     for line in header:
-        print >> fp, "%s" % line
+        print( "%s" % line, file=fp )
 
     shape=arr.shape
     ncols=len(cols)
-    nplot=shape[0]
     s=0
-    for i in range(nplot):
-        print >> fp, "@s%d legend \"%s\"" % (s, legend[i])
+    for i in range(shape[0]):
+        print( "@s%d legend \"%s\"" % (s, legend[i]), file=fp )
         for j in range(shape[1]):
-            for k in range(ncols):
-                print >> fp, arr[i,j,cols[k]],
-                print >> fp, " ",
-            print >> fp, ""
-        print >> fp, "&"
+            s=" ".join("%g" % arr[i,j,cols[k]] for k in range(ncols))
+            print( s, file=fp )
+        print( "&", file=fp )
         s+=1
     fp.close()
-
 
 def print_R_hist(fn, hist, edges, header=''):
     fp = open(fn, 'w')
@@ -351,22 +345,16 @@ def print_R_hist(fn, hist, edges, header=''):
     dim=len(nbins)
 
     if header != '':
-        print >> fp, '%s' % header
-    print >> fp, '# DIMENSIONS: %i' % dim
-    binwidth=np.zeros(dim)
-    print >> fp, '# BINWIDTH: ',
-    for i in range(dim):
-        binwidth[i]=(edges[i][-1]-edges[i][0])/nbins[i]
-        print >> fp, '%g ' % binwidth[i],
-    print >> fp, ''
-    print >> fp, '# NBINS: ',
-    for i in range(dim):
-        print >> fp, '%g ' % nbins[i],
-    print >> fp, ''
+        print( '%s' % header, file=fp )
+    print( '# DIMENSIONS: %i' % dim, file=fp )
+    s="# BINWIDTH: " + " ".join("%g" % ((edges[i][-1]-edges[i][0])/nbins[i]) for i in range(dim) )
+    print( s, file=fp )
+    s="# NBINS: " + " ".join("%g" % (nbins[i]) for i in range(dim) )
+    print( s, file=fp )
     for index, val in np.ndenumerate(hist):
-        for i in range(dim):
-            print >> fp, '%g %g ' % (edges[i][index[i]], edges[i][index[i]+1]),
-        print >> fp, '%g' % val
+        s=" ".join("%g %g" % (edges[i][index[i]], edges[i][index[i]+1]) for i in range(dim) )
+        s=s+" %g" % val
+        print(s, file=fp)
 
 def print_gplot_hist(fn, hist, edges, header='', bSphere=False):
 
@@ -376,25 +364,19 @@ def print_gplot_hist(fn, hist, edges, header='', bSphere=False):
 
     # For Gnuplot, we should plot the average between the two edges.
     # ndemunerate method iterates across all specified dimensions
-    # First gather and print some data as comments to aid interpretation and future scripting.
+    # First gather and print( some data as comments to aid interpretation and future scripting. )
     # Use final histogram output as authoritative source!
     if header != '':
-        print >> fp, '%s' % header
-    print >> fp, '# DIMENSIONS: %i' % dim
-    binwidth=np.zeros(dim)
-    print >> fp, '# BINWIDTH: ',
-    for i in range(dim):
-        binwidth[i]=(edges[i][-1]-edges[i][0])/nbins[i]
-        print >> fp, '%g ' % binwidth[i],
-    print >> fp, ''
-    print >> fp, '# NBINS: ',
-    for i in range(dim):
-        print >> fp, '%g ' % nbins[i],
-    print >> fp, ''
+        print( '%s' % header, file=fp )
+    print( '# DIMENSIONS: %i' % dim, file=fp )
+    s="# BINWIDTH: " + " ".join("%g" % ((edges[i][-1]-edges[i][0])/nbins[i]) for i in range(dim) )
+    print( s, file=fp )
+    s="# NBINS: " + " ".join("%g" % (nbins[i]) for i in range(dim) )
+    print( s, file=fp )
 
     if bSphere:
         if dim != 2:
-            print >> sys.stderr, "= = = ERROR: histogram data is not in 2D, but spherical histogram plotting is requested!"
+            print( "= = = ERROR: histogram data is not in 2D, but spherical histogram plotting is requested!", file=sys.stderr )
             sys.exit(1)
         # Handle spherical data by assuming that X is wrapped, and y is extended.
         # Can assume data is only 2D.
@@ -404,45 +386,43 @@ def print_gplot_hist(fn, hist, edges, header='', bSphere=False):
         for eX in range(nbins[0]):
             xavg=0.5*(edges[0][eX]+edges[0][eX+1])
             # Print polar-caps to complete sphere
-            print >> fp, '%g %g %g' % (xavg, ymin, hist[eX][0])
+            print( '%g %g %g' % (xavg, ymin, hist[eX][0]), file=fp )
             for eY in range(nbins[1]):
                 yavg=0.5*(edges[1][eY]+edges[1][eY+1])
-                print >> fp, '%g %g %g' % (xavg, yavg, hist[eX][eY])
-            print >> fp, '%g %g %g' % (xavg, ymax, hist[eX][-1])
-            print >> fp, ''
+                print( '%g %g %g' % (xavg, yavg, hist[eX][eY]), file=fp )
+            print( '%g %g %g' % (xavg, ymax, hist[eX][-1]), file=fp )
+            print( '', file=fp )
         # Print first line again to complete sphere, with 2-pi deviation just in case.
-        print >> fp, '%g %g %g' % (xmin+2*np.pi, ymin, hist[0][0])
+        print( '%g %g %g' % (xmin+2*np.pi, ymin, hist[0][0]), file=fp )
         for eY in range(nbins[1]):
             yavg=0.5*(edges[1][eY]+edges[1][eY+1])
-            print >> fp, '%g %g %g' % (xmin+2*np.pi, yavg, hist[0][eY])
-        print >> fp, '%g %g %g' % (xmin+2*np.pi, ymax, hist[0][-1])
-        print >> fp, ''
+            print( '%g %g %g' % (xmin+2*np.pi, yavg, hist[0][eY]), file=fp )
+        print( '%g %g %g' % (xmin+2*np.pi, ymax, hist[0][-1]), file=fp )
+        print( '', file=fp )
     else:
         for index, val in np.ndenumerate(hist):
-            for i in range(dim):
-                x=(edges[i][index[i]]+edges[i][index[i]+1])/2.0
-                print >> fp, '%g ' % x ,
-            print >> fp, '%g' % val
+            s=" ".join("%g" % (0.5*(edges[i][index[i]]+edges[i][index[i]+1])) for i in range(dim) )
+            s=s+" %g" % val
+            print(s, file=fp)
             if index[-1] == nbins[-1]-1:
-                print >> fp, ''
-
+                print( '', file=fp )
     fp.close()
 
 def print_gplot_4d(fn, datablock, x, y, z, header=''):
     sh = datablock.shape
     dims = len(sh)
     if dims != 3:
-        print >> sys.stderr, " = = ERROR: general_scripts.print_gplot_3d requires the data to be in 3D."
+        print( " = = ERROR: general_scripts.print_gplot_3d requires the data to be in 3D.", file=sys.stderr )
         sys.exit(1)
 
     fp = open(fn, 'w')
     if header != '':
-        print >> fp, header
+        print( header, file=fp )
 
     for i in range(sh[0]):
         for j in range(sh[1]):
             for k in range(sh[2]):
-                print >> fp, "%g %g %g %g" % (x[i], y[j], z[k], datablock[i,j,k])
+                print( "%g %g %g %g" % (x[i], y[j], z[k], datablock[i,j,k]), file=fp )
 
     fp.close()
 
@@ -453,18 +433,18 @@ def print_numpy_block(fn, data, header='', delim='&', axis=-1):
     axis ==  0 means each line spans the first axis of data.
     """
     if axis != 0 and axis != -1:
-        print >> sys.stderr, "= = ERROR in print_numpy_block, axis argument must be either 0 or -1 !"
+        print( "= = ERROR in print_numpy_block, axis argument must be either 0 or -1 !", file=sys.stderr )
         return -1
     shape = data.shape
     dims= len(shape)
     if dims > 3 :
-        print >> sys.stderr, "= = ERROR in print_numpy_block, cannot yet deal with 4+ dimensions in numpy array!"
+        print( "= = ERROR in print_numpy_block, cannot yet deal with 4+ dimensions in numpy array!", file=sys.stderr )
         return -1
 
     fp = open(fn, 'w')
     writer = csv.writer(fp, delimiter=' ')
     if header != '':
-        print >> fp, header
+        print( header, file=fp )
     if dims == 2:
         if axis == -1:
             for i in range(shape[0]):
@@ -476,17 +456,19 @@ def print_numpy_block(fn, data, header='', delim='&', axis=-1):
         if axis == -1:
             for i in range(shape[0]):
                 for j in range(shape[1]):
-                    for k in range(shape[2]):
-                        print >> fp, '%g ' % data[i,j,k],
-                    print >> fp, '\n'
-                print >> fp, delim
+                    s=" ".join('%g ' % data[i,j,k] for k in range(shape[2]))
+                    print(s, file=fp)
+                    print('', file=fp)
+                    #print( '\n', file=fp )
+                print( delim, file=fp )
         elif axis == 0:
             for i in range(shape[1]):
                 for j in range(shape[2]):
-                    for k in range(shape[0]):
-                        print >> fp, '%g ' % data[k,i,j],
-                    print >> fp, '\n'
-                print >> fp, delim
+                    s=" ".join('%g ' % data[k,i,j] for k in range(shape[0]))
+                    print(s, file=fp)
+                    print('', file=fp)
+                    #print( '\n', file=fp )
+                print( delim, file=fp )
     # Done.
     fp.close()
 
@@ -516,31 +498,27 @@ def print_xvg_matrix(fn, db, header='', bReverse=False, bAmpersand=True):
             if len(sh)==2:
                 if bReverse:
                     for j in range(sh[-1]):
-                        for k in range(sh[0]):
-                            print >> fp, '%f ' % db[i][k,j],
-                        print >> fp, ''
+                        s=" ".join('%f' % db[i][k,j] for k in range(sh[0]))
+                        print(s, file=fp)
                 else:
                     for j in range(sh[0]):
-                        for k in range(sh[-1]):
-                            print >> fp, '%f ' % db[i][j,k],
-                        print >> fp, ''
+                        s=" ".join('%f' % db[i][j,k] for k in range(sh[-1]))
+                        print(s, file=fp)
             if bAmpersand:
-                print >> fp, '&'
+                print( '&', file=fp )
     elif isinstance( db, np.ndarray):
         sh = db.shape
         if len(sh)==2:
             if bReverse:
                 for j in range(sh[-1]):
-                    for k in range(sh[0]):
-                        print >> fp, '%f ' % db[k,j],
-                    print >> fp, ''
+                    s=" ".join('%f' % db[k,j] for k in range(sh[0]))
+                    print(s, file=fp)
             else:
                 for j in range(sh[0]):
-                    for k in range(sh[-1]):
-                        print >> fp, '%f ' % db[j,k],
-                    print >> fp, ''
+                    s=" ".join('%f' % db[j,k] for k in range(sh[-1]))
+                    print(s, file=fp)
         if bAmpersand:
-            print >> fp, '&'
+            print( '&', file=fp )
 
     fp.close()
 
@@ -553,42 +531,38 @@ def print_xvg_complex(fn, x, dataBlock, header='', bType=False, bTarget=False, g
     if len(sh) == 3:
         if bType:
             if sh[1] == 2:
-                print >> fp, '@type xydy'
+                print( '@type xydy', file=fp )
             elif sh[1] == 1:
-                print >> fp, '@type xy'
+                print( '@type xy', file=fp )
         series=0
         # Each axis-0 in dataBlock represents a graph that must be plotted.
         for i in range(sh[0]):
             if bTarget:
-                print >> fp, '@target g%i.s%i' % (graph, series)
+                print( '@target g%i.s%i' % (graph, series), file=fp )
             for h in range(nVals):
-                print >> fp, '%g ' % x[h],
-                for j in range(sh[1]):
-                    print >> fp, '%g ' % dataBlock[i,j,h],
-                print >> fp, ''
-            print >> fp, '&'
+                s='%g ' % x[h] + " ".join('%g' % dataBlock[i,j,h] for j in range(sh[1]))
+                print(s, file=fp)
+            print( '&', file=fp )
             series+=1
     # 2D - a single plot with a separate X.
     elif len(sh) == 2:
         if bType:
             if sh[0] == 2:
-                print >> fp, '@type xydy'
+                print( '@type xydy', file=fp )
             elif sh[0] == 1:
-                print >> fp, '@type xy'
+                print( '@type xy', file=fp )
         if bTarget:
-            print >> fp, '@target g%i.s%i' % (graph, series)
+            print( '@target g%i.s%i' % (graph, series), file=fp )
         for h in range(nVals):
-            print >> fp, '%g ' % x[h],
-            for j in range(sh[0]):
-                print >> fp, '%g ' % dataBlock[j,h],
-            print >> fp, ''
-        print >> fp, '&'
+            s='%g ' % x[h] + " ".join('%g' % dataBlock[j,h] for j in range(sh[0]))
+            print(s, file=fp)
+        print( '&', file=fp )
     # 1D - single plot again with separate X.
     elif len(sh) == 1:
         if bType:
-            print >> fp, '@type xy'
+            print( '@type xy', file=fp )
         for h in range(nVals):
-            print >> fp, '%g %g' % (x[h], dataBlock[h])
-        print >> fp, '&'
+            print( '%g %g' % (x[h], dataBlock[h]), file=fp )
+        print( '&', file=fp )
 
     fp.close()

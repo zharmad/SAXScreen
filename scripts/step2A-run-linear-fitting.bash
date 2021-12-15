@@ -41,10 +41,11 @@ do
     target_file="${@: -1}"
     assert_files $target_file
     if [[ "$use_ligand_scattering" == "yes" ]] ; then
+        ligand_name=$3
         # Look up the raw ligand scattering file corresponding to the name of the titration
-        ligand_file=$(awk -v sp=$1 '$1 == sp {print $NF}' $ligand_dictionary )
+        ligand_file=$(awk -v sp=$ligand_name '$1 == sp {print $NF}' $ligand_dictionary )
         if [[ "$ligand_file" == "" ]] ; then
-            echo "= = ERROR: ligand file not found in dictionary $ligand_dictionary with pattern $1! Aborting."
+            echo "= = ERROR: ligand file not found in dictionary $ligand_dictionary with pattern $ligand_name! Aborting."
             exit 1
         fi
         bufferLigand=$average_raw_ligand_buffer

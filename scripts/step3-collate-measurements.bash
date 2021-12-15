@@ -19,7 +19,8 @@ if [ ! $1 ] ; then
 fi
 quant=$1
 
-bError=True
+bCompare=False
+bError=True 
 case $quant in
     chi)
         ofile=$analysis_output_folder/chi_summary.xvg
@@ -46,12 +47,21 @@ case $quant in
         file_prefix=$autognom_output_folder
         file_suffix=_${autognom_output_designation}_Iq.dat
         ;;
-    VR)
-        ofile=$analysis_output_folder/VR_summary.xvg
+    V_R|VR|VoR)
+        ofile=$analysis_output_folder/${quant}_summary.xvg
         file_prefix=$buffer_subtracted_saxs_folder
         #file_suffix=_${buffer_subtracted_saxs_suffix}.dat
         file_suffix=*
         bError=False
+        bCompare=True
+        ;;
+    chi_free|chifree|Cf)
+        ofile=$analysis_output_folder/${quant}_summary.xvg
+        file_prefix=$buffer_subtracted_saxs_folder
+        #file_suffix=_${buffer_subtracted_saxs_suffix}.dat
+        file_suffix=*
+        bError=False
+        bCompare=True
         ;;
     PV)
         ofile=$analysis_output_folder/PV_summary.xvg
@@ -129,7 +139,7 @@ do
         fi
         s=$((s+1))
     fi
-    if [[ "$quant" == "VR" ]] ; then
+    if [[ "$bCompare" == "True" ]] ; then
         args=$average_subtracted_sample
     else
         args=""

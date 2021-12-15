@@ -83,7 +83,7 @@ if args.addfile != '' and args.addfact != 0 :
     bMod=True
     ax, ay, ady = gs.load_xydy(args.addfile)
     if ax[0] != sx[0]:
-        print "= = = ERROR: The first X-value between sample and additonal-correction curves are NOT the same! Aborting."
+        print( "= = = ERROR: The first X-value between sample and additonal-correction curves are NOT the same! Aborting." )
         sys.exit()
     ay  *= args.addfact
     ady *= args.addfact
@@ -100,14 +100,14 @@ bdy=np.zeros((nbuf, nq))
 for i in range(nbuf):
     bx[i], by[i], bdy[i] = gs.load_xydy(bfiles[i])
     if bx[i,0] != sx[0]:
-        print "= = = ERROR: The first X-value between buffer and sample curves are NOT the same! Aborting."
+        print( "= = = ERROR: The first X-value between buffer and sample curves are NOT the same! Aborting." )
         sys.exit()
 
 #bx_av=np.average(bx,0)
 if nbuf > 1:
     by_av=np.average(by,0)
     bdy_av=np.average(bdy,0)
-    print by.shape, by_av.shape
+    print( by.shape, by_av.shape )
 else:
     by_av=by[0]
     bdy_av=bdy[0]
@@ -117,7 +117,7 @@ else:
 if args.bFitGuinier:
     # = = = Functionality limitation?
     #if bMod:
-    #    print >> sys.stderr, "= = ERROR: Guinier optimisation with buffer modulation not implemented."
+    #    print( "= = ERROR: Guinier optimisation with buffer modulation not implemented.", file=sys.stderr )
     #    sys.exit(1)
 
     # Estimate initial parameters. Use the first N points, and then 2N-points after that.
@@ -131,7 +131,7 @@ if args.bFitGuinier:
     RgInit = 0.5* np.sqrt( 3.0*(logI0Init - logEstI2)/(estQ2*estQ2) )
 
     params = [ f2, logI0Init, RgInit ]
-    print "= = = Initial paramter estimates:", params
+    print( "= = = Initial paramter estimates:", params )
     constArgs=( sx, sy, by_av, f1, 1.3)
     # = = = Conduct grid search.
     minChi = 1e99
@@ -142,11 +142,11 @@ if args.bFitGuinier:
                 if val < minChi:
                     params = [i,j,k]
                     minChi = val
-                #print i,j,k,val
-                #print i, j, k, guinier_fit_with_buffer_subtraction([i,j,k], *constArgs)
-    print "= = = Refined after grid-search:", params
+                #print( i,j,k,val )
+                #print( i, j, k, guinier_fit_with_buffer_subtraction([i,j,k], *constArgs) )
+    print( "= = = Refined after grid-search:", params )
     #sys.exit(0)
-    print "= = = .. begin Powell minimization"
+    print( "= = = .. begin Powell minimization" )
 
     fminOut = fmin_powell(guinier_fit_with_buffer_subtraction,
                 params, args=constArgs,

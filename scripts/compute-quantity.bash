@@ -84,6 +84,21 @@ function compute-VR() {
     fi
 }
 
+function compute-chifree() {
+    [ -e temp-Exp-1.xvg ] && rm temp-Exp-1.xvg
+    python $script_location/fit-saxs-curves.py \
+        -metric chi_free -Dmax $analysis_comparison_Dmax \
+        -o temp \
+        -qmin $q_min -qmax $q_max \
+        $1 $2 > /dev/stderr
+    if [ -e temp-Exp-1.xvg ] ; then
+        grep chiFree temp-Exp-1.xvg | awk '{print $NF}'
+        rm -f temp-Exp-1.xvg
+    else
+        echo "= = ERROR in compute-VR from compute-quantity.bash! The input to the function does not generate an output file!" > /dev/stderr
+    fi
+}
+
 function compute-UnitlessKratky() {
     #buffer=$(guinier-plot -f $1 -qmax $2 -nofile)
     #Rg=$(echo "$buffer" | awk '$1 == "Rg" {print $(NF-2)}')
@@ -114,6 +129,7 @@ if [ ! $2 ] ; then
     echo "    ...examples:
     Vc - Volume of Correlation.
     VR - Volatility of Ratio (minimized). Fits VR ( I_A+c , I_B-c ) over constant scattering c to remove potential buffer differences.
+    chi_free - Chi_free measurement by Tainer group.
     I0 - I(0)
     Rg - Radius of Gyration from GNOM.
     autorg - Radius of Gyration from ATSAS autorg utility.
@@ -133,8 +149,9 @@ args=$*
 
 case $mode in
     chi) cmdPref=collect-chi ;;
+    chi_free|chifree|Cf) cmdPref=compute-chifree ;;
     Vc)  cmdPref=compute-Vc  ;;
-    VR)  cmdPref=compute-VR  ;;
+    VR|V_R|VoR)  cmdPref=compute-VR  ;;
     I0)  cmdPref=collect-I0  ;;
     Rg|Rgyr) cmdPref=collect-Rg ;;
     autorg) cmdPref=compute-Rg ;;

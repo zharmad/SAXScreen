@@ -13,7 +13,7 @@ def read_xvgs_all(filelist):
     out_list=[]
     for i in range(len(filelist)):
         block = np.array( gs.load_xydy(filelist[i]) )
-        print >> sys.stderr, "  ...file read, shape: %s" % str(block.shape)
+        print( "  ...file read, shape: %s" % str(block.shape), file=sys.stderr )
         out_list.append(block)
     return out_list
 
@@ -72,7 +72,7 @@ def intensityDiff(pos, *args):
             f, c = pos
         # Check for negative values first.
         if np.any(f*y2+c < 0.0):
-            print >> sys.stderr, "= = WARNING: for values of f %g and c %g there exists invalid logs." % (f, c)
+            print( "= = WARNING: for values of f %g and c %g there exists invalid logs." % (f, c), file=sys.stderr )
             return 1e20
         if bUseWeights:
             value=sc.log_chi_square(y1,f*y2+c, dx1=y1sig, dx2=f*y2sig)
@@ -104,7 +104,7 @@ def intensityDiff(pos, *args):
         # prob = sc.cormap_value( y1, f*y2+c )
         # value = 1.0 - sc.cormap_value( y1, f*y2+c )
     else:
-        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+        print( "= = = ERROR, metric not recognised! %s" % fitMetric, file=sys.stderr )
         sys.exit(1)
     return value
 
@@ -138,7 +138,7 @@ def populationIntensityDiff(pos, *args):
     elif fitMetric == 'log_chi':
         # Check for negative values first.
         if np.any(y2 < 0.0):
-            #print >> sys.stderr, "= = WARNING: for values of f %g and c %g there exists invalid logs." % (f, c)
+            #print( "= = WARNING: for values of f %g and c %g there exists invalid logs." % (f, c), file=sys.stderr )
             return 1e20
         if bUseWeights:
             value=sc.log_chi_square(yT,y2, dx1=yTsig, dx2=y2sig)
@@ -158,9 +158,9 @@ def populationIntensityDiff(pos, *args):
         # prob = sc.cormap_value( yT, y2 )
         # value = 1.0 - sc.cormap_value( yT, y2 )
     else:
-        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+        print( "= = = ERROR, metric not recognised! %s" % fitMetric, file=sys.stderr )
         sys.exit(1)
-    print value
+    print( value )
     return value
 
 #####################################
@@ -252,26 +252,26 @@ elif fitMetric == 'chired' or fitMetric == 'chi_reduced':
 
 if fitMetric == 'vr':
     if bNoConst:
-        print >> sys.stderr, '= = = ERROR: The volatility ratio has only 1 free parameter for constant subtraction. Cannot be used with argument -noc.'
+        print( '= = = ERROR: The volatility ratio has only 1 free parameter for constant subtraction. Cannot be used with argument -noc.', file=sys.stderr )
         sys.exit(1)
     if np.isnan(Dmax):
-        print >> sys.stderr, '= = = ERROR: Volatility ratio requires the definition of Dmax in order to operate!'
+        print( '= = = ERROR: Volatility ratio requires the definition of Dmax in order to operate!', file=sys.stderr )
         sys.exit(1)
 
 if fitMetric == 'chi_free' or fitMetric == 'chi_red':
     if np.isnan(Dmax):
-        print >> sys.stderr, '= = = ERROR: Chi_free and chi_red ratios requires the definition of Dmax in order to operate!'
+        print( '= = = ERROR: Chi_free and chi_red ratios requires the definition of Dmax in order to operate!', file=sys.stderr )
         sys.exit(1)
 
 if fitMetric == 'cormap_matrix' and fitMode == 2:
-    print >> sys.stderr, '= = = ERROR: Refuse to do CorMap matrices for a matrix of fits. This is not currently supported.'
+    print( '= = = ERROR: Refuse to do CorMap matrices for a matrix of fits. This is not currently supported.', file=sys.stderr )
     sys.exit(1)
 
 # Read all files now.
 fileList=args.files
 nFiles = len(fileList)
 if nFiles < 2:
-    print >> sys.stderr, '= = ERROR: Script requires at least two files for fitting.'
+    print( '= = ERROR: Script requires at least two files for fitting.', file=sys.stderr )
     sys.exit(1)
 
 # Read and assemble interpolated graphs
@@ -279,9 +279,9 @@ if nFiles < 2:
 dataRaw = read_xvgs_all(fileList)
 qBasis = find_subrange_all( dataRaw, (qmin, qmax) )
 if bVerbose:
-    print >> sys.stderr, '= = Input x1 trimmed from ( %g , %g ) to ( %g , %g ) to preserve coverage.' \
-                          % ( dataRaw[0][0,0], dataRaw[0][0,-1], qBasis[0], qBasis[-1])
-    print >> sys.stderr, '= = ...number of q-points remaining: %i' % len(qBasis)
+    print( '= = Input x1 trimmed from ( %g , %g ) to ( %g , %g ) to preserve coverage.' \
+            % ( dataRaw[0][0,0], dataRaw[0][0,-1], qBasis[0], qBasis[-1]), file=sys.stderr )
+    print( '= = ...number of q-points remaining: %i' % len(qBasis), file=sys.stderr )
 
 # Assume again that the q-points are evenly spaced. Determine number of point per Shannon channel
 if not np.isnan(Dmax):
@@ -290,8 +290,8 @@ if not np.isnan(Dmax):
     numChannels = (qBasis[-1]-qBasis[0])*Dmax/np.pi
     #1.0*len(qBasis)/numPointsPerChannel
     if bVerbose:
-        print >> sys.stderr, '= = Determined the number of Channels to be %g based on input data, resulting in %i points per channel' \
-                % ( numChannels,  numPointsPerChannel )
+        print( '= = Determined the number of Channels to be %g based on input data, resulting in %i points per channel' \
+                % ( numChannels,  numPointsPerChannel ), file=sys.stderr )
     if bNoConst:
         redFactor=numChannels/(numChannels-1)
     else:
@@ -303,7 +303,7 @@ else:
 # It is of arrangement( file, y&dy&etc., vals )
 dataBlock = build_interpolated_block( qBasis, dataRaw )
 if bVerbose:
-    print >> sys.stderr, '= = Interpolated data block has been built with size:', dataBlock.shape
+    print( '= = Interpolated data block has been built with size:', dataBlock.shape, file=sys.stderr )
 
 # run through fitting modes. dataModel is the converted raw data, while dataModelInterp is the converted interpolated data.
 dataModel = []
@@ -315,22 +315,22 @@ if fitMode < 2:
     # = = = Fit data between 1st and all others. = = =
     for i in range(1,len(fileList)):
         if bVerbose:
-            print >> sys.stderr, "= = = Beginning analysis of file %i (%s)..." % (i, fileList[i] )
+            print( "= = = Beginning analysis of file %i (%s)..." % (i, fileList[i] ), file=sys.stderr )
 
         if bEstimateF0:
             fInit=np.mean( dataBlock[0,0,0:f0EstInterval] ) / np.mean( dataBlock[i,0,0:f0EstInterval] )
             if fitMode == 1:
                 fInit=1/fInit
         if bVerbose:
-            print >> sys.stderr, '      ...estimated F0 to be %g' % fInit
+            print( '      ...estimated F0 to be %g' % fInit, file=sys.stderr )
         if bEstimateC0:
             cInit=0
             y2min = np.min( dataBlock[i,0] )
             if fitMetric == 'log_chi' and (fInit*y2min + cInit < 0 ):
-                print '= = WARNING: Adjusted initial c to prevent legative logarithms.'
+                print( '= = WARNING: Adjusted initial c to prevent legative logarithms.' )
                 cInit = 1 - fInit*y2min
             if bVerbose:
-                print >> sys.stderr, '      ...estimated C0 to be %g' % cInit
+                print( '      ...estimated C0 to be %g' % cInit, file=sys.stderr )
 
         #if fitMetric == 'chi' or fitMetric == 'chi_free' or fitMetric == 'cormap':
         if fitMetric == 'vr':
@@ -347,7 +347,7 @@ if fitMode < 2:
             fminOut = fmin_powell(intensityDiff, pos, args=( dataBlock[i], dataBlock[0], \
                     fitMetric, bUseWeights, bNoConst, numPointsPerChannel, numRounds), full_output=True)
         else:
-            print >> sys.stderr, "= = = ERROR: Impossible fit mode found, cannot proceed! (%i) " % fitMode
+            print( "= = = ERROR: Impossible fit mode found, cannot proceed! (%i) " % fitMode, file=sys.stderr )
             sys.exit(20)
 
         xopt = fminOut[0] ; funcopt = fminOut[1]
@@ -429,20 +429,18 @@ if fitMode < 2:
                 log10p = 99
             fileHeader.append( '#probExc = %g' % prob )
             fileHeader.append( '#-log10P = %g' % log10p )
-            print "= = Probability that difference is due completely to random noise = %g"  % prob
+            print( "= = Probability that difference is due completely to random noise = %g"  % prob )
         elif fitMetric == 'cormap_matrix':
             if fitMode == 0:
                 mat = sc.cormap_matrix( dataBlock[0][0], dataModelInterp[i][0] )
             else:
                 mat = sc.cormap_matrix( dataBlock[i][0], dataModelInterp[i][0] )
             outFile='%s-CorMapMatrix-%i.dat' % (outpref, i)
-            fp = open( outFile, 'w')
-            sc.print_cormap_matrix( fp, mat )
-            fp.close()
+            np.savetxt( outFile, mat )
             # Break out into the next combo!
             continue
         else:
-            print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+            print( "= = = ERROR, metric not recognised! %s" % fitMetric, file=sys.stderr )
             sys.exit(1)
 
         gs.print_xy(outFile, dataModel[-1][0], dataModel[-1][1], dy=dataModel[-1][2], header=fileHeader)
@@ -457,15 +455,15 @@ elif fitMode == 2:
         if bEstimateF0:
             fInit=np.mean( dataBlock[i,0,0:f0EstInterval] ) / np.mean( dataBlock[j,0,0:f0EstInterval] )
         if bVerbose:
-            print >> sys.stderr, '      ...estimated F0 to be %g' % fInit
+            print( '      ...estimated F0 to be %g' % fInit, file=sys.stderr )
         if bEstimateC0:
             cInit=0
             y2min = np.min( dataBlock[j,0] )
             if fitMetric == 'log_chi' and (fInit*y2min + cInit < 0 ):
-                print '= = WARNING: Adjusted initial c to prevent legative logarithms.'
+                print( '= = WARNING: Adjusted initial c to prevent legative logarithms.' )
                 cInit = 1 - fInit*y2min
             if bVerbose:
-                print >> sys.stderr, '      ...estimated C0 to be %g' % cInit
+                print( '      ...estimated C0 to be %g' % cInit, file=sys.stderr )
 
         if fitMetric == 'vr':
             pos = [ cInit ]
@@ -477,10 +475,10 @@ elif fitMode == 2:
         fminOut = fmin_powell(intensityDiff, pos, args=( dataBlock[i], dataBlock[j], \
             fitMetric, bUseWeights, bNoConst, numPointsPerChannel, numRounds), full_output=True)
         if bVerbose:
-            print >> sys.stderr, '    ...minimisation results:'
-            print >> sys.stderr, fminOut
+            print( '    ...minimisation results:', file=sys.stderr )
+            print( fminOut, file=sys.stderr )
         else:
-            print >> sys.stderr, '    ....value(%i,%i): %g' % (i, j, fminOut[1])
+            print( '    ....value(%i,%i): %g' % (i, j, fminOut[1]), file=sys.stderr )
         # = = = Enter final value into matrix.
         if fitMetric == 'chi' or fitMetric == 'log_chi' or fitMetric == 'chi_free' :
             valueMatrix[i,j] = math.sqrt(fminOut[1])
@@ -496,7 +494,7 @@ elif fitMode == 2:
             else:
                 valueMatrix[i,j] = 20.0
         else:
-            print >> sys.stderr, "= = ERROR: fitMetric not recognised in loop! This is a coding error."
+            print( "= = ERROR: fitMetric not recognised in loop! This is a coding error.", file=sys.stderr )
             sys.exit(1)
 
         if fitMetric == 'vr':
@@ -506,9 +504,9 @@ elif fitMode == 2:
         else:
             fMatrix[i,j] = fminOut[0]
 
-    #print qBasis[0], dataBlock[:,0,0], dataBlock[:,1,0]
-    #print fMatrix
-    print valueMatrix
+    #print( qBasis[0], dataBlock[:,0,0], dataBlock[:,1,0] )
+    #print( fMatrix )
+    print( valueMatrix )
     header='# Chi matrix between files: %s\n# npts_fit = %8i\n# qmin_fit = %8g\n# qmax_fit = %8g' % \
             ( str(fileList), len(qBasis), qBasis[0], qBasis[-1] )
     outFile='%s_matrix.dat' % outpref
@@ -519,10 +517,10 @@ if fitMode == 3:
     # There will be N scaling factor, plus an optional 1 constant subtraction.
     # chi ~ ( I_exp - (f1*I1 + f2*I2 + ... + c) )
     if bVerbose:
-        print >> sys.stderr, "= = = Starting population modelling..."
+        print( "= = = Starting population modelling...", file=sys.stderr )
 
     if len(fileList) < 3:
-        print >> sys.stderr, "= = = ERROR: Population fitting requires at last two component curves and one target curve!"
+        print( "= = = ERROR: Population fitting requires at last two component curves and one target curve!", file=sys.stderr )
         sys.exit(1)
 
     if bEstimateF0:
@@ -531,7 +529,7 @@ if fitMode == 3:
             if bEstimateF0:
                 fInit[i-1] =  np.mean( dataBlock[0,0,0:f0EstInterval] ) / np.mean( dataBlock[i,0,0:f0EstInterval] )
             if bVerbose:
-                print >> sys.stderr, '      ...estimated F0 to be %g' % fInit[-1]
+                print( '      ...estimated F0 to be %g' % fInit[-1], file=sys.stderr )
     else:
         fInit = np.ones( len(fileList)-1, dtype=dataBlock.dtype )
     pos = fInit/(len(fileList)-1.0)
@@ -540,10 +538,10 @@ if fitMode == 3:
     #if bEstimateC0:
     #    y2min = np.min( dataBlock[i,0] )
     #    if fitMetric == 'log_chi' and (fInit*y2min + cInit < 0 ):
-    #        print '= = WARNING: Adjusted initial c to prevent legative logarithms.'
+    #        print( '= = WARNING: Adjusted initial c to prevent legative logarithms.' )
     #        cInit = 1 - fInit*y2min
     #    if bVerbose:
-    #        print >> sys.stderr, '      ...estimated C0 to be %g' % cInit
+    #        print( '      ...estimated C0 to be %g' % cInit, file=sys.stderr )
 
     #if fitMetric == 'chi' or fitMetric == 'chi_free' or fitMetric == 'cormap':
     if fitMetric == 'vr':
@@ -555,7 +553,7 @@ if fitMode == 3:
     fminOut = fmin_powell(populationIntensityDiff, pos, args=( dataBlock, \
                     fitMetric, bUseWeights, bNoConst, numPointsPerChannel, numRounds), full_output=True)
 
-    print xopt
+    print( xopt )
 
     # = = = Parse results
     xopt = fminOut[0] ; funcopt = fminOut[1]
@@ -617,16 +615,14 @@ if fitMode == 3:
             log10p = 99
         fileHeader.append( '#probExc = %g' % prob )
         fileHeader.append( '#-log10P = %g' % log10p )
-        print "= = Probability that difference is due completely to random noise = %g"  % prob
+        print( "= = Probability that difference is due completely to random noise = %g"  % prob )
     elif fitMetric == 'cormap_matrix':
         mat = sc.cormap_matrix( yTarget, yModel )
         outFile='%s-CorMapMatrix-pop.dat' % (outpref)
-        fp = open( outFile, 'w')
-        sc.print_cormap_matrix( fp, mat )
-        fp.close()
+        np.savetxt(outFile, mat)
         # Break out into the next combo!
     else:
-        print >> sys.stderr, "= = = ERROR, metric not recognised! %s" % fitMetric
+        print( "= = = ERROR, metric not recognised! %s" % fitMetric, file=sys.stderr )
         sys.exit(1)
 
     gs.print_xy(outFile, qBasis, yModel, dy=dyModel, header=fileHeader)

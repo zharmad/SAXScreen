@@ -86,7 +86,7 @@ for e in range(numConc):
     # Rescale and symmetrize matrix.
     Xp = np.maximum( np.zeros( X.shape ), X )
     Xp = 0.5*( Xp + Xp.T )
-    print is_valid_dm(Xp)
+    print( is_valid_dm(Xp) )
 
     if bFirst:
         bFirst=False
@@ -136,9 +136,9 @@ for e in range(numConc):
     )
     figC.savefig(out_file)
 
-    #print inconsistent(Z)
+    #print( inconsistent(Z) )
 
-    print "= = Output for %s is complete." % conc_list[e]
+    print( "= = Output for %s is complete." % conc_list[e] )
 
 # Do final plot with aggregate data
 Xaverage /= numConc

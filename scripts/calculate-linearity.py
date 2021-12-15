@@ -37,7 +37,7 @@ def chi_linear_fit(params, *args):
     chi_raw = np.power( np.sum(scaled_y, axis=0) - targ[1],  2 )
     weights = np.power( np.sum( np.power(scaled_dy, 2) + np.power(targ[2], 2), axis=0 ), 0.5 )
     chisq = np.nanmean( chi_raw / weights )
-    #print "= = ...optimization step over %i variables, chi%s: %g" % (n_par, params, chisq)
+    #print( "= = ...optimization step over %i variables, chi%s: %g" % (n_par, params, chisq) )
     return chisq
 
 def chi_linear_fit_grad(params, *args):
@@ -49,7 +49,7 @@ def chi_linear_fit_grad(params, *args):
     shared_fact = 2.0* ( np.sum(scaled_y, axis=0) - targ[1] )
     weights = np.power( np.sum( np.power(scaled_dy, 2) + np.power(targ[2], 2), axis=0 ), 0.5 )
     grads = [ np.average( ( args[1][1][i] * shared_fact )  / weights) for i in range( n_par) ]
-    #print "= = ...optimization step over %i variables, grad%s: %s" % (n_par, params, grad)
+    #print( "= = ...optimization step over %i variables, grad%s: %s" % (n_par, params, grad) )
     return grad
 
 def load_input_file(infn, min=np.nan, max=np.nan):
@@ -66,7 +66,7 @@ def load_input_file(infn, min=np.nan, max=np.nan):
     return np.array(x[ind]), np.array(y[ind]), np.array(dy[ind])
 
 def load_component_files(fnlist, min, max):
-    print "= = ...Loading list of component curves..."
+    print( "= = ...Loading list of component curves..." )
     n_exp = len( fnlist )
     x, y, dy = load_input_file( fnlist[0], min, max )
     n_vals = len(x)
@@ -78,36 +78,36 @@ def load_component_files(fnlist, min, max):
     for i in np.arange(1,n_exp):
         x, y, dy = load_input_file( fnlist[i], min, max )
         if not np.array_equal( ox[0], x ):
-            print >> sys.stderr, "= = ERROR encountered: the set of sources do not have the same x-values!"
-            print >> sys.stderr, "    ...the failed comparison occurred between curves %i and %i,  with length %i and %i." % ( 0, i, n_vals, len(x) )
+            print( "= = ERROR encountered: the set of sources do not have the same x-values!", file=sys.stderr )
+            print( "    ...the failed comparison occurred between curves %i and %i,  with length %i and %i." % ( 0, i, n_vals, len(x) ), file=sys.stderr )
             sys.exit(1)
         ox[i] = x ; oy[i] = y ; ody[i] = dy
 
     for i in range(n_exp):
-        print "= = Debug: x,y,dy (%s): %f,%f,%f" % (fnlist[i], ox[i,20], oy[i,20], ody[i,20])
-    print "= = ...Loading complete for %i components." % n_exp
+        print( "= = Debug: x,y,dy (%s): %f,%f,%f" % (fnlist[i], ox[i,20], oy[i,20], ody[i,20]) )
+    print( "= = ...Loading complete for %i components." % n_exp )
     return np.stack( (ox, oy, ody), axis=0 )
 
 def print_model_fit(fn, x, ty, tdy, my, header=''):
     fp = open(fn, 'w')
-    print >> fp, header
-    print >> fp, '@type xydy'
+    print( header, file=fp )
+    print( '@type xydy', file=fp )
     npts=len(x)
     for i in range(npts):
-        print >> fp, x[i], ty[i], tdy[i]
-    print >> fp, '&'
-    print >> fp, '@type xy'
+        print( x[i], ty[i], tdy[i], file=fp )
+    print( '&', file=fp )
+    print( '@type xy', file=fp )
     for i in range(npts):
-        print >> fp, x[i], my[i]
-    print >> fp, '&'
+        print( x[i], my[i], file=fp )
+    print( '&', file=fp )
     fp.close()
 
 def print_chi_file(fn, chi, header=''):
     fp = open(fn, 'w')
-    print >> fp, header
+    print( header, file=fp )
     n_pts = len(chi)
     for i in range(n_pts):
-        print >> fp, "%i %g" % (i, chi[i])
+        print( "%i %g" % (i, chi[i]), file=fp )
     fp.close()
 
 scriptname=os.path.basename(__file__)
@@ -145,7 +145,7 @@ n_trials = args.nk
 # Reading input files
 tx, ty, tdy = load_input_file( args.tfile, min=args.xmin, max=args.xmax )
 targ = np.stack( (tx,ty,tdy), axis=0 )
-print "= = Debug: x,y,dy (%s): %f,%f,%f" % (args.tfile, tx[20], ty[20], tdy[20])
+print( "= = Debug: x,y,dy (%s): %f,%f,%f" % (args.tfile, tx[20], ty[20], tdy[20]) )
 
 bPositive = args.bPos
 # Check for blank.
@@ -161,14 +161,14 @@ datablock = load_component_files( args.cfiles, min=args.xmin, max=args.xmax )
 # Leave option to interpolate data.
 
 if not np.array_equal( datablock[0,0], tx ):
-    print >> sys.stderr, "= = ERROR encountered: the sources and target do not have the same x-values!"
-    print >> sys.stderr, "    ...the lengths are %i and %i." % ( len(datablock[0,0]), len(tx) )
+    print( "= = ERROR encountered: the sources and target do not have the same x-values!", file=sys.stderr )
+    print( "    ...the lengths are %i and %i." % ( len(datablock[0,0]), len(tx) ), file=sys.stderr )
     for i in range(len(tx)):
         if datablock[0,0,i] !=  tx[i]:
-            print >> sys.stderr, datablock[0,0,i], "!=", tx[i]
+            print( datablock[0,0,i], "!=", tx[i], file=sys.stderr )
     sys.exit(1)
 else:
-    print "= = ...X-value check complete, all points at same x."
+    print( "= = ...X-value check complete, all points at same x." )
 
 # Conduct linear fit. Assume after this that the x values are now identical.
 shape = datablock.shape
@@ -190,7 +190,7 @@ else:
     else:
         bounds = np.tile( (None, None), (n_comps,1) )
 
-print "= = ...fitting started, using L-BFGS-B..."
+print( "= = ...fitting started, using L-BFGS-B..." )
 if not bError:
     func_opt = optimize.fmin_l_bfgs_b( chi_linear_fit, x0=guess, bounds=bounds, args=(targ, datablock), approx_grad=True )
     #func_opt = optimize.fmin_powell( chi_linear_fit, x0=guess, args=(targ, datablock) )
@@ -199,11 +199,11 @@ else:
     chi_block = np.zeros( n_trials )
     for i in range(n_trials):
         targ_this = gaussian_noise_curve( targ, scale=1.0 )
-        # print "= = Debug: y= %f+-%f y= %f+-%f " % ( targ[1,20], targ[2,20], targ_this[1,20], targ_this[2,20] )
+        # print( "= = Debug: y= %f+-%f y= %f+-%f " % ( targ[1,20], targ[2,20], targ_this[1,20], targ_this[2,20] ) )
         func_opt = optimize.fmin_l_bfgs_b( chi_linear_fit, x0=guess, bounds=bounds, args=(targ_this, datablock), approx_grad=True )
         if func_opt[2]['warnflag']>0:
-            print >> sys.stderr, "= = WARNING: error encountered in L-BFGS-B minimization, code:", func_opt[2]['warnflag']
-            print >> sys,stderr, "   Grad/#Calls/#Iterations:", func_opt[2]['grad'], func_opt[2]['funcalls'], func_opt[2]['nits']
+            print( "= = WARNING: error encountered in L-BFGS-B minimization, code:", func_opt[2]['warnflag'], file=sys.stderr )
+            print( "   Grad/#Calls/#Iterations:", func_opt[2]['grad'], func_opt[2]['funcalls'], func_opt[2]['nits'], file=sys.stderr )
             sys.exit(1)
         else:
             opt_pars[i]  = func_opt[0]
@@ -213,7 +213,7 @@ else:
 #opt_chi=np.sqrt(func_opt[1])
 chi_mean = np.mean( chi_block )
 chi_std  = np.std(  chi_block )
-print "= = ...fitting complete. Chi: %g +- %g" % ( chi_mean, chi_std )
+print( "= = ...fitting complete. Chi: %g +- %g" % ( chi_mean, chi_std ) )
 pars_mean = np.mean( opt_pars, axis=0 )
 pars_std  = np.std(  opt_pars, axis=0 )
 
@@ -223,6 +223,6 @@ header_lines = '# Fitted chi: %g +- %g\n' % ( chi_mean, chi_std )
 for i in range( n_comps ):
     header_lines = header_lines + '# Scaling factor for file %i: %g +- %g\n' % ( i+1, pars_mean[i], pars_std[i] )
 
-print "= = ...finishing up and printing to %s and %s" % ( model_file, chi_file )
+print( "= = ...finishing up and printing to %s and %s" % ( model_file, chi_file ) )
 print_model_fit( model_file, tx, ty, tdy, model_y, header=header_lines )
 print_chi_file( chi_file, chi_block, header=header_lines )
