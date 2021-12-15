@@ -1,0 +1,424 @@
+@ view 0.1, 0.1, 0.7, 0.95
+@ legend 0.7, 0.95
+@ legend char size 0.75
+@ legend length 2
+@s0 line type 1
+@s0 line linewidth 1.0
+@s0 line color 1
+@s0 symbol 0
+@s0 symbol size 0.25
+@s0 symbol color 1
+@s1 line type 0
+@s1 line linewidth 1.0
+@s1 line color 1
+@s1 errorbar color 1
+@s1 errorbar size 0.20
+@s1 symbol 1
+@s1 symbol size 0.25
+@s1 symbol color 1
+@s2 line type 1
+@s2 line linewidth 1.0
+@s2 line color 2
+@s2 symbol 0
+@s2 symbol size 0.25
+@s2 symbol color 2
+@s3 line type 0
+@s3 line linewidth 1.0
+@s3 line color 2
+@s3 errorbar color 2
+@s3 errorbar size 0.20
+@s3 symbol 1
+@s3 symbol size 0.25
+@s3 symbol color 2
+@s4 line type 1
+@s4 line linewidth 1.0
+@s4 line color 3
+@s4 symbol 0
+@s4 symbol size 0.25
+@s4 symbol color 3
+@s5 line type 0
+@s5 line linewidth 1.0
+@s5 line color 3
+@s5 errorbar color 3
+@s5 errorbar size 0.20
+@s5 symbol 1
+@s5 symbol size 0.25
+@s5 symbol color 3
+@s6 line type 1
+@s6 line linewidth 1.0
+@s6 line color 4
+@s6 symbol 0
+@s6 symbol size 0.25
+@s6 symbol color 4
+@s7 line type 0
+@s7 line linewidth 1.0
+@s7 line color 4
+@s7 errorbar color 4
+@s7 errorbar size 0.20
+@s7 symbol 1
+@s7 symbol size 0.25
+@s7 symbol color 4
+@s8 line type 1
+@s8 line linewidth 1.0
+@s8 line color 5
+@s8 symbol 0
+@s8 symbol size 0.25
+@s8 symbol color 5
+@s9 line type 0
+@s9 line linewidth 1.0
+@s9 line color 5
+@s9 errorbar color 5
+@s9 errorbar size 0.20
+@s9 symbol 1
+@s9 symbol size 0.25
+@s9 symbol color 5
+@s10 line type 1
+@s10 line linewidth 1.0
+@s10 line color 6
+@s10 symbol 0
+@s10 symbol size 0.25
+@s10 symbol color 6
+@s11 line type 0
+@s11 line linewidth 1.0
+@s11 line color 6
+@s11 errorbar color 6
+@s11 errorbar size 0.20
+@s11 symbol 1
+@s11 symbol size 0.25
+@s11 symbol color 6
+@s12 line type 1
+@s12 line linewidth 1.0
+@s12 line color 7
+@s12 symbol 0
+@s12 symbol size 0.25
+@s12 symbol color 7
+@s13 line type 0
+@s13 line linewidth 1.0
+@s13 line color 7
+@s13 errorbar color 7
+@s13 errorbar size 0.20
+@s13 symbol 1
+@s13 symbol size 0.25
+@s13 symbol color 7
+@s14 line type 1
+@s14 line linewidth 1.0
+@s14 line color 8
+@s14 symbol 0
+@s14 symbol size 0.25
+@s14 symbol color 8
+@s15 line type 0
+@s15 line linewidth 1.0
+@s15 line color 8
+@s15 errorbar color 8
+@s15 errorbar size 0.20
+@s15 symbol 1
+@s15 symbol size 0.25
+@s15 symbol color 8
+@s16 line type 1
+@s16 line linewidth 1.0
+@s16 line color 9
+@s16 symbol 0
+@s16 symbol size 0.25
+@s16 symbol color 9
+@s17 line type 0
+@s17 line linewidth 1.0
+@s17 line color 9
+@s17 errorbar color 9
+@s17 errorbar size 0.20
+@s17 symbol 1
+@s17 symbol size 0.25
+@s17 symbol color 9
+@s18 line type 1
+@s18 line linewidth 1.0
+@s18 line color 10
+@s18 symbol 0
+@s18 symbol size 0.25
+@s18 symbol color 10
+@s19 line type 0
+@s19 line linewidth 1.0
+@s19 line color 10
+@s19 errorbar color 10
+@s19 errorbar size 0.20
+@s19 symbol 1
+@s19 symbol size 0.25
+@s19 symbol color 10
+@s20 line type 1
+@s20 line linewidth 1.0
+@s20 line color 11
+@s20 symbol 0
+@s20 symbol size 0.25
+@s20 symbol color 11
+@s21 line type 0
+@s21 line linewidth 1.0
+@s21 line color 11
+@s21 errorbar color 11
+@s21 errorbar size 0.20
+@s21 symbol 1
+@s21 symbol size 0.25
+@s21 symbol color 11
+@s22 line type 1
+@s22 line linewidth 1.0
+@s22 line color 12
+@s22 symbol 0
+@s22 symbol size 0.25
+@s22 symbol color 12
+@s23 line type 0
+@s23 line linewidth 1.0
+@s23 line color 12
+@s23 errorbar color 12
+@s23 errorbar size 0.20
+@s23 symbol 1
+@s23 symbol size 0.25
+@s23 symbol color 12
+@s0 legend "RNA01: K\sD\N =  6.61 \xm\f{}M"
+@s2 legend "RNA02: K\sD\N =    12 \xm\f{}M"
+@s4 legend "RNA03: K\sD\N =  2.21 \xm\f{}M"
+@s6 legend "RNA04: K\sD\N =  12.3 \xm\f{}M"
+@s8 legend "RNA05: K\sD\N =  5.25 \xm\f{}M"
+@s10 legend "RNA06: K\sD\N =  13.7 \xm\f{}M"
+@s12 legend "RNA07: K\sD\N =  6.48 \xm\f{}M"
+@s14 legend "RNA08: K\sD\N =  9.56 \xm\f{}M"
+@s16 legend "RNA09: K\sD\N = 0.788 \xm\f{}M"
+@s18 legend "RNA10: K\sD\N = 0.005 \xm\f{}M"
+@s20 legend "RNA11: K\sD\N = 0.005 \xm\f{}M"
+@s22 legend "RNA12: K\sD\N = 0.005 \xm\f{}M"
+@type xy
+0 0.0366213
+0.1 0.0719842
+0.2 0.106438
+0.4 0.171748
+0.6 0.230395
+0.8 0.279906
+0.9 0.300642
+1 0.318616
+&
+@type xy
+0 0.0251398
+0.1 0.140526
+0.2 0.195417
+0.4 0.273606
+0.6 0.249757
+0.8 0.238521
+0.9 0.270413
+1 0.289884
+&
+@type xy
+0 0.0366213
+0.1 0.0884316
+0.2 0.138339
+0.4 0.23132
+0.6 0.313317
+0.8 0.382608
+0.9 0.412283
+1 0.438731
+&
+@type xy
+0 0.0136176
+0.1 0.0987465
+0.2 0.156301
+0.4 0.250669
+0.6 0.332273
+0.8 0.375545
+0.9 0.420313
+1 0.409825
+&
+@type xy
+0 0.0366213
+0.1 0.0751844
+0.2 0.113332
+0.4 0.187746
+0.6 0.257743
+0.8 0.318899
+0.9 0.344026
+1 0.364527
+&
+@type xy
+0 0.0274574
+0.1 0.0643506
+0.2 0.106375
+0.4 0.183451
+0.6 0.263713
+0.8 0.336604
+0.9 0.326208
+1 0.366261
+&
+@type xy
+0 0.0366213
+0.1 0.0966929
+0.2 0.154529
+0.4 0.262206
+0.6 0.357111
+0.8 0.437339
+0.9 0.471735
+1 0.502426
+&
+@type xy
+0 0.0337408
+0.1 0.114115
+0.2 0.141619
+0.4 0.279672
+0.6 0.413847
+0.8 0.455215
+0.9 0.464107
+1 0.446748
+&
+@type xy
+0 0.0366213
+0.1 0.0391397
+0.2 0.0416033
+0.4 0.0463053
+0.6 0.0505669
+0.8 0.0541772
+0.9 0.0556787
+1 0.0569647
+&
+@type xy
+0 0.0162819
+0.1 0.0217981
+0.2 0.0203968
+0.4 0.0484056
+0.6 0.0878914
+0.8 0.0688705
+0.9 0.028851
+1 0.0502923
+&
+@type xy
+0 0.0366213
+0.1 0.090534
+0.2 0.142337
+0.4 0.238534
+0.6 0.323162
+0.8 0.394818
+0.9 0.42567
+1 0.453319
+&
+@type xy
+0 0.0174187
+0.1 0.137087
+0.2 0.165208
+0.4 0.253339
+0.6 0.390346
+0.8 0.404933
+0.9 0.393702
+1 0.409929
+&
+@type xy
+0 0.0366213
+0.1 0.0860754
+0.2 0.134276
+0.4 0.225696
+0.6 0.307853
+0.8 0.377224
+0.9 0.40626
+1 0.431403
+&
+@type xy
+0 0.0200344
+0.1 0.0927509
+0.2 0.117367
+0.4 0.227861
+0.6 0.323132
+0.8 0.416774
+0.9 0.329213
+1 0.461807
+&
+@type xy
+0 0.0366213
+0.1 0.0716838
+0.2 0.105609
+0.4 0.169211
+0.6 0.22562
+0.8 0.273191
+0.9 0.293381
+1 0.311195
+&
+@type xy
+0 0.0107571
+0.1 0.0521674
+0.2 0.11226
+0.4 0.183456
+0.6 0.246574
+0.8 0.271698
+0.9 0.281883
+1 0.303314
+&
+@type xy
+0 0.0366213
+0.1 0.0536431
+0.2 0.0705939
+0.4 0.104154
+0.6 0.136793
+0.8 0.166892
+0.9 0.179586
+1 0.189394
+&
+@type xy
+0 0.0379433
+0.1 0.0413407
+0.2 0.0662851
+0.4 0.104126
+0.6 0.143489
+0.8 0.170587
+0.9 0.173987
+1 0.190098
+&
+@type xy
+0 0.0366213
+0.1 0.0452242
+0.2 0.0538269
+0.4 0.071031
+0.6 0.0882316
+0.8 0.105418
+0.9 0.113979
+1 0.121804
+&
+@type xy
+0 0.0184922
+0.1 0.0182946
+0.2 0.0354128
+0.4 0.0766856
+0.6 0.08101
+0.8 0.108142
+0.9 0.116729
+1 0.125637
+&
+@type xy
+0 0.0366213
+0.1 0.0445149
+0.2 0.0524083
+0.4 0.068194
+0.6 0.0839764
+0.8 0.0997457
+0.9 0.107601
+1 0.114781
+&
+@type xy
+0 0.0175218
+0.1 0.0489063
+0.2 0.0333298
+0.4 0.0531561
+0.6 0.080231
+0.8 0.0948902
+0.9 0.116022
+1 0.122809
+&
+@type xy
+0 0.0366213
+0.1 0.0379588
+0.2 0.0392962
+0.4 0.041971
+0.6 0.0446452
+0.8 0.0473171
+0.9 0.0486482
+1 0.0498647
+&
+@type xy
+0 0.0144883
+0.1 0.0229159
+0.2 0.0199234
+0.4 0.0116308
+0.6 0.062507
+0.8 0.029462
+0.9 0.0464196
+1 0.0731752
+&

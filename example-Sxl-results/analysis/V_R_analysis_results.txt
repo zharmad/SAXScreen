@@ -1,0 +1,98 @@
+= = Comparison of sample statistics with latest fit in paramList:
+shared  apoValue statistics: single fit: 0.0366213 mean value from sample: 0.0371634 +- 0.00433876
+= = titration RNA01 (#1):
+= = titration RNA01 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.441488 mean value from sample: 0.527151 +- 0.076654
+per-curve  logKd statistics: single fit: 0.820323 mean value from sample: 1.14972 +- 0.208226
+converted Kd statistics:
+normal Kd single fit: 6.61185
+normal Kd mean value 14.1163 +- 7.03048
+normal Kd mean xmgrace : 14.1163 8.68432 5.37663
+= = titration RNA02 (#2):
+= = titration RNA02 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.689677 mean value from sample: 0.679179 +- 0.0224781
+per-curve  logKd statistics: single fit: 1.07884 mean value from sample: 1.04705 +- 0.0503424
+converted Kd statistics:
+normal Kd single fit: 11.9905
+normal Kd mean value 11.1441 +- 1.29469
+normal Kd mean xmgrace : 11.1441 1.36965 1.21974
+= = titration RNA03 (#3):
+= = titration RNA03 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.441095 mean value from sample: 0.442247 +- 0.0138745
+per-curve  logKd statistics: single fit: 0.344434 mean value from sample: 0.331414 +- 0.164291
+converted Kd statistics:
+normal Kd single fit: 2.21021
+normal Kd mean value 2.14494 +- 0.830907
+normal Kd mean xmgrace : 2.14494 0.986223 0.675592
+= = titration RNA04 (#4):
+= = titration RNA04 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.797938 mean value from sample: 0.768109 +- 0.0287151
+per-curve  logKd statistics: single fit: 1.09035 mean value from sample: 1.01338 +- 0.0555709
+converted Kd statistics:
+normal Kd single fit: 12.3127
+normal Kd mean value 10.313 +- 1.32322
+normal Kd mean xmgrace : 10.313 1.40776 1.23868
+= = titration RNA05 (#5):
+= = titration RNA05 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.0647107 mean value from sample: 0.0662239 +- 0.00831295
+per-curve  logKd statistics: single fit: 0.720153 mean value from sample: 0.675471 +- 0.301494
+converted Kd statistics:
+normal Kd single fit: 5.24992
+normal Kd mean value 4.73665 +- 3.55882
+normal Kd mean xmgrace : 4.73665 4.74678 2.37085
+= = titration RNA06 (#6):
+= = titration RNA06 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.735317 mean value from sample: 0.73198 +- 0.0258659
+per-curve  logKd statistics: single fit: 1.13535 mean value from sample: 1.13437 +- 0.0479268
+converted Kd statistics:
+normal Kd single fit: 13.6569
+normal Kd mean value 13.626 +- 1.50675
+normal Kd mean xmgrace : 13.626 1.58981 1.4237
+= = titration RNA07 (#7):
+= = titration RNA07 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.60144 mean value from sample: 0.593271 +- 0.0277505
+per-curve  logKd statistics: single fit: 0.81179 mean value from sample: 0.734987 +- 0.270308
+converted Kd statistics:
+normal Kd single fit: 6.4832
+normal Kd mean value 5.43234 +- 3.6037
+normal Kd mean xmgrace : 5.43234 4.69033 2.51707
+= = titration RNA08 (#8):
+= = titration RNA08 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.460307 mean value from sample: 0.45578 +- 0.0216136
+per-curve  logKd statistics: single fit: 0.98029 mean value from sample: 0.952537 +- 0.08097
+converted Kd statistics:
+normal Kd single fit: 9.5563
+normal Kd mean value 8.96473 +- 1.68109
+normal Kd mean xmgrace : 8.96473 1.83735 1.52483
+= = titration RNA09 (#9):
+= = titration RNA09 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.209815 mean value from sample: 0.215681 +- 0.00846424
+per-curve  logKd statistics: single fit: -0.103486 mean value from sample: 0.0433526 +- 0.319887
+converted Kd statistics:
+normal Kd single fit: 0.787978
+normal Kd mean value 1.10498 +- 0.889505
+normal Kd mean xmgrace : 1.10498 1.20305 0.575964
+= = titration RNA10 (#10):
+= = titration RNA10 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.12266 mean value from sample: 0.122897 +- 0.00117308
+per-curve  logKd statistics: single fit: -2.30103 mean value from sample: -2.30103 +- 2.62978e-12
+converted Kd statistics:
+normal Kd single fit: 0.005
+normal Kd mean value 0.005 +- 3.02779e-14
+normal Kd mean xmgrace : 0.005 3.02779e-14 3.02779e-14
+= = titration RNA11 (#11):
+= = titration RNA11 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.115566 mean value from sample: 0.115704 +- 0.00210196
+per-curve  logKd statistics: single fit: -2.30103 mean value from sample: -2.30103 +- 0
+converted Kd statistics:
+normal Kd single fit: 0.005
+normal Kd mean value 0.005 +- 0
+normal Kd mean xmgrace : 0.005 0 0
+= = titration RNA12 (#12):
+= = titration RNA12 Failed quality check? False
+per-curve  holoValue statistics: single fit: 0.0499978 mean value from sample: 0.0503518 +- 0.00462165
+per-curve  logKd statistics: single fit: -2.30103 mean value from sample: -1.78372 +- 1.26714
+converted Kd statistics:
+normal Kd single fit: 0.005
+normal Kd mean value 0.0164543 +- 0.151747
+normal Kd mean xmgrace : 0.0164543 0.28793 0.0155648
